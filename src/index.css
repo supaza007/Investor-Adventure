@@ -216,21 +216,61 @@ body::after {
   body::after { opacity: 0.25; }
 }
 
-/* Force landscape prompt on portrait mobile */
-@media (max-width: 600px) and (orientation: portrait) {
-  #root::before {
-    content: "📱 กรุณาหมุนหน้าจอเป็นแนวนอน";
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #0b0c15;
-    color: #e2e7f7;
-    font-size: 1.1rem;
-    font-weight: 600;
-    text-align: center;
-    padding: 2rem;
+/* ===== เป้าสัมผัสสำหรับมือถือ ===== */
+/* เข้าเงื่อนไข 2 ทาง เพราะแต่ละทางครอบคลุมคนละกรณี:
+     pointer: coarse  = อุปกรณ์ที่ใช้นิ้วจริง (รวมแท็บเล็ตจอใหญ่)
+     max-width: 640px = จอแคบ (รวมเบราว์เซอร์ที่จำลองมือถือ ซึ่งไม่รายงานว่าเป็น touch)
+   ถ้าใช้ pointer อย่างเดียวจะทดสอบด้วยการย่อหน้าต่างไม่ได้เลย
+   44px คือเป้าสัมผัสขั้นต่ำตามแนวทาง Apple/Google — ก่อนแก้ ปุ่ม +/− สูงแค่ 25px */
+@media (pointer: coarse), (max-width: 640px) {
+  .pixel-btn {
+    min-height: 44px;
+  }
+
+  /* ชิปเล็ก (แถบสเตจ/ปุ่มเลือกสไตล์) ไม่ใช่ปุ่มหลัก จึงไม่บังคับความสูงทั้งแถว
+     แต่เพิ่ม padding ให้พื้นที่แตะกว้างขึ้นโดยไม่ดันเลย์เอาต์ */
+  .pixel-chip {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+  }
+}
+
+/* จอเตี้ย (มือถือแนวนอน) — ที่แนวตั้งมีจำกัดมาก ยอมให้ปุ่มเตี้ยลง
+   ไม่งั้นปุ่ม 44px หลายแถวจะดันเนื้อหาเกมล้นจอจนเล่นไม่ได้ */
+@media (max-height: 500px) {
+  .pixel-btn {
+    min-height: 34px;
+  }
+  .pixel-chip {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+  }
+}
+
+/* ===== ขนาดตัวอักษรขั้นต่ำบนมือถือแนวตั้ง =====
+   เลย์เอาต์เดิมออกแบบมาสำหรับมือถือ "แนวนอน" (จอเตี้ย) จึงบีบฟอนต์ลงเหลือ 7-9px
+   ทุกที่เพื่อให้เนื้อหาลงจอ พอเปิดให้เล่นแนวตั้งได้ ข้อจำกัดกลับด้าน:
+   ที่แนวตั้งเหลือเฟือ (หน้าจัดพอร์ตเหลือช่องว่าง ~180px) แต่ตัวอักษรเล็กจนอ่านไม่ออก
+
+   แก้ที่นี่จุดเดียวแทนการไล่แก้ className 20+ จุดใน 5 ไฟล์ เพราะทุกที่ใช้รูปแบบ
+   `text-[Npx] sm:text-[Mpx]` เหมือนกันหมด และการไล่แก้ทีละจุดพลาดง่ายกว่ามาก
+
+   ⚠️ ถ้าเพิ่ม text-[Npx] ขนาดใหม่ในคอมโพเนนต์ อย่าลืมมาเพิ่มบรรทัดที่นี่ด้วย
+   เงื่อนไข min-height กันไม่ให้กฎนี้ไปโดนมือถือแนวนอนซึ่งต้องการฟอนต์เล็กตามเดิม */
+@media (max-width: 640px) and (min-height: 500px) {
+  .text-\[7px\] {
+    font-size: 9px;
+  }
+  .text-\[8px\] {
+    font-size: 10px;
+  }
+  .text-\[9px\] {
+    font-size: 11px;
+  }
+  .text-\[10px\] {
+    font-size: 11px;
+  }
+  .text-\[11px\] {
+    font-size: 12px;
   }
 }

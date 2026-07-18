@@ -8,27 +8,49 @@ import Portrait, { PortraitPlaceholder } from './Portrait'
 import { eventArtOf } from './art'
 
 // แถบบอกว่าอยู่สเตจไหนของบท — ผู้เล่นต้องรู้เสมอว่าเหลืออีกกี่ก้าว
+//
+// มือถือกับจอกว้างแสดงคนละแบบ เพราะชื่อสเตจภาษาไทยยาว ("เผยประเภทเหตุการณ์")
+// ยัดครบ 5 ชื่อในจอ 375px ต้องย่อฟอนต์เหลือ 7px ซึ่งอ่านไม่ออกอยู่ดี
+//   จอแคบ  → จุด 5 จุด + ชื่อสเตจปัจจุบันชื่อเดียวขนาดอ่านได้
+//   จอกว้าง → ชิปครบ 5 อันเหมือนเดิม เห็นภาพรวมทั้งบทพร้อมกัน
 function StageTrack({ stageIndex }) {
+  const stages = BALANCE.stages
   return (
-    <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-      {BALANCE.stages.map((s, i) => (
-        <div
-          key={s.key}
-          className={`pixel-chip px-1 py-0.5 text-[7px] sm:px-1.5 sm:text-[9px] ${
-            i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/35'
-          }`}
-        >
-          {s.label}
+    <>
+      {/* จอแคบ */}
+      <div className="flex shrink-0 items-center gap-1.5 sm:hidden">
+        <div className="flex items-center gap-1">
+          {stages.map((s, i) => (
+            <div
+              key={s.key}
+              className={`h-2 w-2 ${i === stageIndex ? 'bg-yellow-400' : i < stageIndex ? 'bg-emerald-500' : 'bg-slate-600'}`}
+            />
+          ))}
         </div>
-      ))}
-    </div>
+        <span className="truncate text-[11px] font-bold text-yellow-300">{stages[stageIndex]?.label}</span>
+      </div>
+
+      {/* จอกว้าง */}
+      <div className="hidden shrink-0 items-center gap-1 sm:flex">
+        {stages.map((s, i) => (
+          <div
+            key={s.key}
+            className={`pixel-chip px-1.5 py-0.5 text-[9px] ${
+              i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/35'
+            }`}
+          >
+            {s.label}
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
 // สเตจ 1 — สัญญาณเตือนคลุมเครือ: รู้ว่ามีบางอย่างมา แต่ไม่รู้ว่าอะไร
 function SignalStage({ event }) {
   return (
-    <div className="text-center">
+    <div className="w-full text-center">
       <div className="enemy-idle text-5xl font-black opacity-40 grayscale sm:text-7xl">?</div>
       <div className="mt-3 text-sm font-bold text-amber-200 sm:text-xl">มีบางอย่างกำลังก่อตัว...</div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">“{event.hint}”</p>
@@ -42,7 +64,7 @@ function RevealStage({ event }) {
   const primary = Object.entries(event.tagWeights).sort((a, b) => b[1] - a[1])[0]
   const art = eventArtOf(event.id)
   return (
-    <div className="text-center">
+    <div className="w-full text-center">
       <div className="enemy-idle mx-auto w-fit">
         {art ? <Portrait src={art} alt={event.name} size="lg" /> : <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" />}
       </div>
@@ -67,7 +89,7 @@ function ShockStage({ state, event }) {
   const markerPos = range > 0 ? ((shock.shockPct - band.min) / range) * 100 : 50
 
   return (
-    <div className="text-center">
+    <div className="w-full text-center">
       {state.isBlackSwan && (
         <div className="pixel-chip mx-auto mb-2 inline-block bg-purple-950 px-2 py-1 text-[10px] font-bold text-purple-200 sm:text-sm">
           BLACK SWAN — เหตุการณ์ที่ไม่มีใครเตรียมตัวทันได้
@@ -135,7 +157,7 @@ function BehaviorStage({ state, onChoose }) {
   ]
 
   return (
-    <div className="text-center">
+    <div className="w-full text-center">
       <div className="text-sm font-bold text-amber-200 sm:text-xl">พอร์ตคุณเพิ่งเสียไป {money(lost)}</div>
       <p className="mt-1 text-[10px] text-white/55 sm:text-sm">
         {confirmed ? 'ตัดสินใจแล้ว — เปลี่ยนใจไม่ได้อีก' : 'ตอนนี้คุณจะทำยังไง? ไม่มีตัวเลือกไหนถูกเสมอ'}
@@ -240,7 +262,7 @@ function DebriefStage({ state, event }) {
   const villain = contributions[contributions.length - 1]
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto w-full max-w-2xl">
       <div className="text-center text-sm font-bold sm:text-lg">เกิดอะไรขึ้นกับพอร์ตของคุณ</div>
 
       <div className="pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
@@ -284,7 +306,7 @@ function ScamOffer({ scam, onAnswer }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3">
       <div className="pixel-frame w-full max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
-        <div className="text-center">
+        <div className="w-full text-center">
           <div className="text-sm font-bold text-amber-200 sm:text-lg">มีคนทักมาหาคุณ</div>
         </div>
         <div className="pixel-chip mt-2 bg-black/50 p-2 text-[10px] leading-relaxed text-white/85 sm:text-sm">

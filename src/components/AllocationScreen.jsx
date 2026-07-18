@@ -13,28 +13,30 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd }) {
   const worstTag = Object.entries(tool.exposure).sort((a, b) => b[1] - a[1])[0]
 
   return (
-    <div className={`pixel-frame border bg-gradient-to-b p-1.5 sm:p-2 ${c.border} ${c.grad}`}>
+    <div className={`pixel-frame border bg-gradient-to-b p-2 sm:p-2 ${c.border} ${c.grad}`}>
       <div className="flex items-center gap-1.5">
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[11px] font-bold sm:text-sm">{tool.name}</div>
-          <div className="truncate text-[8px] text-white/50 sm:text-[10px]">{tool.tagline}</div>
+          <div className="truncate text-xs font-bold sm:text-sm">{tool.name}</div>
+          <div className="truncate text-[10px] text-white/50">{tool.tagline}</div>
         </div>
         <div className="shrink-0 text-right">
-          <div className={`text-sm font-bold sm:text-lg ${c.text}`}>{percent}%</div>
-          <div className="text-[8px] text-white/40 sm:text-[10px]">{money(value)}</div>
+          <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
+          <div className="text-[10px] text-white/40">{money(value)}</div>
         </div>
       </div>
 
-      <div className="mt-1 flex items-center gap-1">
-        <button type="button" onClick={onSub} disabled={percent === 0} className={`pixel-btn flex-1 py-0.5 text-xs font-bold sm:text-sm ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}>
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <button type="button" onClick={onSub} disabled={percent === 0} className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}>
           −
         </button>
-        <button type="button" onClick={onAdd} disabled={!canAdd} className={`pixel-btn flex-1 py-0.5 text-xs font-bold sm:text-sm ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}>
+        <button type="button" onClick={onAdd} disabled={!canAdd} className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}>
           +
         </button>
       </div>
 
-      <div className="mt-1 flex items-center justify-between text-[8px] sm:text-[10px]">
+      {/* บนมือถือแยกเป็น 2 บรรทัด — การ์ดกว้างแค่ ~177px ถ้าอัดบรรทัดเดียวต้องย่อฟอนต์เหลือ 8px
+          ซึ่งอ่านไม่ออกบนมือถือ · จอกว้างค่อยกลับมาเรียงบรรทัดเดียวตามเดิม */}
+      <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] sm:flex-row sm:items-center sm:justify-between">
         <span className="text-white/45">โต {tool.growthMult.toFixed(2)}× / 10 ปี</span>
         <span className="text-rose-300/80" title={`อ่อนไหวต่อ${TAG_LABELS[worstTag[0]]}`}>
           จุดอ่อน {TAG_LABELS[worstTag[0]]} {riskDots(worstTag[1])}
