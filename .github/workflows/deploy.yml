@@ -1,0 +1,64 @@
+# อัปเดตเว็บอัตโนมัติทุกครั้งที่ push ขึ้น main
+# ไม่ต้อง build เองในเครื่อง ไม่ต้องลากไฟล์ไปวางที่ไหน — push แล้วรอ 1-2 นาที เว็บอัปเดตเอง
+#
+# ครั้งแรกต้องเปิดใช้งานก่อน: GitHub → Settings → Pages → Source เลือก "GitHub Actions"
+
+name: Deploy game to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # กดสั่ง deploy เองได้จากหน้า Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ถ้า push ติดๆ กัน ให้ตัวใหม่ทำงานแทน ไม่ต้องรอตัวเก่าจนจบ
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # เทสต์ก่อน deploy — ถ้าเอนจินเกมพัง จะไม่ปล่อยขึ้นเว็บ
+      - name: ทดสอบเอนจินเกม
+        run: npm test
+
+      # ตรวจว่าเกมยังสอนถูก (ไม่มีกลยุทธ์ไหนเป็นเฉลยตายตัว) — sim จะ exit 1 ถ้าบาลานซ์พัง
+      # ใช้ 1500 รอบ ไม่ใช่ 500: เช็ค "ทุ่มคริปโตล้มละลายได้จริง" วัดเหตุการณ์ที่เกิดราว 0.9%
+      # ที่ 500 รอบมีโอกาส ~1% ที่จะไม่เจอเลยแล้ว deploy ล้มทั้งที่โค้ดไม่ผิด · ที่ 1500 เหลือ ~0.01%
+      # (รันแค่ 1.4 วินาที ไม่ใช่ต้นทุนที่ต้องประหยัด)
+      - name: ตรวจบาลานซ์เกม
+        run: npm run sim -- 1500
+
+      - name: Build เวอร์ชันเว็บ (แยกไฟล์ โหลดเร็ว)
+        run: npm run build:web
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

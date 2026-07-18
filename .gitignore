@@ -1,0 +1,40 @@
+# dependencies
+node_modules
+
+# build output
+dist
+dist-web
+release
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+.vite
+.vscode
+Thumbs.db
+
+# ── ภาพประกอบ ────────────────────────────────────────────────
+# รูปทั้งหมดถูกกันออกจาก repo โดยตั้งใจ เพราะยังไม่ทราบเจ้าของลิขสิทธิ์
+# (โหลดมาจากอินเทอร์เน็ต) การขึ้น repo สาธารณะ = เผยแพร่ต่อ และ git เก็บประวัติถาวรลบยาก
+#
+# เกมทำงานได้ปกติโดยไม่มีไฟล์เหล่านี้ — src/components/art.js กับ CoverScreen.jsx
+# ใช้ import.meta.glob สแกนตอน build ถ้าไม่เจอไฟล์จะ fallback ไปใช้ emoji และชื่อเกมแบบตัวอักษร
+#
+# ถ้าวันไหนได้รูปที่มีสิทธิ์เผยแพร่แล้ว ให้ลบ 4 บรรทัดล่างนี้ทิ้ง แล้ว commit รูปตามปกติ
+src/assets/characters/
+src/assets/events/
+src/assets/title-bg.*
+src/assets/title-logo.*
+
+# ต้นฉบับรูป/เสียงก่อนบีบ — ไฟล์ใหญ่ ไม่ต้องขึ้น repo
+รูปภาพจาก User/
+Sound Effect/
+
+# ต้นฉบับที่ยังไม่ทราบเจ้าของลิขสิทธิ์เหมือนกัน — กันไม่ให้รั่วผ่านโฟลเดอร์อื่น
+# (รูปหน้าปกชุดเดียวกับ src/assets/title-* เคยหลุดมาทางนี้)
+uploads/
+public/pop.mp3
+build/icon.ico
