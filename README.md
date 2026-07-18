@@ -77,19 +77,32 @@ npm run electron:build  # build เป็น .exe (Windows, portable)
 ## โครงสร้างโปรเจกต์
 
 ```
-├─ docs/plans/           ดีไซน์ + สเปกตัวเลขเอนจิน (อ่านก่อนแก้บาลานซ์)
-├─ scripts/sim.mjs       ตัวจำลองบาลานซ์
+├─ docs/
+│  ├─ plans/             ดีไซน์ + สเปกตัวเลขเอนจิน (อ่านก่อนแก้บาลานซ์)
+│  └─ reference/         เนื้อหาความรู้ที่เก็บไว้อ้างอิง (ยังไม่ได้ใช้ในเกม)
+├─ scripts/
+│  ├─ sim.mjs            จำลองเกม 2,000 รอบ เช็คว่าเกมยังสอนถูก
+│  └─ optimize-images.mjs  บีบรูปสำหรับเว็บ (GIF → WebP เคลื่อนไหว)
+├─ assets-source/        ต้นฉบับภาพ/เสียงก่อนบีบ (ไม่ขึ้น repo)
+├─ electron/             Electron main process สำหรับ build .exe
 └─ src/
-   ├─ App.jsx            สลับหน้าจอตาม phase
+   ├─ App.jsx            สลับหน้าจอตาม phase + เสียงคลิกสังเคราะห์
    ├─ game/engine/       เอนจินเกม — JS ล้วน ไม่มี React ไม่มีการสุ่มที่ซ่อนอยู่
    │  ├─ balance.js      ⭐ ตัวเลขจูนได้ทุกตัวรวมที่เดียว (แก้ตรงนี้ที่เดียวพอ)
    │  ├─ gameState.js    state machine 4 บท × 5 สเตจ
    │  ├─ encounter.js    สูตร exposure / outcome band / margin call
    │  ├─ portfolio.js    คณิตศาสตร์พอร์ต (HHI, การกระจุกตัว, ทบต้น)
+   │  ├─ scam.js         กลไกมิจฉาชีพ (ไม่ใช่แค่ tag matching)
    │  ├─ report.js       รายงานผลเกษียณ
-   │  └─ data/           เครื่องมือ 6 ชนิด · เหตุการณ์ 12 ตัว · สไตล์ 4 แบบ
-   └─ components/        UI ทั้งหมด
+   │  ├─ rng.js          ตัวสุ่มที่กำหนด seed ได้ (เกม replay ได้)
+   │  ├─ data/           เครื่องมือ 6 ชนิด · เหตุการณ์ 12 ตัว · สไตล์ 4 แบบ
+   │  └─ *.test.js       เทสต์ 48 ตัว
+   ├─ assets/            ภาพที่เกมใช้จริง (ไม่ขึ้น repo — ดูหัวข้อด้านบน)
+   └─ components/        UI 7 หน้าจอ + Portrait/ToolTheme/art
 ```
+
+หน้าจอทั้งหมดมี 5 หน้า เดินตามลำดับนี้:
+`CoverScreen` → `StyleSelect` → `AllocationScreen` ⇄ `StageScreen` → `ReportScreen`
 
 ## จะจูนบาลานซ์ยังไง
 
