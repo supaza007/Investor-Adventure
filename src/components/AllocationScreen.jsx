@@ -2,45 +2,113 @@ import { useState, useMemo } from 'react'
 import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
 import { netWorth } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
+import LifeTimeline from './LifeTimeline'
+import { BALANCE } from '../game/engine/balance.js'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
 // แปลง exposure 0..1 เป็นดาว 1-5 เม็ด — นักเรียน ม.ปลาย ไม่ต้องอ่านทศนิยม
 const riskDots = (v) => '●'.repeat(Math.max(1, Math.round(v * 5))) + '○'.repeat(5 - Math.max(1, Math.round(v * 5)))
 
-function ToolRow({ tool, percent, value, onAdd, onSub, canAdd }) {
+// growthVol จริงอยู่ระหว่าง 0.08-1.2 ไม่ใช่ 0..1 จึงแปลเป็นระดับคำแทนโชว์ % ตรงๆ
+const VOL_LEVELS = [
+  { max: 0.15, label: 'แทบไม่ผันผวน' },
+  { max: 0.35, label: 'ผันผวนต่ำ' },
+  { max: 0.6, label: 'ผันผวนปานกลาง' },
+  { max: 1.0, label: 'ผันผวนสูง' },
+  { max: Infinity, label: 'ผันผวนสุดขั้ว' },
+]
+const volInfo = (v) => {
+  const i = VOL_LEVELS.findIndex((l) => v < l.max)
+  const idx = i === -1 ? VOL_LEVELS.length - 1 : i
+  return { label: VOL_LEVELS[idx].label, dots: idx + 1 }
+}
+
+// เสี่ยงโดยรวมจาก growthVol — มาตราเดียวกันทุกเครื่องมือ จึงเทียบข้ามการ์ดได้จริง
+// ต่างจาก exposure ต่อ tag เดิมที่แต่ละเครื่องมือโชว์คนละ tag เทียบกันไม่ได้
+const volDots = (v) => {
+  const n = volInfo(v).dots
+  return '●'.repeat(n) + '○'.repeat(5 - n)
+}
+
+// การ์ดหน้าเริ่มต้น — ย่อเหลือ 4 บรรทัด (ชื่อ / %+เงิน / ปุ่ม −+ / เสี่ยง) กดที่การ์ดเปิด modal
+// รายละเอียดเต็ม (tagline, โต X×, exposure ครบ 4 tag, ความผันผวนเป็นคำ, lesson) — ไอคอน ⓘ
+// มุมขวาบนเป็นตัวใบ้ว่ากดดูเพิ่มได้ ไม่กดก็เล่นต่อได้ปกติ
+function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
   const c = colorOf(tool.id)
-  const worstTag = Object.entries(tool.exposure).sort((a, b) => b[1] - a[1])[0]
 
   return (
-    <div className={`pixel-frame border bg-gradient-to-b p-2 sm:p-2 ${c.border} ${c.grad}`}>
-      <div className="flex items-center gap-1.5">
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-xs font-bold sm:text-sm">{tool.name}</div>
-          <div className="truncate text-[10px] text-white/50">{tool.tagline}</div>
-        </div>
-        <div className="shrink-0 text-right">
-          <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
-          <div className="text-[10px] text-white/40">{money(value)}</div>
-        </div>
+    <div
+      className={`pixel-frame relative cursor-pointer border bg-gradient-to-b p-2 sm:p-2 ${c.border} ${c.grad}`}
+      onClick={() => onOpenDetail(tool)}
+    >
+      <span className="absolute right-1.5 top-1.5 text-[10px] leading-none text-white/35" aria-hidden="true">ⓘ</span>
+
+      <div className="truncate pr-3 text-xs font-bold sm:text-sm">{tool.name}</div>
+
+      <div className="mt-1 flex items-center justify-between gap-1.5">
+        <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
+        <div className="text-[10px] text-white/40">{money(value)}</div>
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
-        <button type="button" onClick={onSub} disabled={percent === 0} className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onSub() }}
+          disabled={percent === 0}
+          className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}
+        >
           −
         </button>
-        <button type="button" onClick={onAdd} disabled={!canAdd} className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onAdd() }}
+          disabled={!canAdd}
+          className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}
+        >
           +
         </button>
       </div>
 
-      {/* บนมือถือแยกเป็น 2 บรรทัด — การ์ดกว้างแค่ ~177px ถ้าอัดบรรทัดเดียวต้องย่อฟอนต์เหลือ 8px
-          ซึ่งอ่านไม่ออกบนมือถือ · จอกว้างค่อยกลับมาเรียงบรรทัดเดียวตามเดิม */}
-      <div className="mt-1.5 flex flex-col gap-0.5 text-[10px] sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-white/45">โต {tool.growthMult.toFixed(2)}× / 10 ปี</span>
-        <span className="text-rose-300/80" title={`อ่อนไหวต่อ${TAG_LABELS[worstTag[0]]}`}>
-          จุดอ่อน {TAG_LABELS[worstTag[0]]} {riskDots(worstTag[1])}
-        </span>
+      <div className="mt-1.5 text-[10px] text-amber-300/80">เสี่ยง {volDots(tool.growthVol)}</div>
+    </div>
+  )
+}
+
+// กดที่การ์ดเครื่องมือเปิด modal นี้ — โชว์ความอ่อนไหวครบทั้ง 4 tag (ไม่ใช่แค่จุดอ่อนสุด) + ความผันผวน + บทเรียน
+function ToolDetailModal({ tool, onClose }) {
+  const c = colorOf(tool.id)
+  const vol = volInfo(tool.growthVol)
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={onClose}>
+      <div
+        className={`pixel-frame w-full max-w-md border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${c.border}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-base font-bold sm:text-lg">{tool.name}</div>
+        <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{tool.tagline}</p>
+        <div className="mt-1 text-[10px] text-white/45 sm:text-xs">โต {tool.growthMult.toFixed(2)}× / 10 ปี</div>
+
+        <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">ความอ่อนไหวต่อความเสี่ยงแต่ละด้าน</div>
+        <div className="mt-1.5 space-y-1">
+          {Object.entries(tool.exposure).map(([tag, v]) => (
+            <div key={tag} className="pixel-chip flex items-center justify-between bg-black/30 px-2 py-1 text-[10px] sm:text-xs">
+              <span className="text-white/70">{TAG_LABELS[tag]}</span>
+              <span className="text-rose-300">{riskDots(v)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="pixel-chip mt-3 bg-black/30 px-2 py-1 text-[10px] sm:text-xs">
+          <span className="text-white/70">ความผันผวน — </span>
+          <span className="text-amber-300">{vol.label}</span>
+        </div>
+
+        <div className="pixel-chip mt-3 bg-emerald-950/40 p-2 text-[10px] leading-relaxed text-emerald-100/85 sm:text-xs">{tool.lesson}</div>
+
+        <button type="button" onClick={onClose} className="pixel-btn mt-4 w-full bg-white py-2 text-xs font-semibold text-slate-900 sm:text-sm">
+          ปิด
+        </button>
       </div>
     </div>
   )
@@ -102,6 +170,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
 
   const [alloc, setAlloc] = useState(initial)
   const cashLeft = alloc.cash
+  const [detailTool, setDetailTool] = useState(null)
 
   // แสดง popup แนะนำบทแค่ครั้งเดียวต่อบท แม้ผู้เล่นจะลาก slider จน component re-render ก็ไม่โผล่ซ้ำ
   const [introSeenFor, setIntroSeenFor] = useState(null)
@@ -122,7 +191,9 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} onContinue={() => setIntroSeenFor(chapter.n)} />}
+      {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
+        <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
         <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
           <div className="min-w-0">
             <div className="text-xs font-bold sm:text-base">
@@ -150,6 +221,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
               canAdd={cashLeft >= STEP}
               onAdd={() => change(t.id, STEP)}
               onSub={() => change(t.id, -STEP)}
+              onOpenDetail={setDetailTool}
             />
           ))}
         </div>
