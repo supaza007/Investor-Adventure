@@ -74,16 +74,27 @@ function CompareCard({ style, selected, onClick }) {
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`pixel-frame flex flex-col items-center gap-1 border bg-gradient-to-b p-1.5 text-center transition-opacity sm:p-2 ${STYLE_GRAD[style.id]} ${
+      className={`pixel-frame flex min-w-0 flex-col items-center gap-1 border bg-gradient-to-b p-1.5 text-center transition-opacity sm:p-2 ${STYLE_GRAD[style.id]} ${
         selected ? 'outline outline-2 outline-offset-2 outline-yellow-400 sm:outline-[3px]' : 'opacity-60 hover:opacity-90'
       }`}
     >
-      {art ? (
-        <Portrait src={art} alt={style.name} size="md" fit="cover" objectPosition={PORTRAIT_POSITION[style.id]} className="pointer-events-none" />
-      ) : (
-        <PortraitPlaceholder label={style.name} emoji={style.emoji} size="md" />
-      )}
-      <div className="truncate text-[9px] font-bold leading-tight sm:text-[11px]">{style.name}</div>
+      {/* กรอบภาพจัตุรัสกว้างเท่าการ์ดเสมอ — ห้ามใช้ขนาดตายตัว (size="md" = 80px) เพราะบนมือถือ
+          จอแคบ การ์ดกว้างแค่ ~69px ภาพจะล้นออกนอกกรอบข้างละ ~5px ทำให้ขอบซ้าย-ขวาไม่เท่ากัน
+          ต้อง absolute ตัวภาพด้วย ไม่งั้น <img> ที่ h-full จะดันความสูงตามสัดส่วนไฟล์ต้นฉบับ
+          (vi 400×711 ดันเป็น 102px) จน aspect-square ไม่มีผล กรอบ 4 ใบเลยสูงไม่เท่ากัน
+          เพดาน max-w จำเป็น เพราะ w-full+aspect-square บนจอกว้างแต่เตี้ย (มือถือแนวนอน การ์ด
+          กว้าง ~155px) จะดันแถบเทียบสูง 170px จนการ์ดรายละเอียดเหลือที่แค่ 55px */}
+      <div className="relative mx-auto aspect-square w-full max-w-[4.5rem] sm:max-w-24 [@media(max-height:500px)]:max-w-14">
+        {art ? (
+          <Portrait src={art} alt={style.name} size="fill" fit="cover" objectPosition={PORTRAIT_POSITION[style.id]} className="pointer-events-none absolute inset-0" />
+        ) : (
+          <PortraitPlaceholder label={style.name} emoji={style.emoji} size="fill" className="absolute inset-0" />
+        )}
+      </div>
+      {/* ชื่อไทยยาวกว่าการ์ดและไม่มีช่องว่างให้เบรก ต้องบังคับตัดบรรทัดเอง — ห้ามใช้ truncate
+          เพราะ "นักลงทุนระยะกลาง"/"นักลงทุนระยะยาว" จะถูกตัดเหลือข้อความเดียวกันจนแยกไม่ออก
+          การ์ดในกริดสูงเท่ากันอยู่แล้ว (align stretch) ชื่อ 2 บรรทัดจึงไม่ทำให้แถวเบี้ยว */}
+      <div className="w-full break-words text-[9px] font-bold leading-tight sm:text-[11px]">{style.name}</div>
     </button>
   )
 }
