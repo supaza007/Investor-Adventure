@@ -6,6 +6,7 @@ import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import { eventArtOf } from './art'
+import LifeTimeline from './LifeTimeline'
 
 // แถบบอกว่าอยู่สเตจไหนของบท — ผู้เล่นต้องรู้เสมอว่าเหลืออีกกี่ก้าว
 //
@@ -341,6 +342,7 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
+        <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
         <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
           <div className="text-[10px] font-bold sm:text-sm">
             บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}

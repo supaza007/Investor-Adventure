@@ -13,7 +13,8 @@ function bandFor(ratio) {
 }
 
 // แปล percentile ที่จับสลากได้เป็นภาษาคน — นี่คือส่วนที่ทำให้ผู้เล่นไม่รู้สึกโดนโกง
-function luckLabel(percentile) {
+// export ไว้ให้ LifeTimeline.jsx ใช้ซ้ำตอนเปิดดูเหตุการณ์ที่ผ่านมาแล้ว (ต้องได้คำอธิบายแบบเดียวกับหน้ารายงานจบเกม)
+export function luckLabel(percentile) {
   if (percentile >= 0.8) return { text: 'โชคดีกว่าที่ควรจะเป็น', tone: 'good' }
   if (percentile >= 0.55) return { text: 'ผลออกมาดีกว่าค่ากลางเล็กน้อย', tone: 'good' }
   if (percentile >= 0.45) return { text: 'ผลออกมาตามค่ากลาง', tone: 'neutral' }
@@ -22,7 +23,8 @@ function luckLabel(percentile) {
 }
 
 // แปลคุณภาพการเตรียมพอร์ตเป็นภาษาคน (ยิ่งกระจุก+ยิ่งอ่อนไหว = เตรียมแย่)
-function prepLabel(exposure, concentration) {
+// export ไว้ให้ LifeTimeline.jsx ใช้ซ้ำ (เหตุผลเดียวกับ luckLabel ด้านบน)
+export function prepLabel(exposure, concentration) {
   const score = 1 - (exposure * 0.7 + concentration * 0.3)
   if (score >= 0.7) return { text: 'เตรียมพอร์ตมาดีมาก', tone: 'good', score }
   if (score >= 0.5) return { text: 'เตรียมพอร์ตมาพอใช้', tone: 'neutral', score }
