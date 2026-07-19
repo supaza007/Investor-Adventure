@@ -48,7 +48,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
 
       <div className="mt-1 flex items-center justify-between gap-1.5">
         <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
-        <div className="text-[10px] text-white/40">{money(value)}</div>
+        <div className="text-base font-bold text-white/70 sm:text-lg">{money(value)}฿</div>
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
