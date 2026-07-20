@@ -3,6 +3,7 @@ import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
 import { netWorth } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
+import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
@@ -103,13 +104,13 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
       className={`pixel-frame relative cursor-pointer border bg-gradient-to-b p-2 sm:p-2 ${c.border} ${c.grad}`}
       onClick={() => onOpenDetail(tool)}
     >
-      <span className="absolute right-1.5 top-1.5 text-[10px] leading-none text-white/35" aria-hidden="true">ⓘ</span>
+      <span className="absolute right-1.5 top-1.5 text-[10px] leading-none text-white/55" aria-hidden="true">ⓘ</span>
 
       <div className="truncate pr-3 text-xs font-bold sm:text-sm">{tool.name}</div>
 
       <div className="mt-1 flex items-center justify-between gap-1.5">
         <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
-        <div className="text-base font-bold text-white/70 sm:text-lg">{money(value)}฿</div>
+        <div className="text-base font-bold text-white/70 sm:text-lg">{money(value)}</div>
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
@@ -117,7 +118,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
           type="button"
           {...subHold}
           disabled={percent === 0}
-          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}
+          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-600 text-white'}`}
         >
           −
         </button>
@@ -125,7 +126,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
           type="button"
           {...addHold}
           disabled={!canAdd}
-          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}
+          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-500 text-white'}`}
         >
           +
         </button>
@@ -141,11 +142,8 @@ function ToolDetailModal({ tool, onClose }) {
   const c = colorOf(tool.id)
   const vol = volInfo(tool.growthVol)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={onClose}>
-      <div
-        className={`pixel-frame w-full max-w-md border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${c.border}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} label={`รายละเอียด ${tool.name}`} panelClassName={`pixel-frame max-w-md border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${c.border}`}>
+      <div>
         <div className="text-base font-bold sm:text-lg">{tool.name}</div>
         <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{tool.tagline}</p>
         <div className="mt-1 text-[10px] text-white/45 sm:text-xs">โต {tool.growthMult.toFixed(2)}× / 10 ปี</div>
@@ -171,7 +169,7 @@ function ToolDetailModal({ tool, onClose }) {
           ปิด
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -181,8 +179,9 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
   const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4">
-      <div className="pixel-frame w-full max-w-md border border-slate-600 bg-gradient-to-b from-slate-900 to-slate-950 p-4 text-center sm:p-6">
+    // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
+    <Modal label={`บทที่ ${chapter.n} — ${chapter.theme}`} panelClassName="pixel-frame max-w-md border border-slate-600 bg-gradient-to-b from-slate-900 to-slate-950 p-4 text-center sm:p-6">
+      <div>
         {prevSummary && (
           <div className="pixel-chip mb-3 bg-black/40 p-2 text-left text-[10px] leading-relaxed sm:text-xs">
             <div className="font-bold text-white/85">จบบทที่ {prevSummary.chapter} แล้ว — {prevSummary.eventName}</div>
@@ -193,7 +192,7 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
           </div>
         )}
 
-        <div className="text-[10px] uppercase tracking-widest text-white/40 sm:text-xs">
+        <div className="text-[10px] uppercase tracking-widest text-white/55 sm:text-xs">
           บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
         </div>
         <div className="mt-1 text-lg font-black sm:text-2xl">{chapter.theme}</div>
@@ -205,7 +204,7 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
           เริ่มจัดพอร์ตบทนี้
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -296,12 +295,12 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 text-[9px] leading-snug text-white/60 sm:text-xs">
               เงินสดที่ยังไม่ลงทุน <b className="text-slate-200">{cashLeft}%</b> ({money((cashLeft / 100) * total)})
-              <div className="text-[8px] text-white/40 sm:text-[10px]">
+              <div className="text-[8px] text-white/55 sm:text-[10px]">
                 เงินสดไม่โตและถูกเงินเฟ้อกิน แต่ต้องมีไว้ถึงจะซื้อเพิ่มตอนตลาดร่วงได้
               </div>
               {/* กดค้างไม่มีอะไรบอกให้รู้เองได้ ต้องเขียนบอก — ซ่อนบนจอเตี้ย (มือถือแนวนอน)
                   ที่แนวตั้งมีจำกัดจนบรรทัดนี้จะไปดันปุ่มยืนยันตกขอบจอ */}
-              <div className="text-[8px] text-amber-200/45 sm:text-[10px] [@media(max-height:500px)]:hidden">
+              <div className="text-[8px] text-amber-200/70 sm:text-[10px] [@media(max-height:500px)]:hidden">
                 เคล็ดลับ: กดปุ่ม +/− ค้างไว้ ตัวเลขจะวิ่งเร็วขึ้นเรื่อยๆ
               </div>
             </div>

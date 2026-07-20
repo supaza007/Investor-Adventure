@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getStyles } from '../game/engine/data/styles.js'
 import { BALANCE } from '../game/engine/balance.js'
 import Portrait, { PortraitPlaceholder } from './Portrait'
+import Modal from './Modal'
 import { characterArtOf } from './art'
 
 const STYLE_GRAD = {
@@ -149,11 +150,8 @@ function StyleDetailModal({ style, allGainPct, allDefensePct, selectedIndex, onC
   const gainPct = allGainPct[selectedIndex]
   const defensePct = allDefensePct[selectedIndex]
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={onClose}>
-      <div
-        className={`pixel-frame max-h-[85vh] w-full max-w-lg overflow-y-auto border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} label={`รายละเอียด ${style.name}`} panelClassName={`pixel-frame max-w-lg border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}>
+      <div>
         <div className="text-base font-bold sm:text-lg">{style.name}</div>
         <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{style.tagline}</p>
 
@@ -199,7 +197,7 @@ function StyleDetailModal({ style, allGainPct, allDefensePct, selectedIndex, onC
           ปิด
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -289,7 +287,7 @@ export default function StyleSelect({ onSelect }) {
               className="mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
             >
               ⓘ ดูรายละเอียดเพิ่มเติม
-              <span className="block text-[9px] text-white/35 sm:text-[10px]">
+              <span className="block text-[9px] text-white/55 sm:text-[10px]">
                 (tagline · กำไรเฉลี่ย/ป้องกันความเสี่ยงเทียบ 4 สไตล์ · กลไกปรับพอร์ต · บทเรียน)
               </span>
             </button>

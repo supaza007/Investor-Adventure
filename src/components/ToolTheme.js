@@ -12,5 +12,9 @@ export const TOOL_COLOR = {
 export const colorOf = (id) => TOOL_COLOR[id] ?? TOOL_COLOR.cash
 
 // แสดงเงินแบบไม่มีทศนิยม — นักเรียนไม่ต้องอ่านเลขยาว
-export const money = (n) => Math.round(n).toLocaleString('th-TH')
+//
+// ต่อท้าย ฿ ในฟังก์ชันนี้ที่เดียว ห้ามไปเติมเองที่หน้าจอ — ก่อนหน้านี้มีแค่การ์ดในหน้าจัดพอร์ต
+// ที่เขียน {money(x)}฿ ทำให้ที่อื่นทั้งเกมขึ้นเลขเปล่า เช่น "พอร์ตคุณเพิ่งเสียไป 9" ซึ่งอ่านไม่ออกว่า
+// เก้าอะไร (บาท? หมื่นบาท?) หน่วยต้องมาคู่กับตัวเลขเสมอ ไม่งั้นตัวเลขไม่มีความหมาย
+export const money = (n) => `${Math.round(n).toLocaleString('th-TH')}฿`
 export const pct = (n) => `${n >= 0 ? '+' : ''}${(n * 100).toFixed(1)}%`

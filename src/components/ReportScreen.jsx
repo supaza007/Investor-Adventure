@@ -33,7 +33,7 @@ function ChapterRow({ c }) {
         </div>
         <div className="shrink-0 text-right">
           <div className={`text-xs font-bold sm:text-base ${down ? 'text-rose-400' : 'text-emerald-400'}`}>{pct(c.changePct)}</div>
-          <div className="text-[8px] text-white/40 sm:text-[10px]">ปลายบท {money(c.valueEnd)}</div>
+          <div className="text-[8px] text-white/55 sm:text-[10px]">ปลายบท {money(c.valueEnd)}</div>
         </div>
       </div>
       {c.scamAccepted && c.scamLost > 0 && (
@@ -72,7 +72,7 @@ export default function ReportScreen({ report, onRestart }) {
           <div className={`mt-0.5 text-[10px] font-bold sm:text-sm ${beat ? 'text-emerald-300' : 'text-rose-300'}`}>
             คุณทำได้ {beat ? 'ดีกว่า' : 'แย่กว่า'}เกณฑ์นี้ {Math.abs(Math.round(vsBench * 100))}%
           </div>
-          {!beat && <div className="mt-0.5 text-[8px] leading-snug text-white/40 sm:text-[10px]">นักลงทุนมืออาชีพส่วนใหญ่ก็ทำได้ไม่ถึงเกณฑ์นี้เหมือนกัน — การอยู่เฉยๆ ยากกว่าที่คิด</div>}
+          {!beat && <div className="mt-0.5 text-[8px] leading-snug text-white/55 sm:text-[10px]">นักลงทุนมืออาชีพส่วนใหญ่ก็ทำได้ไม่ถึงเกณฑ์นี้เหมือนกัน — การอยู่เฉยๆ ยากกว่าที่คิด</div>}
         </div>
 
         <div className="mt-2 shrink-0 text-[10px] font-bold text-white/70 sm:text-sm">เกิดอะไรขึ้นบ้างในชีวิตคุณ</div>

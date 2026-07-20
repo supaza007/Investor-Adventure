@@ -5,6 +5,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
+import Modal from './Modal'
 import { eventArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
@@ -37,7 +38,7 @@ function StageTrack({ stageIndex }) {
           <div
             key={s.key}
             className={`pixel-chip px-1.5 py-0.5 text-[9px] ${
-              i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/35'
+              i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/55'
             }`}
           >
             {s.label}
@@ -55,7 +56,7 @@ function SignalStage({ event }) {
       <div className="enemy-idle text-5xl font-black opacity-40 grayscale sm:text-7xl">?</div>
       <div className="mt-3 text-sm font-bold text-amber-200 sm:text-xl">มีบางอย่างกำลังก่อตัว...</div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">“{event.hint}”</p>
-      <p className="mt-2 text-[9px] text-white/40 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
+      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
     </div>
   )
 }
@@ -74,7 +75,7 @@ function RevealStage({ event }) {
         กระทบด้าน {TAG_LABELS[primary[0]]}
       </div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">{event.description}</p>
-      <p className="mt-2 text-[9px] text-white/40 sm:text-xs">ยังไม่รู้ว่าจะแรงแค่ไหน — สินทรัพย์ที่อ่อนไหวด้านนี้จะเจ็บที่สุด</p>
+      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังไม่รู้ว่าจะแรงแค่ไหน — สินทรัพย์ที่อ่อนไหวด้านนี้จะเจ็บที่สุด</p>
     </div>
   )
 }
@@ -118,7 +119,7 @@ function ShockStage({ state, event }) {
         <div className="pixel-bar relative h-4 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-5">
           <div className="absolute top-0 h-full w-1 bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.6)]" style={{ left: `calc(${Math.min(98, Math.max(0, markerPos))}% - 2px)` }} />
         </div>
-        <div className="flex justify-between text-[8px] text-white/40 sm:text-[10px]">
+        <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
           <span>แย่สุด {pct(band.min)}</span>
           <span>ดีสุด {pct(band.max)}</span>
         </div>
@@ -305,8 +306,10 @@ function DebriefStage({ state, event }) {
 // ข้อเสนอมิจฉาชีพ — ธงแดงคือ "การันตี" + "เร่งรัดเวลา" ไม่ใช่ตัวเลข
 function ScamOffer({ scam, onAnswer }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3">
-      <div className="pixel-frame w-full max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
+    // ไม่ส่ง onClose = กด Esc หรือคลิกฉากหลังหนีไม่ได้ ต้องเลือก "โอนเลย" หรือ "ปฏิเสธ" เท่านั้น
+    // ตั้งใจให้เป็นแบบนี้ — ในโลกจริงมิจฉาชีพก็บีบให้ตัดสินใจตรงนั้น การกดหนีได้จะทำให้บทเรียนหาย
+    <Modal label="มีคนทักมาหาคุณ — ข้อเสนอการลงทุน" panelClassName="pixel-frame max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
+      <div>
         <div className="w-full text-center">
           <div className="text-sm font-bold text-amber-200 sm:text-lg">มีคนทักมาหาคุณ</div>
         </div>
@@ -327,7 +330,7 @@ function ScamOffer({ scam, onAnswer }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -366,7 +369,7 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
                 ปรับพอร์ต
               </button>
             ) : (
-              <span className="text-[8px] leading-snug text-white/35 sm:text-[10px]">
+              <span className="text-[8px] leading-snug text-white/55 sm:text-[10px]">
                 {currentStyle(state).name}แตะพอร์ตตรงนี้ไม่ได้
               </span>
             )}
