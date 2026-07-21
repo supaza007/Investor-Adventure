@@ -76,7 +76,12 @@ export default function ReportScreen({ report, onRestart }) {
         </div>
 
         <div className="mt-2 shrink-0 text-[10px] font-bold text-white/70 sm:text-sm">เกิดอะไรขึ้นบ้างในชีวิตคุณ</div>
-        <div className="mt-1 grid gap-1.5">
+        {/* ต้องระบุ grid-cols-1 ห้ามใช้ grid เปล่าๆ — grid เปล่าได้คอลัมน์ auto ที่ยืดตาม min-content
+            ของลูกได้ไม่จำกัด และ truncate ข้างใน ChapterRow มี white-space: nowrap ที่ดัน min-content
+            ให้เท่ากับความยาวข้อความเต็ม ผลคือแถวกว้าง 454px บนจอ 390px แล้วกล่องแม่ (overflow-y-auto
+            ซึ่ง CSS บังคับให้ overflow-x เป็น auto ตามไปด้วย) เลื่อนแนวนอนได้ ผู้เล่นปัดนิ้วทีเดียว
+            ข้อความหายไปทางซ้ายทั้งหน้า · grid-cols-1 ของ Tailwind = minmax(0,1fr) ซึ่งตรึงไว้ที่ความกว้างแม่ */}
+        <div className="mt-1 grid grid-cols-1 gap-1.5">
           {report.chapters.map((c) => (
             <ChapterRow key={c.chapter} c={c} />
           ))}

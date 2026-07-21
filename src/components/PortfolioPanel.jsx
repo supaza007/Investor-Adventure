@@ -42,7 +42,10 @@ export default function PortfolioPanel({ positions, cash, compact = false }) {
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mb-1.5 block w-full py-1 text-left"
+          // วัดได้ 37px ต่ำกว่าเกณฑ์ 44px ที่เกมใช้กับปุ่มอื่นทั้งหมด — ปุ่มนี้ไม่ใช่ .pixel-btn
+          // จึงไม่ได้ min-height จาก media query ใน index.css ต้องเพิ่ม padding เอง
+          // จอเตี้ย (มือถือแนวนอน) ยกเว้นไว้ เพราะที่แนวตั้งมีจำกัดจนต้องยอมแลก
+          className="mb-1.5 block w-full py-2 text-left [@media(max-height:500px)]:py-0.5"
         >
           {bar}
           <span className="mt-0.5 block text-[8px] text-white/45 sm:text-[10px]">

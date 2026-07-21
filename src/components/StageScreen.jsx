@@ -442,7 +442,13 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
           <StageTrack stageIndex={state.stageIndex} />
         </header>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-2">
+        {/* safe center ไม่ใช่ center เฉยๆ — เวลาเนื้อหาสั้นกว่ากล่องจะจัดกึ่งกลางเหมือนเดิม แต่พอเนื้อหา
+            ล้น (เช่นหน้าสรุปบทที่มีตารางรายสินทรัพย์ครบ 6 ตัว บนมือถือที่แถบเบราว์เซอร์กินที่)
+            การจัดกึ่งกลางจะดันส่วนเกินขึ้นไปเหนือขอบบนจนหลุดออกนอกระยะ scroll — scrollTop เป็น 0
+            แล้วแต่หัวข้อยังอยู่สูงกว่าขอบ 48px คือมองไม่เห็นและเลื่อนขึ้นไปดูไม่ได้เลย
+            safe center สั่งให้สลับไปชิดบนอัตโนมัติเมื่อล้น ทุกบรรทัดจึงเลื่อนถึงได้เสมอ
+            เบราว์เซอร์เก่าที่ไม่รู้จักคำนี้จะทิ้งทั้งบรรทัดแล้วได้ค่า default (ชิดบน) ซึ่งก็ยังถูกกว่าเดิม */}
+        <div className="flex min-h-0 flex-1 justify-center overflow-y-auto py-2 [align-items:safe_center]">
           {stage.key === 'signal' && <SignalStage event={event} />}
           {stage.key === 'reveal' && <RevealStage event={event} />}
           {stage.key === 'shock' && <ShockStage state={state} event={event} />}
