@@ -29,6 +29,7 @@ export function createInitialState(seed = Date.now()) {
     positionsBeforeShock: {}, // สำเนา positions ก่อนแรงกระแทกลง — สเตจ 5 ใช้บอกผลกระทบรายตัว
     cash: 0,
     eventOrder: [], // เหตุการณ์ของทั้ง 4 บท เลือกตอนเริ่มรอบ
+    scamChapter: null, // บทที่มิจฉาชีพจะทัก — อีเวนต์เสริม สุ่มบทเดียวต่อรอบ
     isBlackSwan: false,
     band: null,
     shock: null, // { shockPct, percentile }
@@ -83,12 +84,15 @@ function startRun(state, styleId) {
   if (!style) return state
   const rng = rngFrom(state.seed)
   const eventOrder = pickEvents(rng)
+  // มิจฉาชีพทักครั้งเดียวต่อรอบ สุ่มว่าบทไหน — ผู้เล่นได้เจอบทเรียนนี้เสมอ แต่เดาล่วงหน้าไม่ได้
+  const scamChapter = Math.floor(rng() * BALANCE.chapters.length)
 
   return {
     ...createInitialState(rng.getSeed()),
     phase: 'allocation',
     styleId,
     eventOrder,
+    scamChapter,
     cash: BALANCE.chapters[0].income, // ทุนตั้งต้นของบท 1
   }
 }
@@ -125,11 +129,9 @@ function enterStage(state, index) {
   const stage = STAGES[index]
   let next = { ...state, stageIndex: index }
 
-  if (stage.key === 'reveal') {
-    const event = currentEvent(next)
-    if (event?.special === 'scam_offer' && !next.scam) {
-      next.scam = makeScamOffer(next.positions, next.cash)
-    }
+  // อีเวนต์เสริม: มิจฉาชีพทักซ้อนมาบนเหตุการณ์ประจำบท ไม่แทนที่มัน
+  if (stage.key === 'reveal' && next.chapterIndex === next.scamChapter && !next.scam) {
+    next.scam = makeScamOffer(next.positions, next.cash)
   }
 
   if (stage.key === 'shock') next = resolveShock(next)
