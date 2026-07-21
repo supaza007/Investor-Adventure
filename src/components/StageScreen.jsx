@@ -244,6 +244,72 @@ const exposureTone = (exposure) => (exposure >= 0.6 ? 'bad' : exposure < 0.35 ? 
 const diversificationTone = (diversification) => (diversification >= 0.75 ? 'good' : diversification < 0.4 ? 'bad' : 'neutral')
 const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral' : 'bad')
 
+// ตารางผลกระทบรายสินทรัพย์ — หัวใจของสเตจ 5
+//
+// แทนประโยค "X ช่วยดูดซับมากสุด ส่วน Y เจ็บหนักสุด" แบบเดิม ซึ่งเรียงด้วยค่า exposure
+// (คุณสมบัติติดตัวของสินทรัพย์) ไม่ใช่ผลที่เกิดขึ้นจริงรอบนั้น — สินทรัพย์ที่อ่อนไหวที่สุดแต่ถือไว้
+// นิดเดียวไม่ใช่ตัวที่ทำร้ายพอร์ตจริง การเรียงด้วย ฿ ที่หายไปจริงจึงตรงกับสิ่งที่ผู้เล่นรู้สึก
+//
+// แถบสียาวตามสัดส่วน |฿ ที่เปลี่ยน| เทียบกับตัวที่เปลี่ยนมากสุดในรอบนั้น (สเกลสัมพัทธ์แบบเดียวกับ
+// StyleCompareBars) วางเป็นพื้นหลังของแถวเลย ไม่ใช่บรรทัดแยก — จอเตี้ยจึงไม่ต้องจ่ายความสูงเพิ่ม
+//
+// ทิศการเรียงพลิกตามผลรวม: พอร์ตติดลบ → เสียมากสุดขึ้นก่อน · พอร์ตเป็นบวก → ได้มากสุดขึ้นก่อน
+// ทั้งสองทางคือ "ตัวที่กำหนดผลลัพธ์รอบนี้มากที่สุดอยู่บนสุดเสมอ" กล่องบทเรียนจึงอ้างแถวบนสุดได้
+function ImpactTable({ rows, cash, gained, isBlackSwan }) {
+  const maxAbs = Math.max(1e-9, ...rows.map((r) => Math.abs(r.change)))
+
+  return (
+    <div className="mt-2">
+      <div className="text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยคุณบ้าง' : 'สินทรัพย์ไหนทำร้ายคุณบ้าง'}</div>
+
+      {/* Black Swan บังคับ exposure เท่ากันหมดทุกตัว (encounter.js) ทุกแถวเลยได้ % เดียวกันเป๊ะ
+          ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
+      {isBlackSwan && (
+        <div className="pixel-chip mt-1 bg-purple-950/50 px-1.5 py-1 text-[9px] leading-snug text-purple-200 sm:text-[11px]">
+          รอบนี้ทุกอย่างโดนเท่ากันหมด — Black Swan ไม่เลือกที่หลบ
+        </div>
+      )}
+
+      <div className="mt-1 flex flex-col gap-[3px]">
+        {rows.map((r) => {
+          const down = r.change < 0
+          // money() ปัดเป็นจำนวนเต็ม ตัวที่ขยับน้อยมากจึงกลายเป็น 0฿ — ต้องไม่ติดเครื่องหมายมาด้วย
+          // ("−0฿" อ่านแล้วขัด และสื่อผิดว่าเสียเงินทั้งที่ปัดแล้วไม่เสีย) ส่วน % ยังบอกว่าขยับจริง
+          const absRounded = Math.round(Math.abs(r.change))
+          // ใช้ยัติภังค์ ASCII ให้ตรงกับที่ pct() ผลิต ไม่ใช่ − (U+2212) ไม่งั้นสองค่าในบรรทัดเดียวกัน
+          // จะใช้เครื่องหมายลบคนละตัวจนดูเหมือนพิมพ์ผิด
+          const sign = absRounded === 0 ? '' : down ? '-' : '+'
+          return (
+            <div key={r.tool.id} className="relative overflow-hidden bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
+              <div
+                className={`absolute inset-y-0 left-0 ${down ? 'bg-rose-500/25' : 'bg-emerald-500/25'}`}
+                style={{ width: `${(Math.abs(r.change) / maxAbs) * 100}%` }}
+              />
+              <div className="relative flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
+                <span className="truncate text-white">{r.tool.name}</span>
+                <span className={`shrink-0 whitespace-nowrap ${down ? 'text-rose-300' : 'text-emerald-300'}`}>
+                  {pct(r.pct)} · {sign}{money(Math.abs(r.change))}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* เงินสดไม่ผ่าน applyShock เลย จึงไม่มีแถบ — ความต่างทางสายตาบอกเองว่ามันคนละประเภท
+            ไม่ใช่แค่ตัวที่บังเอิญเปลี่ยนแปลง 0 และทำให้ผลรวมทุกแถวเท่ากับตัวเลขใหญ่ด้านบนพอดี */}
+        {cash > 0.5 && (
+          <div className="bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
+            <div className="flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
+              <span className="truncate text-white/60">เงินสด</span>
+              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนกระแทก</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // สเตจ 5 — สรุปเฉพาะตัว: อธิบายด้วยตัวเลขจริงว่าทำไมผลถึงออกมาแบบนี้
 function DebriefStage({ state, event }) {
   const { band, shock } = state
@@ -251,17 +317,22 @@ function DebriefStage({ state, event }) {
   const diversification = 1 - band.concentration // แปลงตอนแสดงผลเท่านั้น ไม่แตะ band.concentration ที่ engine ใช้จริง
   const style = currentStyle(state)
 
-  // เรียงว่าอะไรในพอร์ตช่วย/ทำร้ายมากสุดในเหตุการณ์นี้
-  const contributions = Object.keys(state.positions)
+  // เทียบก่อน/หลังแรงกระแทกรายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
+  // ไม่ย้อนคำนวณจาก band.exposure เพราะเคส margin call (เหลือ 0) กับเคสชนพื้น 10% ย้อนกลับไม่ได้
+  const before = state.positionsBeforeShock ?? {}
+  const impacts = Object.keys(before)
+    .filter((id) => before[id] > 0.5)
     .map((id) => {
-      const tool = getTool(id)
-      const sens = Object.entries(event.tagWeights).reduce((s, [tag, w]) => s + w * (tool.exposure[tag] ?? 0), 0)
-      return { tool, sens: sens * (tool.shockMult ?? 1) }
+      const change = (state.positions[id] ?? 0) - before[id]
+      return { tool: getTool(id), change, pct: change / before[id] }
     })
-    .sort((a, b) => a.sens - b.sens)
 
-  const hero = contributions[0]
-  const villain = contributions[contributions.length - 1]
+  const totalChange = impacts.reduce((s, r) => s + r.change, 0)
+  const gained = totalChange >= 0
+  impacts.sort((a, b) => (gained ? b.change - a.change : a.change - b.change))
+
+  // บทเรียนของแถวบนสุด = ตัวที่กำหนดผลลัพธ์รอบนี้มากสุด · ไม่ได้ถืออะไรเลยก็ใช้คำอธิบายเหตุการณ์แทน
+  const lead = impacts[0]
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -280,11 +351,8 @@ function DebriefStage({ state, event }) {
           {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
         </div>
 
-        {hero && villain && hero.tool.id !== villain.tool.id && (
-          <div className="mt-1.5">
-            <b className={'text-emerald-300'}>{hero.tool.name}</b> ช่วยดูดซับแรงกระแทกไว้มากสุด ส่วน{' '}
-            <b className="text-rose-300">{villain.tool.name}</b> คือตัวที่เจ็บหนักสุด
-          </div>
+        {impacts.length > 0 && (
+          <ImpactTable rows={impacts} cash={state.cash} gained={gained} isBlackSwan={state.isBlackSwan} />
         )}
 
         {state.lastFee > 0.5 && (
@@ -297,7 +365,7 @@ function DebriefStage({ state, event }) {
       </div>
 
       <div className="pixel-chip mt-2 bg-emerald-950/60 p-2 text-[10px] leading-relaxed text-emerald-100/90 sm:text-xs">
-        {villain?.tool.lesson ?? event.description}
+        {lead?.tool.lesson ?? event.description}
       </div>
     </div>
   )

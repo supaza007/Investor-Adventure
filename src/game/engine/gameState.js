@@ -26,6 +26,7 @@ export function createInitialState(seed = Date.now()) {
     chapterIndex: 0,
     stageIndex: 0,
     positions: {}, // { [toolId]: มูลค่า }
+    positionsBeforeShock: {}, // สำเนา positions ก่อนแรงกระแทกลง — สเตจ 5 ใช้บอกผลกระทบรายตัว
     cash: 0,
     eventOrder: [], // เหตุการณ์ของทั้ง 4 บท เลือกตอนเริ่มรอบ
     isBlackSwan: false,
@@ -157,12 +158,21 @@ function resolveShock(state) {
   const bs = isBlackSwan(rng)
   const band = outcomeBand(positions, event, { styleShockMult: style.shockMult, isBlackSwan: bs })
   const shock = rollShock(band, rng)
+
+  // เก็บสำเนาไว้ก่อน applyShock เขียนทับ — สเตจ 5 ต้องเทียบก่อน/หลังรายสินทรัพย์
+  // ย้อนคำนวณเอาทีหลังไม่ได้ทุกเคส: ตัวที่โดน margin call เหลือ 0 (หารกลับไม่ได้)
+  // และตัวที่ชนพื้น 10% ก็ไม่ได้สะท้อน shock จริงที่โดน
+  //
+  // จุดนี้คือ "หลังมิจฉาชีพเชิดเงินแล้ว" โดยตั้งใจ — ตารางสเตจ 5 รายงานผลของเหตุการณ์อย่างเดียว
+  // ส่วนเงินที่โดนโกงมีบรรทัดของตัวเองอยู่แล้วในสเตจ 3
+  const positionsBeforeShock = { ...positions }
   positions = applyShock(positions, event, shock.shockPct, { isBlackSwan: bs })
 
   return {
     ...state,
     seed: rng.getSeed(),
     positions,
+    positionsBeforeShock,
     cash,
     scam,
     isBlackSwan: bs,
@@ -294,6 +304,7 @@ function finishChapter(state) {
     isBlackSwan: false,
     band: null,
     shock: null,
+    positionsBeforeShock: {}, // ล้างพร้อม band/shock — ข้อมูลของบทที่จบไปแล้วต้องไม่ค้างมาบทใหม่
     scam: null,
     behavior: null,
     reboundOwed: 0,
