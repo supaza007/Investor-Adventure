@@ -346,9 +346,30 @@ function DebriefStage({ state, event }) {
           กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
         </div>
 
+        {/* เดิมเขียนว่า "ผลออกมาที่ อันดับ N% ของช่วงที่เป็นไปได้" ซึ่งผู้เล่นอ่านไม่เข้าใจด้วย 3 เหตุผล:
+              1. "อันดับ" ในภาษาไทยขั้วกลับด้าน — อันดับ 1 คือดีที่สุด คนอ่านเลยเข้าใจว่าเลขน้อย = ดี
+                 แต่ที่นี่เลขน้อย = แย่ (0 = ปลายแย่สุดของช่วง) ชนกับสัญชาตญาณทางภาษาเต็มๆ
+              2. อ้างถึง "ช่วงที่เป็นไปได้" ที่มองไม่เห็นแล้ว — แถบนั้นอยู่สเตจ 3 พอถึงสเตจ 5 มันหายไป
+              3. "อันดับ %" ทำให้เข้าใจว่าเทียบกับผู้เล่นคนอื่น ทั้งที่เป็นตำแหน่งลูกเต๋าในช่วงของตัวเอง
+            แก้โดยเลิกใช้ตัวเลขนามธรรม เอาช่วงจริงมาโชว์ซ้ำพร้อมหมุดชี้ตำแหน่ง — ใช้หน้าตาเดียวกับ
+            แถบในสเตจ 3 ผู้เล่นจึงจำได้ว่าเป็นของเดียวกัน โดยไม่ต้องแตะเอนจิน (band มีข้อมูลครบแล้ว) */}
         <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[luckTone(luckPct)]}`}>
-          ดวงของคุณรอบนี้: ผลออกมาที่ <b>อันดับ {luckPct}%</b> ของช่วงที่เป็นไปได้ —{' '}
-          {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
+          <div>
+            ดวงของคุณรอบนี้: ได้จริง <b>{pct(shock.shockPct)}</b> จากช่วงที่เป็นไปได้ทั้งหมด —{' '}
+            {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
+          </div>
+          {/* luckPct คือ percentile × 100 ซึ่งเท่ากับตำแหน่งหมุดพอดีอยู่แล้ว
+              (shockPct = min + roll × ช่วง) จึงไม่ต้องคำนวณ markerPos ซ้ำแบบสเตจ 3 */}
+          <div className="pixel-bar relative mt-1 h-2 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-2.5">
+            <div
+              className="absolute top-0 h-full w-1 bg-white"
+              style={{ left: `calc(${Math.min(98, Math.max(0, luckPct))}% - 2px)` }}
+            />
+          </div>
+          <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
+            <span>แย่สุด {pct(band.min)}</span>
+            <span>ดีสุด {pct(band.max)}</span>
+          </div>
         </div>
 
         {impacts.length > 0 && (
