@@ -87,13 +87,79 @@ filter/group ใน Table Editor ได้ตรงๆ ไม่ต้องแ�
   endpoint อ่านสาธารณะ — ถ้าอยากให้ครูดูเองในอนาคตโดยไม่ต้องมี Supabase account ค่อยทำ
   ระบบ auth/dashboard แยกทีหลัง (ไม่ใช่ scope ตอนนี้)
 
-## จุดที่ implement (เมื่อพร้อมลงมือ — ยังไม่ทำในดีไซน์นี้)
+## Backend setup (ทำได้เลยตอนนี้ — ไม่แตะโค้ดเกม)
 
+ไม่ต้องเขียน backend server เอง Supabase สร้าง REST API ให้อัตโนมัติจาก schema ตาราง
+งานฝั่ง backend ทั้งหมดคือตั้งค่าใน Supabase project:
+
+1. รัน SQL นี้ใน Supabase SQL Editor (สร้างตาราง + ดัชนี + RLS ครบในทีเดียว):
+
+```sql
+create extension if not exists pgcrypto;
+
+create table game_sessions (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  student_name text not null,
+  class_room text not null,
+  style_id text not null,
+  final_value numeric not null,
+  contributed numeric not null,
+  benchmark numeric not null,
+  ratio numeric not null,
+  multiple numeric not null,
+  outcome_band text not null,
+  is_ruined boolean not null default false,
+  scam_victim boolean not null default false,
+  black_swan_count integer not null default 0
+);
+
+create table chapter_events (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references game_sessions(id) on delete cascade,
+  chapter_n integer not null,
+  event_id text not null,
+  event_name text not null,
+  is_black_swan boolean not null default false,
+  shock_pct numeric not null,
+  percentile numeric not null,
+  exposure numeric not null,
+  concentration numeric not null,
+  behavior text,
+  scam_accepted boolean not null default false,
+  scam_lost numeric not null default 0,
+  value_before numeric not null,
+  value_after numeric not null,
+  value_end numeric not null
+);
+
+create index idx_chapter_events_session_id on chapter_events(session_id);
+create index idx_game_sessions_class_room on game_sessions(class_room);
+create index idx_game_sessions_created_at on game_sessions(created_at);
+
+alter table game_sessions enable row level security;
+alter table chapter_events enable row level security;
+
+create policy "public can insert sessions"
+  on game_sessions for insert to anon with check (true);
+
+create policy "public can insert chapter events"
+  on chapter_events for insert to anon with check (true);
+-- ตั้งใจไม่สร้าง policy select/update/delete ให้ anon
+-- → อ่าน/แก้/ลบผ่าน public API ไม่ได้เลย ต้อง login เข้า dashboard เท่านั้น
+```
+
+2. คัดลอก URL + anon key จากหน้า Project Settings → API เก็บไว้ใช้ตอน implement ฝั่ง frontend
+3. ไม่ต้องตั้งค่า CORS เพิ่ม — Supabase เปิดให้เบราว์เซอร์เรียก REST API ข้ามโดเมนได้เองโดย default
+
+## จุดที่ implement ฝั่งเกม (เมื่อพร้อมลงมือ — ยังไม่ทำในดีไซน์นี้)
+
+- เพิ่ม `.env` เข้า `.gitignore` ก่อน (ตอนนี้ repo ยังไม่มีการจัดการ `.env` เลย) แล้วใส่
+  `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` ลงไป
 - ติดตั้ง `@supabase/supabase-js`
 - เพิ่มฟอร์มกรอกชื่อ+ห้อง ก่อนเริ่มเกม (หรือหน้า cover) — ยังไม่มีอยู่ในโค้ดตอนนี้
 - ที่ [ReportScreen.jsx](../../src/components/ReportScreen.jsx) ตอนแสดงผลสรุป: insert 1 แถว
   ลง `game_sessions` แล้ว insert 4 แถวลง `chapter_events` จาก `report.chapters`
-- ตั้งค่า RLS policy ตามหัวข้อด้านบนตั้งแต่สร้างตาราง
 
 ## เรื่องค้างจากเซสชันนี้ (ไม่เกี่ยวกับ database — บันทึกไว้กันลืม)
 
