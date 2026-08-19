@@ -16,7 +16,7 @@ import {
 import { BALANCE } from './balance.js'
 import { getEvent } from './data/events.js'
 
-const BALANCED = { bond: 1, esg: 1, fund: 1, stock: 1, derivatives: 1, crypto: 1 }
+const BALANCED = { bond: 1, fund: 1, stock: 1, crypto: 1 }
 
 // เล่นจบ 1 รอบ: จัดพอร์ตตามสัดส่วนที่กำหนด แล้วกดผ่านทุกสเตจของทุกบท
 function playFullRun(weights = BALANCED, { styleId = 'medium', seed = 12345, behavior = 'hold' } = {}) {

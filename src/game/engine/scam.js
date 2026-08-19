@@ -6,11 +6,11 @@
 import { BALANCE } from './balance.js'
 import { weights } from './portfolio.js'
 
-// ขนาดข้อเสนอโตตามสัดส่วนคริปโต+อนุพันธ์ในพอร์ต
+// ขนาดข้อเสนอโตตามสัดส่วนคริปโตในพอร์ต (สินทรัพย์เก็งกำไรสูงสุดที่เหลือ)
 // มิจฉาชีพจริงเล็งคนที่แสดงพฤติกรรมอยากรวยเร็ว ไม่ได้สุ่มยิงมั่ว — เกมจึงเล็งแบบเดียวกัน
 export function makeScamOffer(positions, cash) {
   const w = weights(positions)
-  const greedShare = (w.crypto ?? 0) + (w.derivatives ?? 0)
+  const greedShare = w.crypto ?? 0
   const total = Object.values(positions).reduce((a, b) => a + b, 0) + cash
   const pct = BALANCE.scam.baseOfferPct + BALANCE.scam.greedOfferPct * greedShare
 

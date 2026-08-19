@@ -116,7 +116,7 @@ npm run electron:build  # build เป็น .exe (Windows, portable)
    │  ├─ scam.js         กลไกมิจฉาชีพ (ไม่ใช่แค่ tag matching)
    │  ├─ report.js       รายงานผลเกษียณ
    │  ├─ rng.js          ตัวสุ่มที่กำหนด seed ได้ (เกม replay ได้)
-   │  ├─ data/           เครื่องมือ 6 ชนิด · เหตุการณ์ 12 ตัว · สไตล์ 4 แบบ
+   │  ├─ data/           เครื่องมือ 4 ชนิด · เหตุการณ์ 12 ตัว · สไตล์ 4 แบบ
    │  └─ *.test.js       เทสต์ 48 ตัว
    ├─ assets/            ภาพที่เกมใช้จริง (บีบแล้ว — ดูหัวข้อด้านบน)
    └─ components/        UI 5 หน้าจอ + LifeTimeline/Portrait/ToolTheme/art

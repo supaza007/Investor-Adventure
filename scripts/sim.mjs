@@ -14,7 +14,7 @@ import { BALANCE } from '../src/game/engine/balance.js'
 const RUNS = Number(process.argv[2]) || 2000
 
 const STRATEGIES = {
-  'กระจายครบ 6 ชนิด': { bond: 1, esg: 1, fund: 1, stock: 1, derivatives: 1, crypto: 1 },
+  'กระจายครบ 4 ชนิด': { bond: 1, fund: 1, stock: 1, crypto: 1 },
   'กองทุนรวมล้วน (เกณฑ์อ้างอิง)': { fund: 1 },
   'ตราสารหนี้ล้วน (กลัวเสี่ยง)': { bond: 1 },
   'หุ้นล้วน': { stock: 1 },
@@ -90,7 +90,7 @@ for (const [name, s] of Object.entries(results)) {
 }
 
 console.log('\n── ตรวจว่าเกมสอนถูกไหม ──')
-const spread6 = results['กระจายครบ 6 ชนิด']
+const spread = results['กระจายครบ 4 ชนิด']
 const allBond = results['ตราสารหนี้ล้วน (กลัวเสี่ยง)']
 const allCrypto = results['คริปโตล้วน (ทุ่มสุดตัว)']
 const allCash = results['ไม่ลงทุนเลย (เงินสดล้วน)']
@@ -102,8 +102,8 @@ const check = (ok, msg) => {
   return ok
 }
 const checks = [
-  check(spread6.median > allBond.median, 'กระจายความเสี่ยงชนะการหลบอยู่ในตราสารหนี้'),
-  check(spread6.p90 - spread6.p10 < allCrypto.p90 - allCrypto.p10, 'กระจายความเสี่ยง = ผลลัพธ์คาดเดาได้กว่าการทุ่มสุดตัว'),
+  check(spread.median > allBond.median, 'กระจายความเสี่ยงชนะการหลบอยู่ในตราสารหนี้'),
+  check(spread.p90 - spread.p10 < allCrypto.p90 - allCrypto.p10, 'กระจายความเสี่ยง = ผลลัพธ์คาดเดาได้กว่าการทุ่มสุดตัว'),
   // ล้มละลายถาวรเกิดยาก (~1%) เพราะเงินเดือนก้อนใหม่เข้ามาทุกบทให้สร้างตัวใหม่ได้ — ซึ่งสมจริง
   // บทลงโทษที่แท้จริงของการทุ่มสุดตัวจึงอยู่ที่หางล่าง ไม่ใช่ที่อัตราหมดตัว
   // เช็คเฉพาะสไตล์เริ่มต้น: คนถือยาวโดน margin call ยากกว่าโดยตั้งใจ (แรงกระแทกถูกหน่วง 20%)
