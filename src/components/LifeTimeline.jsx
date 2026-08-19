@@ -31,15 +31,20 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
 
           return (
             <div key={p.n} className="flex flex-1 items-center last:flex-none">
+              {/* จุดวงกลมเล็กแค่ 20px แต่จุดที่ "ผ่านมาแล้ว" กดดูย้อนหลังได้จริง — เล็กเกินกว่าจะแตะแม่น
+                  ขยายพื้นที่แตะด้วย ::after ที่ absolute ออกไปรอบๆ (relative + -inset-3 = ~44px)
+                  ไม่ใช้ padding เพราะจะไปดันเส้นเชื่อมระหว่างจุดให้เลย์เอาต์เบี้ยวทั้งแถบ
+                  จุดห่างกัน ~75px บนจอ 375px พื้นที่แตะจึงไม่ทับกัน */}
               <button
                 type="button"
                 disabled={!isPast}
                 onClick={() => setOpenN((cur) => (cur === p.n ? null : p.n))}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center border-2 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[11px] ${
+                aria-label={p.kind === 'retire' ? 'เกษียณ' : `บทที่ ${p.n}${isPast ? ' — ดูสรุปย้อนหลัง' : ''}`}
+                className={`relative flex h-5 w-5 shrink-0 items-center justify-center border-2 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[11px] ${
                   isCurrent
                     ? 'border-yellow-400 bg-yellow-500 text-yellow-950'
                     : isPast
-                      ? `cursor-pointer border-emerald-400 bg-emerald-600 text-emerald-950 ${openN === p.n ? 'ring-2 ring-white' : ''}`
+                      ? `cursor-pointer border-emerald-400 bg-emerald-600 text-emerald-950 after:absolute after:-inset-3 after:content-[''] ${openN === p.n ? 'ring-2 ring-white' : ''}`
                       : 'cursor-not-allowed border-slate-700 bg-slate-800 text-slate-500'
                 }`}
               >

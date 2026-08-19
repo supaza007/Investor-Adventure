@@ -5,6 +5,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
+import Modal from './Modal'
 import { eventArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
@@ -37,7 +38,7 @@ function StageTrack({ stageIndex }) {
           <div
             key={s.key}
             className={`pixel-chip px-1.5 py-0.5 text-[9px] ${
-              i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/35'
+              i === stageIndex ? 'bg-yellow-500 font-bold text-yellow-950' : i < stageIndex ? 'bg-emerald-800 text-emerald-200/70' : 'bg-slate-800 text-white/55'
             }`}
           >
             {s.label}
@@ -55,7 +56,7 @@ function SignalStage({ event }) {
       <div className="enemy-idle text-5xl font-black opacity-40 grayscale sm:text-7xl">?</div>
       <div className="mt-3 text-sm font-bold text-amber-200 sm:text-xl">มีบางอย่างกำลังก่อตัว...</div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">“{event.hint}”</p>
-      <p className="mt-2 text-[9px] text-white/40 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
+      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
     </div>
   )
 }
@@ -74,7 +75,7 @@ function RevealStage({ event }) {
         กระทบด้าน {TAG_LABELS[primary[0]]}
       </div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">{event.description}</p>
-      <p className="mt-2 text-[9px] text-white/40 sm:text-xs">ยังไม่รู้ว่าจะแรงแค่ไหน — สินทรัพย์ที่อ่อนไหวด้านนี้จะเจ็บที่สุด</p>
+      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังไม่รู้ว่าจะแรงแค่ไหน — สินทรัพย์ที่อ่อนไหวด้านนี้จะเจ็บที่สุด</p>
     </div>
   )
 }
@@ -118,7 +119,7 @@ function ShockStage({ state, event }) {
         <div className="pixel-bar relative h-4 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-5">
           <div className="absolute top-0 h-full w-1 bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.6)]" style={{ left: `calc(${Math.min(98, Math.max(0, markerPos))}% - 2px)` }} />
         </div>
-        <div className="flex justify-between text-[8px] text-white/40 sm:text-[10px]">
+        <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
           <span>แย่สุด {pct(band.min)}</span>
           <span>ดีสุด {pct(band.max)}</span>
         </div>
@@ -243,6 +244,72 @@ const exposureTone = (exposure) => (exposure >= 0.6 ? 'bad' : exposure < 0.35 ? 
 const diversificationTone = (diversification) => (diversification >= 0.75 ? 'good' : diversification < 0.4 ? 'bad' : 'neutral')
 const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral' : 'bad')
 
+// ตารางผลกระทบรายสินทรัพย์ — หัวใจของสเตจ 5
+//
+// แทนประโยค "X ช่วยดูดซับมากสุด ส่วน Y เจ็บหนักสุด" แบบเดิม ซึ่งเรียงด้วยค่า exposure
+// (คุณสมบัติติดตัวของสินทรัพย์) ไม่ใช่ผลที่เกิดขึ้นจริงรอบนั้น — สินทรัพย์ที่อ่อนไหวที่สุดแต่ถือไว้
+// นิดเดียวไม่ใช่ตัวที่ทำร้ายพอร์ตจริง การเรียงด้วย ฿ ที่หายไปจริงจึงตรงกับสิ่งที่ผู้เล่นรู้สึก
+//
+// แถบสียาวตามสัดส่วน |฿ ที่เปลี่ยน| เทียบกับตัวที่เปลี่ยนมากสุดในรอบนั้น (สเกลสัมพัทธ์แบบเดียวกับ
+// StyleCompareBars) วางเป็นพื้นหลังของแถวเลย ไม่ใช่บรรทัดแยก — จอเตี้ยจึงไม่ต้องจ่ายความสูงเพิ่ม
+//
+// ทิศการเรียงพลิกตามผลรวม: พอร์ตติดลบ → เสียมากสุดขึ้นก่อน · พอร์ตเป็นบวก → ได้มากสุดขึ้นก่อน
+// ทั้งสองทางคือ "ตัวที่กำหนดผลลัพธ์รอบนี้มากที่สุดอยู่บนสุดเสมอ" กล่องบทเรียนจึงอ้างแถวบนสุดได้
+function ImpactTable({ rows, cash, gained, isBlackSwan }) {
+  const maxAbs = Math.max(1e-9, ...rows.map((r) => Math.abs(r.change)))
+
+  return (
+    <div className="mt-2">
+      <div className="text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยคุณบ้าง' : 'สินทรัพย์ไหนทำร้ายคุณบ้าง'}</div>
+
+      {/* Black Swan บังคับ exposure เท่ากันหมดทุกตัว (encounter.js) ทุกแถวเลยได้ % เดียวกันเป๊ะ
+          ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
+      {isBlackSwan && (
+        <div className="pixel-chip mt-1 bg-purple-950/50 px-1.5 py-1 text-[9px] leading-snug text-purple-200 sm:text-[11px]">
+          รอบนี้ทุกอย่างโดนเท่ากันหมด — Black Swan ไม่เลือกที่หลบ
+        </div>
+      )}
+
+      <div className="mt-1 flex flex-col gap-[3px]">
+        {rows.map((r) => {
+          const down = r.change < 0
+          // money() ปัดเป็นจำนวนเต็ม ตัวที่ขยับน้อยมากจึงกลายเป็น 0฿ — ต้องไม่ติดเครื่องหมายมาด้วย
+          // ("−0฿" อ่านแล้วขัด และสื่อผิดว่าเสียเงินทั้งที่ปัดแล้วไม่เสีย) ส่วน % ยังบอกว่าขยับจริง
+          const absRounded = Math.round(Math.abs(r.change))
+          // ใช้ยัติภังค์ ASCII ให้ตรงกับที่ pct() ผลิต ไม่ใช่ − (U+2212) ไม่งั้นสองค่าในบรรทัดเดียวกัน
+          // จะใช้เครื่องหมายลบคนละตัวจนดูเหมือนพิมพ์ผิด
+          const sign = absRounded === 0 ? '' : down ? '-' : '+'
+          return (
+            <div key={r.tool.id} className="relative overflow-hidden bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
+              <div
+                className={`absolute inset-y-0 left-0 ${down ? 'bg-rose-500/25' : 'bg-emerald-500/25'}`}
+                style={{ width: `${(Math.abs(r.change) / maxAbs) * 100}%` }}
+              />
+              <div className="relative flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
+                <span className="truncate text-white">{r.tool.name}</span>
+                <span className={`shrink-0 whitespace-nowrap ${down ? 'text-rose-300' : 'text-emerald-300'}`}>
+                  {pct(r.pct)} · {sign}{money(Math.abs(r.change))}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* เงินสดไม่ผ่าน applyShock เลย จึงไม่มีแถบ — ความต่างทางสายตาบอกเองว่ามันคนละประเภท
+            ไม่ใช่แค่ตัวที่บังเอิญเปลี่ยนแปลง 0 และทำให้ผลรวมทุกแถวเท่ากับตัวเลขใหญ่ด้านบนพอดี */}
+        {cash > 0.5 && (
+          <div className="bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
+            <div className="flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
+              <span className="truncate text-white/60">เงินสด</span>
+              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนกระแทก</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // สเตจ 5 — สรุปเฉพาะตัว: อธิบายด้วยตัวเลขจริงว่าทำไมผลถึงออกมาแบบนี้
 function DebriefStage({ state, event }) {
   const { band, shock } = state
@@ -250,17 +317,22 @@ function DebriefStage({ state, event }) {
   const diversification = 1 - band.concentration // แปลงตอนแสดงผลเท่านั้น ไม่แตะ band.concentration ที่ engine ใช้จริง
   const style = currentStyle(state)
 
-  // เรียงว่าอะไรในพอร์ตช่วย/ทำร้ายมากสุดในเหตุการณ์นี้
-  const contributions = Object.keys(state.positions)
+  // เทียบก่อน/หลังแรงกระแทกรายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
+  // ไม่ย้อนคำนวณจาก band.exposure เพราะเคส margin call (เหลือ 0) กับเคสชนพื้น 10% ย้อนกลับไม่ได้
+  const before = state.positionsBeforeShock ?? {}
+  const impacts = Object.keys(before)
+    .filter((id) => before[id] > 0.5)
     .map((id) => {
-      const tool = getTool(id)
-      const sens = Object.entries(event.tagWeights).reduce((s, [tag, w]) => s + w * (tool.exposure[tag] ?? 0), 0)
-      return { tool, sens: sens * (tool.shockMult ?? 1) }
+      const change = (state.positions[id] ?? 0) - before[id]
+      return { tool: getTool(id), change, pct: change / before[id] }
     })
-    .sort((a, b) => a.sens - b.sens)
 
-  const hero = contributions[0]
-  const villain = contributions[contributions.length - 1]
+  const totalChange = impacts.reduce((s, r) => s + r.change, 0)
+  const gained = totalChange >= 0
+  impacts.sort((a, b) => (gained ? b.change - a.change : a.change - b.change))
+
+  // บทเรียนของแถวบนสุด = ตัวที่กำหนดผลลัพธ์รอบนี้มากสุด · ไม่ได้ถืออะไรเลยก็ใช้คำอธิบายเหตุการณ์แทน
+  const lead = impacts[0]
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -274,16 +346,34 @@ function DebriefStage({ state, event }) {
           กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
         </div>
 
+        {/* เดิมเขียนว่า "ผลออกมาที่ อันดับ N% ของช่วงที่เป็นไปได้" ซึ่งผู้เล่นอ่านไม่เข้าใจด้วย 3 เหตุผล:
+              1. "อันดับ" ในภาษาไทยขั้วกลับด้าน — อันดับ 1 คือดีที่สุด คนอ่านเลยเข้าใจว่าเลขน้อย = ดี
+                 แต่ที่นี่เลขน้อย = แย่ (0 = ปลายแย่สุดของช่วง) ชนกับสัญชาตญาณทางภาษาเต็มๆ
+              2. อ้างถึง "ช่วงที่เป็นไปได้" ที่มองไม่เห็นแล้ว — แถบนั้นอยู่สเตจ 3 พอถึงสเตจ 5 มันหายไป
+              3. "อันดับ %" ทำให้เข้าใจว่าเทียบกับผู้เล่นคนอื่น ทั้งที่เป็นตำแหน่งลูกเต๋าในช่วงของตัวเอง
+            แก้โดยเลิกใช้ตัวเลขนามธรรม เอาช่วงจริงมาโชว์ซ้ำพร้อมหมุดชี้ตำแหน่ง — ใช้หน้าตาเดียวกับ
+            แถบในสเตจ 3 ผู้เล่นจึงจำได้ว่าเป็นของเดียวกัน โดยไม่ต้องแตะเอนจิน (band มีข้อมูลครบแล้ว) */}
         <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[luckTone(luckPct)]}`}>
-          ดวงของคุณรอบนี้: ผลออกมาที่ <b>อันดับ {luckPct}%</b> ของช่วงที่เป็นไปได้ —{' '}
-          {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
+          <div>
+            ดวงของคุณรอบนี้: ได้จริง <b>{pct(shock.shockPct)}</b> จากช่วงที่เป็นไปได้ทั้งหมด —{' '}
+            {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
+          </div>
+          {/* luckPct คือ percentile × 100 ซึ่งเท่ากับตำแหน่งหมุดพอดีอยู่แล้ว
+              (shockPct = min + roll × ช่วง) จึงไม่ต้องคำนวณ markerPos ซ้ำแบบสเตจ 3 */}
+          <div className="pixel-bar relative mt-1 h-2 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-2.5">
+            <div
+              className="absolute top-0 h-full w-1 bg-white"
+              style={{ left: `calc(${Math.min(98, Math.max(0, luckPct))}% - 2px)` }}
+            />
+          </div>
+          <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
+            <span>แย่สุด {pct(band.min)}</span>
+            <span>ดีสุด {pct(band.max)}</span>
+          </div>
         </div>
 
-        {hero && villain && hero.tool.id !== villain.tool.id && (
-          <div className="mt-1.5">
-            <b className={'text-emerald-300'}>{hero.tool.name}</b> ช่วยดูดซับแรงกระแทกไว้มากสุด ส่วน{' '}
-            <b className="text-rose-300">{villain.tool.name}</b> คือตัวที่เจ็บหนักสุด
-          </div>
+        {impacts.length > 0 && (
+          <ImpactTable rows={impacts} cash={state.cash} gained={gained} isBlackSwan={state.isBlackSwan} />
         )}
 
         {state.lastFee > 0.5 && (
@@ -296,7 +386,7 @@ function DebriefStage({ state, event }) {
       </div>
 
       <div className="pixel-chip mt-2 bg-emerald-950/60 p-2 text-[10px] leading-relaxed text-emerald-100/90 sm:text-xs">
-        {villain?.tool.lesson ?? event.description}
+        {lead?.tool.lesson ?? event.description}
       </div>
     </div>
   )
@@ -305,8 +395,10 @@ function DebriefStage({ state, event }) {
 // ข้อเสนอมิจฉาชีพ — ธงแดงคือ "การันตี" + "เร่งรัดเวลา" ไม่ใช่ตัวเลข
 function ScamOffer({ scam, onAnswer }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3">
-      <div className="pixel-frame w-full max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
+    // ไม่ส่ง onClose = กด Esc หรือคลิกฉากหลังหนีไม่ได้ ต้องเลือก "โอนเลย" หรือ "ปฏิเสธ" เท่านั้น
+    // ตั้งใจให้เป็นแบบนี้ — ในโลกจริงมิจฉาชีพก็บีบให้ตัดสินใจตรงนั้น การกดหนีได้จะทำให้บทเรียนหาย
+    <Modal label="มีคนทักมาหาคุณ — ข้อเสนอการลงทุน" panelClassName="pixel-frame max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
+      <div>
         <div className="w-full text-center">
           <div className="text-sm font-bold text-amber-200 sm:text-lg">มีคนทักมาหาคุณ</div>
         </div>
@@ -327,7 +419,7 @@ function ScamOffer({ scam, onAnswer }) {
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -350,7 +442,13 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
           <StageTrack stageIndex={state.stageIndex} />
         </header>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-2">
+        {/* safe center ไม่ใช่ center เฉยๆ — เวลาเนื้อหาสั้นกว่ากล่องจะจัดกึ่งกลางเหมือนเดิม แต่พอเนื้อหา
+            ล้น (เช่นหน้าสรุปบทที่มีตารางรายสินทรัพย์ครบ 6 ตัว บนมือถือที่แถบเบราว์เซอร์กินที่)
+            การจัดกึ่งกลางจะดันส่วนเกินขึ้นไปเหนือขอบบนจนหลุดออกนอกระยะ scroll — scrollTop เป็น 0
+            แล้วแต่หัวข้อยังอยู่สูงกว่าขอบ 48px คือมองไม่เห็นและเลื่อนขึ้นไปดูไม่ได้เลย
+            safe center สั่งให้สลับไปชิดบนอัตโนมัติเมื่อล้น ทุกบรรทัดจึงเลื่อนถึงได้เสมอ
+            เบราว์เซอร์เก่าที่ไม่รู้จักคำนี้จะทิ้งทั้งบรรทัดแล้วได้ค่า default (ชิดบน) ซึ่งก็ยังถูกกว่าเดิม */}
+        <div className="flex min-h-0 flex-1 justify-center overflow-y-auto py-2 [align-items:safe_center]">
           {stage.key === 'signal' && <SignalStage event={event} />}
           {stage.key === 'reveal' && <RevealStage event={event} />}
           {stage.key === 'shock' && <ShockStage state={state} event={event} />}
@@ -366,7 +464,7 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
                 ปรับพอร์ต
               </button>
             ) : (
-              <span className="text-[8px] leading-snug text-white/35 sm:text-[10px]">
+              <span className="text-[8px] leading-snug text-white/55 sm:text-[10px]">
                 {currentStyle(state).name}แตะพอร์ตตรงนี้ไม่ได้
               </span>
             )}

@@ -6,7 +6,7 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 
-import { getEvent, getEvents } from './data/events.js'
+import { getEvent, getMainEvents } from './data/events.js'
 import { getTools, getTool, TAGS } from './data/tools.js'
 import { getStyles } from './data/styles.js'
 import { concentration, hhi, weights, totalValue, rebalance, applyGrowth } from './portfolio.js'
@@ -17,9 +17,10 @@ const ALL_BOND = { bond: 600 }
 const ALL_CRYPTO = { crypto: 600 }
 
 describe('ความสมบูรณ์ของข้อมูล', () => {
-  test('เหตุการณ์ครบ 12 ตัวและ tagWeights รวมได้ 1.0 เสมอ', () => {
-    const events = getEvents()
-    assert.equal(events.length, 12)
+  // 11 ตัว = เหตุการณ์ประจำบทที่กระแทกพอร์ตผ่าน tag — ไม่นับ Scammer ที่เป็นอีเวนต์เสริมคนละกลไก
+  test('เหตุการณ์ประจำบทครบ 11 ตัวและ tagWeights รวมได้ 1.0 เสมอ', () => {
+    const events = getMainEvents()
+    assert.equal(events.length, 11)
     for (const e of events) {
       const sum = Object.values(e.tagWeights).reduce((s, x) => s + x, 0)
       assert.ok(Math.abs(sum - 1) < 1e-9, `${e.id} tagWeights รวมได้ ${sum} ไม่ใช่ 1.0`)
@@ -117,7 +118,7 @@ describe('Encounter Engine — บทเรียนที่สูตรต้�
   test('ไม่มีเครื่องมือไหนปลอดภัยทุกเหตุการณ์ — ทุกชิ้นต้องมีเหตุการณ์ที่เป็นจุดตายของมัน', () => {
     // นี่คือเสาหลักข้อ 3 "ไม่มีเฉลยสมบูรณ์แบบ" ในรูปเทสต์
     for (const tool of getTools()) {
-      const worst = Math.max(...getEvents().map((e) => toolExposure(tool.id, e)))
+      const worst = Math.max(...getMainEvents().map((e) => toolExposure(tool.id, e)))
       assert.ok(worst > 0.3, `${tool.name} ไม่มีจุดตายเลย (แย่สุดแค่ ${worst.toFixed(2)}) → กลายเป็นเฉลยตายตัว`)
     }
   })
@@ -185,14 +186,14 @@ describe('การลงแรงกระแทกกับพอร์ตจ�
   })
 
   test('พอร์ตกระจายไม่มีวันหมดตัว ต่อให้เจอกรณีแย่สุดของทุกเหตุการณ์', () => {
-    for (const e of getEvents()) {
+    for (const e of getMainEvents()) {
       const after = worstCase(EVEN_SPLIT, e)
       assert.ok(totalValue(after) > 0.5 * totalValue(EVEN_SPLIT), `${e.name} ทำพอร์ตกระจายเสียหายเกินครึ่ง`)
     }
   })
 
   test('แรงกระแทกไม่ทำให้เกิดมูลค่าติดลบ', () => {
-    for (const e of getEvents()) {
+    for (const e of getMainEvents()) {
       const after = applyShock(EVEN_SPLIT, e, -1)
       for (const [id, v] of Object.entries(after)) {
         assert.ok(v >= 0, `${id} ติดลบหลังเจอ ${e.id}`)

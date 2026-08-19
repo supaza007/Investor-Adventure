@@ -38,3 +38,6 @@ public/
 # .claude/skills/ เก็บไว้ใน repo (เป็นสกิลประจำโปรเจกต์ ใครมาช่วยงานก็ได้ใช้)
 # ส่วน .agents/ คือชุดเดียวกันเวอร์ชัน Codex — ซ้ำซ้อน ไม่ต้องขึ้น repo
 .agents/
+
+# settings.local.json = สิทธิ์/ค่าตั้งเฉพาะเครื่องที่นั่งทำงานอยู่ ไม่ใช่ของโปรเจกต์
+.claude/settings.local.json

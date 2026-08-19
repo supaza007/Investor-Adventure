@@ -73,6 +73,16 @@ body::after {
     1px 1px 0 0 var(--c-shadow) !important;
 }
 
+/* วงแหวนโฟกัสสำหรับคนเล่นด้วยคีย์บอร์ด — ใช้ :focus-visible ไม่ใช่ :focus
+   เพื่อไม่ให้วงแหวนเด้งตอนคลิกเมาส์/แตะนิ้ว (เบราว์เซอร์แยกให้เองว่ามาจากคีย์บอร์ดไหม)
+   สีเหลืองเพราะต้องเห็นชัดบนพื้นเข้มทุกหน้าจอ และเข้ากับสีไฮไลต์ที่เกมใช้อยู่แล้ว */
+.pixel-btn:focus-visible,
+.pixel-chip:focus-visible,
+button:focus-visible {
+  outline: 3px solid #facc15 !important;
+  outline-offset: 2px;
+}
+
 /* หลอดเลือด/พลังงานแบบแบ่งช่องพิกเซล */
 .pixel-bar {
   position: relative;
@@ -191,6 +201,30 @@ body::after {
 }
 .play-pulse {
   animation: play-pulse 1s steps(2, jump-none) infinite;
+}
+
+/* ===== ลดการเคลื่อนไหวตามการตั้งค่าของผู้ใช้ =====
+   ตัวละครเด้ง/ศัตรูขยับ/ปุ่ม PLAY เต้น เป็น animation แบบ infinite ทั้งหมด
+   ผู้ใช้บางคนตั้งค่า "ลดการเคลื่อนไหว" ในระบบไว้เพราะภาพขยับตลอดเวลาทำให้เวียนหัว/คลื่นไส้จริงๆ
+   (vestibular disorder) — ต้องเคารพการตั้งค่านั้น
+
+   ไม่ปิด animation ทิ้งทั้งหมดด้วย animation: none เพราะบางตัวมี "สถานะปลายทาง" ที่ต้องคงไว้
+   เช่น slide-in ถ้าโดนตัดกลางคันการ์ดอาจค้างที่ opacity 0 มองไม่เห็น — จึงบีบให้จบทันที
+   ในเฟรมเดียวแทน (0.01ms) ผลคือเห็นสถานะสุดท้ายเลยโดยไม่มีการเคลื่อนไหว */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* เส้นสแกนไลน์ CRT ไม่ขยับอยู่แล้ว แต่ลายเส้นถี่ๆ ก็กวนสายตาคนกลุ่มนี้เหมือนกัน */
+  body::after {
+    opacity: 0.15;
+  }
 }
 
 /* ===== MOBILE / TABLET LANDSCAPE ===== */

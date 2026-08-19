@@ -1,11 +1,71 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
 import { netWorth } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
+import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
+
+// ── กด +/− ค้างไว้เพื่อปรับรัวๆ ────────────────────────────────
+// เงินสดเริ่มบทละ 100% ÷ STEP 5% = ต้องกด + ยี่สิบครั้งกว่าจะลงทุนครบ และซ้ำแบบนี้ทุกต้นบท
+// (4 บท = 80 ครั้งต่อเกม) การกดค้างลดเหลือ "กดค้างครั้งเดียว ~2 วินาที"
+//
+// ยิงครั้งแรกทันทีที่กด แล้วรอ HOLD_DELAY ก่อนเริ่มเดินซ้ำ — คนที่ตั้งใจกดทีละครั้งจึงไม่โดน
+// ตัวเลขวิ่งเกินโดยไม่ตั้งใจ ส่วนคนที่กดค้างจะเร่งขึ้นเรื่อยๆ จนถึงเพดาน MIN_INTERVAL
+const HOLD_DELAY = 350 // ms ก่อนเริ่มเดินซ้ำ
+const START_INTERVAL = 120 // ms ต่อก้าวตอนเริ่มเดิน
+const MIN_INTERVAL = 45 // เร็วสุดที่ยังตามตัวเลขทัน
+const ACCEL = 0.82 // คูณลดช่วงห่างทุกก้าว = ยิ่งกดนานยิ่งเร็ว
+
+function useHoldRepeat(action) {
+  // เก็บ action ล่าสุดไว้ใน ref เพราะ closure ใน timer ถูกสร้างครั้งเดียวตอนเริ่มกด
+  // แต่ action ถูกสร้างใหม่ทุก render (ปิดทับ alloc ชุดใหม่) — ถ้าไม่ผ่าน ref ตัวเลขจะค้างที่ค่าเก่า
+  const actionRef = useRef(action)
+  actionRef.current = action
+
+  // สร้าง controller ครั้งเดียวต่อคอมโพเนนต์ ให้ start/stop มี identity คงที่
+  // ต้องดัก pointerup ที่ window ไม่ใช่ที่ตัวปุ่ม เพราะปุ่มกลายเป็น disabled ระหว่างกดค้างได้
+  // (เช่นเงินสดหมดพอดี) แล้ว element ที่ disabled จะไม่ยิง event ให้อีก — timer จะค้างวิ่งต่อ
+  const ctl = useRef(null)
+  if (!ctl.current) {
+    let timer = null
+    const stop = () => {
+      if (timer) clearTimeout(timer)
+      timer = null
+      window.removeEventListener('pointerup', stop)
+      window.removeEventListener('pointercancel', stop)
+    }
+    const start = () => {
+      stop() // กันซ้อนกรณี pointerdown มาสองครั้งโดยไม่มี pointerup คั่น
+      actionRef.current()
+      let interval = START_INTERVAL
+      const tick = () => {
+        actionRef.current()
+        interval = Math.max(MIN_INTERVAL, interval * ACCEL)
+        timer = setTimeout(tick, interval)
+      }
+      timer = setTimeout(tick, HOLD_DELAY)
+      window.addEventListener('pointerup', stop)
+      window.addEventListener('pointercancel', stop)
+    }
+    ctl.current = { start, stop }
+  }
+
+  useEffect(() => ctl.current.stop, []) // unmount ระหว่างกดค้าง (เช่นกดยืนยัน) ต้องหยุด timer ด้วย
+
+  return {
+    onPointerDown: (e) => {
+      if (e.button !== 0) return // เมาส์ปุ่มขวา/กลาง ไม่ใช่การกดปรับ
+      e.stopPropagation()
+      ctl.current.start()
+    },
+    // การเพิ่ม/ลดเกิดที่ pointerdown ไปแล้ว — click เหลือหน้าที่เดียวคือกันไม่ให้การ์ดเปิด modal
+    onClick: (e) => e.stopPropagation(),
+    onContextMenu: (e) => e.preventDefault(), // กดค้างบนมือถือไม่ต้องเด้งเมนู copy/share
+  }
+}
 
 // แปลง exposure 0..1 เป็นดาว 1-5 เม็ด — นักเรียน ม.ปลาย ไม่ต้องอ่านทศนิยม
 const riskDots = (v) => '●'.repeat(Math.max(1, Math.round(v * 5))) + '○'.repeat(5 - Math.max(1, Math.round(v * 5)))
@@ -36,35 +96,37 @@ const volDots = (v) => {
 // มุมขวาบนเป็นตัวใบ้ว่ากดดูเพิ่มได้ ไม่กดก็เล่นต่อได้ปกติ
 function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
   const c = colorOf(tool.id)
+  const subHold = useHoldRepeat(onSub)
+  const addHold = useHoldRepeat(onAdd)
 
   return (
     <div
       className={`pixel-frame relative cursor-pointer border bg-gradient-to-b p-2 sm:p-2 ${c.border} ${c.grad}`}
       onClick={() => onOpenDetail(tool)}
     >
-      <span className="absolute right-1.5 top-1.5 text-[10px] leading-none text-white/35" aria-hidden="true">ⓘ</span>
+      <span className="absolute right-1.5 top-1.5 text-[10px] leading-none text-white/55" aria-hidden="true">ⓘ</span>
 
       <div className="truncate pr-3 text-xs font-bold sm:text-sm">{tool.name}</div>
 
       <div className="mt-1 flex items-center justify-between gap-1.5">
         <div className={`text-base font-bold sm:text-lg ${c.text}`}>{percent}%</div>
-        <div className="text-base font-bold text-white/70 sm:text-lg">{money(value)}฿</div>
+        <div className="text-base font-bold text-white/70 sm:text-lg">{money(value)}</div>
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onSub() }}
+          {...subHold}
           disabled={percent === 0}
-          className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-600 text-white'}`}
+          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-600 text-white'}`}
         >
           −
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onAdd() }}
+          {...addHold}
           disabled={!canAdd}
-          className={`pixel-btn flex-1 py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-600' : 'bg-slate-500 text-white'}`}
+          className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-500 text-white'}`}
         >
           +
         </button>
@@ -80,11 +142,8 @@ function ToolDetailModal({ tool, onClose }) {
   const c = colorOf(tool.id)
   const vol = volInfo(tool.growthVol)
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4" onClick={onClose}>
-      <div
-        className={`pixel-frame w-full max-w-md border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${c.border}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} label={`รายละเอียด ${tool.name}`} panelClassName={`pixel-frame max-w-md border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${c.border}`}>
+      <div>
         <div className="text-base font-bold sm:text-lg">{tool.name}</div>
         <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{tool.tagline}</p>
         <div className="mt-1 text-[10px] text-white/45 sm:text-xs">โต {tool.growthMult.toFixed(2)}× / 10 ปี</div>
@@ -110,7 +169,7 @@ function ToolDetailModal({ tool, onClose }) {
           ปิด
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -120,8 +179,9 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
   const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4">
-      <div className="pixel-frame w-full max-w-md border border-slate-600 bg-gradient-to-b from-slate-900 to-slate-950 p-4 text-center sm:p-6">
+    // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
+    <Modal label={`บทที่ ${chapter.n} — ${chapter.theme}`} panelClassName="pixel-frame max-w-md border border-slate-600 bg-gradient-to-b from-slate-900 to-slate-950 p-4 text-center sm:p-6">
+      <div>
         {prevSummary && (
           <div className="pixel-chip mb-3 bg-black/40 p-2 text-left text-[10px] leading-relaxed sm:text-xs">
             <div className="font-bold text-white/85">จบบทที่ {prevSummary.chapter} แล้ว — {prevSummary.eventName}</div>
@@ -132,7 +192,7 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
           </div>
         )}
 
-        <div className="text-[10px] uppercase tracking-widest text-white/40 sm:text-xs">
+        <div className="text-[10px] uppercase tracking-widest text-white/55 sm:text-xs">
           บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
         </div>
         <div className="mt-1 text-lg font-black sm:text-2xl">{chapter.theme}</div>
@@ -144,7 +204,7 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
           เริ่มจัดพอร์ตบทนี้
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -235,8 +295,13 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0 text-[9px] leading-snug text-white/60 sm:text-xs">
               เงินสดที่ยังไม่ลงทุน <b className="text-slate-200">{cashLeft}%</b> ({money((cashLeft / 100) * total)})
-              <div className="text-[8px] text-white/40 sm:text-[10px]">
+              <div className="text-[8px] text-white/55 sm:text-[10px]">
                 เงินสดไม่โตและถูกเงินเฟ้อกิน แต่ต้องมีไว้ถึงจะซื้อเพิ่มตอนตลาดร่วงได้
+              </div>
+              {/* กดค้างไม่มีอะไรบอกให้รู้เองได้ ต้องเขียนบอก — ซ่อนบนจอเตี้ย (มือถือแนวนอน)
+                  ที่แนวตั้งมีจำกัดจนบรรทัดนี้จะไปดันปุ่มยืนยันตกขอบจอ */}
+              <div className="text-[8px] text-amber-200/70 sm:text-[10px] [@media(max-height:500px)]:hidden">
+                เคล็ดลับ: กดปุ่ม +/− ค้างไว้ ตัวเลขจะวิ่งเร็วขึ้นเรื่อยๆ
               </div>
             </div>
             <button

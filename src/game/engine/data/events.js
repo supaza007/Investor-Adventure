@@ -116,9 +116,11 @@ const EVENTS = [
     id: 'scammer',
     name: 'Scammer',
     emoji: '🎭',
-    tagWeights: { psychology: 1.0 },
-    severity: 0.15, // ต่ำ เพราะความเสียหายจริงมาจากการที่ผู้เล่นรับข้อเสนอเอง ไม่ใช่จาก tag
-    special: 'scam_offer', // กลไกพิเศษ ดู engine/scam.js — ไม่ใช่แค่ tag matching
+    // อีเวนต์เสริม — ซ้อนมาบนเหตุการณ์ประจำบท ไม่กินสล็อตของใคร
+    // ไม่มี tagWeights/severity เพราะไม่ได้กระแทกพอร์ตผ่าน tag เลย:
+    // ปฏิเสธข้อเสนอ = ไม่เสียอะไรสักบาท เป็นเหตุการณ์เดียวในเกมที่หลบได้ 100% จริงๆ
+    side: true,
+    special: 'scam_offer', // กลไกพิเศษ ดู engine/scam.js
     description: 'มิจฉาชีพที่ปลอมตัวเป็นที่ปรึกษาการลงทุน หลอกล่อให้โอนเงินจนหมดตัว',
     hint: 'มีคนทักมาในเฟซบุ๊ก บอกว่าเป็นที่ปรึกษาการลงทุน มีผลงานยืนยัน',
   },
@@ -127,9 +129,12 @@ const EVENTS = [
 export const getEvents = () => EVENTS
 export const getEvent = (id) => EVENTS.find((e) => e.id === id)
 
+// เหตุการณ์ประจำบท — ไม่รวมอีเวนต์เสริมอย่าง Scammer ที่มากลไกของตัวเอง
+export const getMainEvents = () => EVENTS.filter((e) => !e.side)
+
 // เหตุการณ์ที่มี tag นี้เป็นหลัก (น้ำหนักสูงสุด) — ใช้ตอนสุ่มให้ครบทุก tag ตลอด 4 บท
 export const getEventsByPrimaryTag = (tag) =>
-  EVENTS.filter((e) => {
+  getMainEvents().filter((e) => {
     const entries = Object.entries(e.tagWeights)
     const [top] = entries.sort((a, b) => b[1] - a[1])
     return top[0] === tag

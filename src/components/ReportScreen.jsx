@@ -33,7 +33,7 @@ function ChapterRow({ c }) {
         </div>
         <div className="shrink-0 text-right">
           <div className={`text-xs font-bold sm:text-base ${down ? 'text-rose-400' : 'text-emerald-400'}`}>{pct(c.changePct)}</div>
-          <div className="text-[8px] text-white/40 sm:text-[10px]">ปลายบท {money(c.valueEnd)}</div>
+          <div className="text-[8px] text-white/55 sm:text-[10px]">ปลายบท {money(c.valueEnd)}</div>
         </div>
       </div>
       {c.scamAccepted && c.scamLost > 0 && (
@@ -72,11 +72,16 @@ export default function ReportScreen({ report, onRestart }) {
           <div className={`mt-0.5 text-[10px] font-bold sm:text-sm ${beat ? 'text-emerald-300' : 'text-rose-300'}`}>
             คุณทำได้ {beat ? 'ดีกว่า' : 'แย่กว่า'}เกณฑ์นี้ {Math.abs(Math.round(vsBench * 100))}%
           </div>
-          {!beat && <div className="mt-0.5 text-[8px] leading-snug text-white/40 sm:text-[10px]">นักลงทุนมืออาชีพส่วนใหญ่ก็ทำได้ไม่ถึงเกณฑ์นี้เหมือนกัน — การอยู่เฉยๆ ยากกว่าที่คิด</div>}
+          {!beat && <div className="mt-0.5 text-[8px] leading-snug text-white/55 sm:text-[10px]">นักลงทุนมืออาชีพส่วนใหญ่ก็ทำได้ไม่ถึงเกณฑ์นี้เหมือนกัน — การอยู่เฉยๆ ยากกว่าที่คิด</div>}
         </div>
 
         <div className="mt-2 shrink-0 text-[10px] font-bold text-white/70 sm:text-sm">เกิดอะไรขึ้นบ้างในชีวิตคุณ</div>
-        <div className="mt-1 grid gap-1.5">
+        {/* ต้องระบุ grid-cols-1 ห้ามใช้ grid เปล่าๆ — grid เปล่าได้คอลัมน์ auto ที่ยืดตาม min-content
+            ของลูกได้ไม่จำกัด และ truncate ข้างใน ChapterRow มี white-space: nowrap ที่ดัน min-content
+            ให้เท่ากับความยาวข้อความเต็ม ผลคือแถวกว้าง 454px บนจอ 390px แล้วกล่องแม่ (overflow-y-auto
+            ซึ่ง CSS บังคับให้ overflow-x เป็น auto ตามไปด้วย) เลื่อนแนวนอนได้ ผู้เล่นปัดนิ้วทีเดียว
+            ข้อความหายไปทางซ้ายทั้งหน้า · grid-cols-1 ของ Tailwind = minmax(0,1fr) ซึ่งตรึงไว้ที่ความกว้างแม่ */}
+        <div className="mt-1 grid grid-cols-1 gap-1.5">
           {report.chapters.map((c) => (
             <ChapterRow key={c.chapter} c={c} />
           ))}
