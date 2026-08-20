@@ -339,6 +339,84 @@ describe('รายงานเกษียณ', () => {
 })
 
 describe('ความคงทนของ state', () => {
+  test('ปฏิเสธ allocation ที่ไม่ปลอดภัยและไม่หักเงินหรือเปลี่ยน phase', () => {
+    let s = createInitialState(11)
+    s = gameReducer(s, { type: 'START' })
+    s = gameReducer(s, { type: 'SELECT_STYLE', styleId: 'medium' })
+    const before = netWorth(s)
+
+    for (const weights of [
+      null,
+      { stock: -1 },
+      { stock: Number.NaN },
+      { stock: Infinity },
+      { stock: Number.MAX_VALUE, bond: Number.MAX_VALUE },
+      { unknown: 1 },
+      {},
+    ]) {
+      const rejected = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights })
+      assert.equal(rejected.phase, 'allocation')
+      assert.equal(netWorth(rejected), before)
+      assert.match(rejected.validationError, /กรุณา|ไม่สำเร็จ/)
+    }
+  })
+
+  test('ยืนยัน allocation แบบ atomic แล้วเงินรวมไม่เพิ่มและไม่ถูกหักซ้ำ', () => {
+    let s = createInitialState(12)
+    s = gameReducer(s, { type: 'START' })
+    s = gameReducer(s, { type: 'SELECT_STYLE', styleId: 'medium' })
+    const before = netWorth(s)
+    s = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: BALANCED })
+    assert.equal(s.phase, 'stage')
+    assert.ok(Math.abs(netWorth(s) - before) < 1e-9)
+    assert.equal(s.validationError, null)
+
+    const duplicate = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: { crypto: 1 } })
+    assert.equal(duplicate, s)
+  })
+
+  test('expectedStageIndex ป้องกันปุ่มซ้ำไม่ให้ข้ามสเตจ', () => {
+    let s = createInitialState(13)
+    s = gameReducer(s, { type: 'START' })
+    s = gameReducer(s, { type: 'SELECT_STYLE', styleId: 'medium' })
+    s = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: BALANCED })
+
+    const first = gameReducer(s, { type: 'NEXT_STAGE', expectedStageIndex: 0 })
+    const duplicate = gameReducer(first, { type: 'NEXT_STAGE', expectedStageIndex: 0 })
+    assert.equal(first.stageIndex, 1)
+    assert.equal(duplicate, first)
+  })
+
+  test('ข้ามคำตอบ scam หรือ behavior ไม่ได้ และไม่รับค่าที่อยู่นอก contract', () => {
+    let s = createInitialState(14)
+    s = gameReducer(s, { type: 'START' })
+    s = gameReducer(s, { type: 'SELECT_STYLE', styleId: 'medium' })
+    s = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: BALANCED })
+
+    while (s.chapterIndex !== s.scamChapter) {
+      if (s.phase === 'allocation') s = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: BALANCED })
+      if (currentStage(s)?.key === 'behavior' && !s.behavior) s = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: 'hold' })
+      s = gameReducer(s, { type: 'NEXT_STAGE' })
+    }
+    if (s.phase === 'allocation') s = gameReducer(s, { type: 'CONFIRM_ALLOCATION', weights: BALANCED })
+    if (currentStage(s).key === 'signal') s = gameReducer(s, { type: 'NEXT_STAGE' })
+    assert.equal(currentStage(s).key, 'reveal')
+    assert.equal(s.scam.accepted, null)
+
+    const skippedScam = gameReducer(s, { type: 'NEXT_STAGE' })
+    assert.equal(skippedScam.stageIndex, s.stageIndex)
+    assert.match(skippedScam.validationError, /ข้อเสนอ/)
+    const invalidAnswer = gameReducer(s, { type: 'ANSWER_SCAM', accept: 'yes' })
+    assert.equal(invalidAnswer.scam.accepted, null)
+
+    s = gameReducer(s, { type: 'ANSWER_SCAM', accept: false })
+    while (currentStage(s).key !== 'behavior') s = gameReducer(s, { type: 'NEXT_STAGE' })
+    const invalidBehavior = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: 'panic' })
+    assert.equal(invalidBehavior.behavior, null)
+    const skippedBehavior = gameReducer(invalidBehavior, { type: 'NEXT_STAGE' })
+    assert.equal(skippedBehavior.stageIndex, invalidBehavior.stageIndex)
+  })
+
   test('มูลค่าไม่มีวันเป็น NaN ไม่ว่าจะเล่นยังไง', () => {
     for (const weights of [BALANCED, { cash: 1 }, { crypto: 1 }, { bond: 0.5, cash: 0.5 }]) {
       for (const styleId of ['medium', 'longterm', 'trader', 'vi']) {

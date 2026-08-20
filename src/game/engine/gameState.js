@@ -8,7 +8,7 @@
 import { BALANCE } from './balance.js'
 import { getStyle } from './data/styles.js'
 import { getEvent, getEventsByPrimaryTag } from './data/events.js'
-import { TAGS } from './data/tools.js'
+import { TAGS, getTool } from './data/tools.js'
 import { rngFrom, shuffle } from './rng.js'
 import { totalValue, rebalance, applyGrowth } from './portfolio.js'
 import { outcomeBand, rollShock, applyShock, isBlackSwan } from './encounter.js'
@@ -17,6 +17,8 @@ import { buildReport } from './report.js'
 
 export const STAGES = BALANCE.stages
 const LAST_CHAPTER = BALANCE.chapters.length - 1
+export const RULES_VERSION = '2026-08-formula-evidence-v1'
+export const RNG_VERSION = 'mulberry32-v1'
 
 export function createInitialState(seed = Date.now()) {
   return {
@@ -42,7 +44,30 @@ export function createInitialState(seed = Date.now()) {
     lastFee: 0,
     history: [],
     report: null,
+    validationError: null,
+    versions: { rulesVersion: RULES_VERSION, rngVersion: RNG_VERSION, contentVersion: 'content-v1' },
+    timing: { runStartedAt: null, runEndedAt: null, runDurationSeconds: null, chapters: {}, stages: {} },
+    research: { consent: null, consentVersion: 'research-consent-v1', anonymousPlayerId: null, runId: null },
+    assessment: { pre: null, post: null, knowledgeGain: null },
   }
+}
+
+function withTiming(state, action) {
+  if (!action?.at) return state
+  const timing = { ...state.timing }
+  if (action.scope === 'run' && action.phase === 'start') timing.runStartedAt = action.at
+  if (action.scope === 'run' && action.phase === 'end') {
+    timing.runEndedAt = action.at
+    if (timing.runStartedAt) timing.runDurationSeconds = Math.max(0, (Date.parse(action.at) - Date.parse(timing.runStartedAt)) / 1000)
+  }
+  if (action.scope === 'chapter' && Number.isInteger(action.chapter)) {
+    timing.chapters = { ...timing.chapters, [action.chapter]: { ...(timing.chapters[action.chapter] ?? {}), [`${action.phase}At`]: action.at } }
+  }
+  if (action.scope === 'stage' && Number.isInteger(action.chapter) && Number.isInteger(action.stage)) {
+    const key = `${action.chapter}:${action.stage}`
+    timing.stages = { ...timing.stages, [key]: { ...(timing.stages[key] ?? {}), [`${action.phase}At`]: action.at } }
+  }
+  return { ...state, timing }
 }
 
 // ---------- ตัวช่วยอ่าน state (ใช้ทั้งใน UI และในเอนจิน) ----------
@@ -103,9 +128,25 @@ function startRun(state, styleId) {
 const CASH_BUCKET = '__cash' // ถังเงินสดปลอม ใช้เฉพาะตอนคำนวณ ไม่ใช่เครื่องมือ จึงไม่มี exposure
 
 export function applyAllocation(state, weights) {
+  if (!weights || typeof weights !== 'object' || Array.isArray(weights)) {
+    return { ...state, validationError: 'จัดพอร์ตไม่สำเร็จ: กรุณาเลือกสัดส่วนสินทรัพย์ใหม่อีกครั้ง' }
+  }
+
+  const entries = Object.entries(weights)
+  const hasInvalidValue = entries.some(([, value]) => typeof value !== 'number' || !Number.isFinite(value) || value < 0)
+  const hasUnknownAsset = entries.some(([id]) => id !== 'cash' && !getTool(id))
+  if (hasInvalidValue || hasUnknownAsset) {
+    return { ...state, validationError: 'จัดพอร์ตไม่สำเร็จ: สัดส่วนสินทรัพย์ไม่ถูกต้อง กรุณาตรวจสอบแล้วลองใหม่' }
+  }
+
   const total = netWorth(state)
-  if (total <= 0) return state
-  if (Object.values(weights).reduce((a, b) => a + b, 0) <= 0) return state
+  if (!Number.isFinite(total) || total <= 0) {
+    return { ...state, validationError: 'จัดพอร์ตไม่ได้ เพราะไม่มีเงินทุนที่ใช้งานได้' }
+  }
+  const weightSum = entries.reduce((sum, [, value]) => sum + value, 0)
+  if (!Number.isFinite(weightSum) || weightSum <= 0) {
+    return { ...state, validationError: 'กรุณาจัดสรรเงินอย่างน้อยหนึ่งรายการก่อนยืนยัน' }
+  }
 
   // ยัดเงินสดเข้าไปใน rebalance ด้วย เพื่อให้การย้ายเงินสด↔เครื่องมือถูกคิดค่าธรรมเนียมเหมือนการซื้อขายจริง
   const current = { ...state.positions, [CASH_BUCKET]: state.cash }
@@ -117,7 +158,7 @@ export function applyAllocation(state, weights) {
   const { positions, fee } = rebalance(current, target, currentStyle(state)?.tradeFeePct ?? 0)
   const cash = positions[CASH_BUCKET] ?? 0
   delete positions[CASH_BUCKET]
-  return { ...state, positions, cash, lastFee: fee }
+  return { ...state, positions, cash, lastFee: fee, validationError: null }
 }
 
 function confirmAllocation(state) {
@@ -189,7 +230,7 @@ function resolveShock(state) {
 function chooseBehavior(state, choice) {
   const style = currentStyle(state)
   const lost = Math.max(0, state.valueBeforeShock - netWorth(state))
-  let next = { ...state, behavior: choice }
+  let next = { ...state, behavior: choice, validationError: null }
 
   if (choice === 'hold') {
     next.reboundOwed = lost * BALANCE.reboundPct
@@ -323,6 +364,13 @@ function nextStage(state) {
 
 // ---------- reducer ----------
 export function gameReducer(state, action) {
+  if (action.type === 'SET_RESEARCH_CONSENT') {
+    if (typeof action.consent !== 'boolean') return state
+    return { ...state, research: { ...state.research, consent: action.consent, anonymousPlayerId: action.anonymousPlayerId ?? state.research.anonymousPlayerId, runId: action.runId ?? state.research.runId } }
+  }
+  if (action.type === 'SET_PRE_ASSESSMENT') return { ...state, assessment: { ...state.assessment, pre: action.assessment ?? null } }
+  if (action.type === 'SET_POST_ASSESSMENT') return { ...state, assessment: { ...state.assessment, post: action.assessment ?? null, knowledgeGain: null } }
+  if (action.type === 'RECORD_TIMING') return withTiming(state, action)
   switch (action.type) {
     case 'START':
       return state.phase === 'cover' ? { ...state, phase: 'style' } : state
@@ -335,19 +383,38 @@ export function gameReducer(state, action) {
       return applyAllocation(state, action.weights)
 
     case 'CONFIRM_ALLOCATION':
-      return state.phase === 'allocation' ? confirmAllocation(state) : state
+      if (state.phase !== 'allocation') return state
+      if (Object.hasOwn(action, 'weights')) {
+        const allocated = applyAllocation(state, action.weights)
+        return allocated.validationError ? allocated : confirmAllocation(allocated)
+      }
+      return state.validationError ? state : confirmAllocation(state)
 
     case 'ANSWER_SCAM':
       if (!state.scam || state.scam.accepted !== null) return state
+      if (typeof action.accept !== 'boolean') {
+        return { ...state, validationError: 'ตอบข้อเสนอไม่สำเร็จ: กรุณาเลือกว่าจะรับหรือปฏิเสธ' }
+      }
       return { ...state, scam: { ...state.scam, accepted: action.accept } }
 
     case 'CHOOSE_BEHAVIOR':
       if (state.phase !== 'stage' || currentStage(state).key !== 'behavior') return state
       if (state.behavior) return state
+      if (!['hold', 'cut', 'buy'].includes(action.choice)) {
+        return { ...state, validationError: 'เลือกวิธีรับมือไม่สำเร็จ: กรุณาเลือกหนึ่งในตัวเลือกที่แสดง' }
+      }
       return chooseBehavior(state, action.choice)
 
     case 'NEXT_STAGE':
-      return state.phase === 'stage' ? nextStage(state) : state
+      if (state.phase !== 'stage') return state
+      if (action.expectedStageIndex != null && action.expectedStageIndex !== state.stageIndex) return state
+      if (state.scam?.accepted === null) {
+        return { ...state, validationError: 'กรุณาตอบข้อเสนอที่แสดงอยู่ก่อนดำเนินเรื่องต่อ' }
+      }
+      if (currentStage(state).key === 'behavior' && !state.behavior) {
+        return { ...state, validationError: 'กรุณาเลือกวิธีรับมือก่อนดำเนินเรื่องต่อ' }
+      }
+      return { ...nextStage(state), validationError: null }
 
     case 'RESTART':
       return createInitialState(state.seed)
