@@ -25,7 +25,11 @@ export const BALANCE = {
   // ── เงินสด ────────────────────────────────────────────────
   // เงินสดไม่โต และถูกเงินเฟ้อกินมูลค่าจริงทุกบท — "ไม่ลงทุนเลย" จึงไม่ใช่ตัวเลือกที่ปลอดภัย
   // แต่ต้องเหลือเงินสดไว้บ้างถึงจะ "ซื้อเพิ่มตอนราคาถูก" ที่สเตจ 4 ได้ → เป็นการแลกที่ต้องคิดจริง
-  cashDecayPerChapter: 0.85, // −15%/บท ≈ −1.6%/ปี ในแง่มูลค่าแท้จริง
+  // สูตร: real-value factor = (1 + inflationAnnualRate)^(-yearsPerChapter)
+  // ใช้ 2% เป็นค่ากลางของกรอบเป้าหมายเงินเฟ้อไทย 1–3% ของ ธปท.; ไม่ใช่การพยากรณ์เงินเฟ้อ
+  inflationAnnualRate: 0.02,
+  yearsPerChapter: 10,
+  cashDecayPerChapter: (1 + 0.02) ** -10,
 
   // ── สูตร outcome band (ดีไซน์ข้อ 7) ────────────────────────
   // center    = −S × E × (1 + concentrationCenterMult × D)
@@ -39,6 +43,9 @@ export const BALANCE = {
   // ต้องหายากพอไม่ให้เป็นข้ออ้างละเลยการกระจายความเสี่ยง
   blackSwanChance: 0.12,
   blackSwanExposure: 0.8, // บังคับ E คงที่ ไม่สนใจว่าพอร์ตกระจายดีแค่ไหน
+  // Proposed systemic-shock profile: ทุกสินทรัพย์โดน แต่ระดับต่างกัน
+  // เป็น simulation parameter จนกว่าจะผ่าน finance/content review
+  blackSwanShockProfile: { bond: 0.35, fund: 0.55, stock: 0.8, crypto: 1.2 },
 
   // ── จุดตัดสินใจพฤติกรรม สเตจ 4 ─────────────────────────────
   reboundPct: 0.4, // "ถือต่อ" ฟื้น 40% ของที่เสียไป ในบทถัดไป

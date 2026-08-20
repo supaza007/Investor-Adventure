@@ -23,6 +23,21 @@ Design pillars ที่ implement แล้ว: เรียนรู้ผ่�
 5. ปิดบท: rebound → aftershock → growth → history → เงินบทถัดไป
 6. ทำซ้ำ 4 บท แล้วดู retirement report เทียบ benchmark
 
+### Player Experience Journey (UX Session 4)
+
+ผู้เล่นจะพบประสบการณ์ตามลำดับต่อไปนี้ โดย assessment และ research เป็นชั้นเสริมที่ไม่เปลี่ยนกติกา core loop:
+
+1. **Onboarding** — อ่านคำเตือนว่าเป็น simulation, สะท้อนความรู้/ความเสี่ยงผ่าน pre-assessment ที่ดัดแปลงและติดป้ายว่าไม่ใช่แบบทดสอบทางการ
+2. **Choice** — เลือก investor style แล้วเห็นข้อดี ข้อจำกัด และจุดที่ปรับพอร์ตได้ก่อนเริ่ม
+3. **Allocation** — จัดสรรสินทรัพย์ 4 ชนิดกับเงินสดผ่าน draft; review ก่อน commit และเห็นผลต่อ fee/exposure เมื่อ engine ส่ง preview ได้
+4. **Uncertainty** — รับ signal ก่อน reveal; ไม่เห็นชื่อเหตุการณ์ล่วงหน้า; systemic Black Swan และเงินเฟ้อถูกอธิบายเป็น simulation parameter พร้อมผลต่อ cash/purchasing power
+5. **Decision** — ตอบ scam และเลือก hold/cut/buy ใน confirmation ที่บอกผลกระทบ; ตัดสินใจที่ commit แล้วแก้ย้อนหลังไม่ได้ตาม engine
+6. **Debrief** — เห็นผลบท เหตุผล exposure/concentration โชค/การเตรียมตัว และเวลาที่ใช้ โดยแยก portfolio outcome ออกจาก learning outcome
+7. **Reflection** — ทำ post-assessment 3 ด้าน แล้วดูรายงานเกษียณแบบ 4 มิติ; มิติข้อมูลไม่พอแสดง `Not assessed` ไม่เดา
+8. **Research (optional)** — consent แบบ opt-in แยกจากการเล่น; ผู้เล่นตรวจหรือถอน consent ได้; dashboard เป็นพื้นที่ researcher ไม่ใช่หน้า player
+
+UX ไม่เปลี่ยน end condition, balance, RNG หรือผลการจำลอง; เป็นเพียงวิธีทำให้ข้อมูลและข้อจำกัดที่มีอยู่เข้าใจได้
+
 End condition คือจบบท 4; ไม่มี game over กลางทาง ผลสุดท้ายเป็น `ruined`, `tight`, `adequate`, `comfortable`, `fire` ไม่ใช่ชนะ/แพ้ทวิภาค
 
 ## 3. Structure and Content
@@ -128,6 +143,48 @@ Balance risk: simulation ล่าสุดหุ้นล้วน median ส�
 - State มี rulesVersion/rngVersion/contentVersion เพื่อรองรับ replay ที่ตรวจสอบซ้ำได้
 
 ## 9. TBD / Open Decisions
+
+## 10. Feature Design Records — player-facing scope
+
+The following records define the intended end-state; status is audited against implementation, not design intent.
+
+| Feature ID | Goal / player action | Required state/data | Rules | UI | Acceptance / test |
+|---|---|---|---|---|---|
+| F-001 | เริ่มรอบและเลือก style | phase, styleId, seed | style valid; run seeded | Cover, StyleSelect | เล่นเริ่มรอบได้; invalid style no-op/unit |
+| F-002 | จัดพอร์ต/ถือเงินสด | weights, positions, cash | finite non-negative; cash-only valid; fee on turnover | Allocation + preview | ยอดรวมถูกต้อง; unit/property/E2E |
+| F-003 | ทบทวนก่อน commit | draft, preview, fee | cancel no state change; commit once | ReviewDialog | double-click ไม่ commit ซ้ำ; component/E2E |
+| F-004 | ปรับพอร์ตกลางบท | style permissions, stage | only allowed stage; stale reject | Adjustment overlay | allowed/denied matrix |
+| F-005 | เรียนรู้สินทรัพย์ | tool catalog, exposure, lesson | four tools + cash; no hidden live feed | Tool cards/detail | catalog fallback/data tests |
+| F-006 | เห็น risk/concentration | exposure, HHI, band | values from engine; no color-only meaning | HUD/debrief | selector matches engine; visual/a11y |
+| F-007 | รับเหตุการณ์ตลาด | event, band, shock, profile | hidden→reveal→shock; systemic profile | Signal/Reveal/Shock | event leak prevented; seed matrix |
+| F-008 | เข้าใจเงินเฟ้อ | inflation params, cash history | purchasing power declines by formula; no market return for cash | allocation/report copy | cash-only full run + formula test |
+| F-009 | ตัดสินใจหลัง shock | behavior, rebound, aftershock | one choice; effects recorded; rebound not market P/L | Behavior screen | choice lock and reconciliation tests |
+| F-010 | ตรวจ scam | scam offer, redFlags, lost | accept/reject required; no dismiss bypass | Scam modal | branch and loss tests |
+| F-011 | ตรวจสอบกำไรขาดทุน | transactions, events, balances | canonical ledger; opening+flows+valuation=closing | report/optional audit view | property/golden replay |
+| F-012 | สะท้อน readiness | four dimensions, sources, missing flags | simulation only; Not assessed when missing | retirement report | no real-world claim; content/E2E |
+| F-013 | ประเมินก่อนเล่น | pre assessment, instrumentVersion | SET-inspired adaptation, not official TSI | onboarding | score/profile saved; content review |
+| F-014 | วัดการเรียนรู้หลังเล่น | post domains, knowledgeGain | no mid-play questions; separate from luck/outcome | post-report | pre/post fixture and pilot reliability |
+| F-015 | เลือกส่งข้อมูลวิจัย | consent, purpose, version | opt-in separate; decline does not block game | consent/privacy screen | no export without consent; privacy E2E |
+| F-016 | เห็นเวลาที่ใช้ | run/chapter/stage timing | UTC storage; start/end/duration; no clickstream default | optional player summary | non-negative durations; clock tests |
+| F-017 | ผู้พัฒนาดูสถิติรวม | anonymous IDs, run records, cohort TBD | aggregate/de-identify; retention/deletion | researcher dashboard | export filtered by consent; schema tests |
+| F-018 | เชื่อม Supabase (ถ้าอนุมัติ) | schema/API/RLS TBD | online boundary, retry, secrets, RLS | admin/research UI | migrations/security/integration |
+| F-019 | บันทึก/เล่นซ้ำ | versioned envelope, commandSeq | compatible replay only; migration policy | save/continue | round-trip checksum/golden replay |
+| F-020 | กู้คืน/กัน exploit | command result, invariants | atomic reject, stale/double lock | global error/retry | fuzz and E2E recovery |
+
+### Player progression
+
+```text
+Onboarding → pre-risk reflection → style choice → portfolio allocation
+→ 4 chapters of decisions/events → chapter debriefs
+→ post-assessment → four-dimensional simulation report
+→ personal learning reflection (research export only if opted in)
+```
+
+Progression is not a power ladder. The player does not unlock higher returns; progression is increased understanding, clearer evidence, and a replayable comparison of choices under the same rules/seed.
+
+### State transition policy
+
+Every player-facing transition must declare input, process, output and error behavior. A rejected command returns the same committed state and preserves local draft. A report cannot score missing dimensions; it renders `Not assessed`. A research export cannot be created unless consent for that purpose is active.
 
 ## 8.2 Research-Backed Retirement Readiness Outcome — Approved Direction
 

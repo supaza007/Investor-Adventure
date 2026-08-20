@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { executeCommand } from '../game/engine/command.js'
+import { executeCommand, validateGameState } from '../game/engine/command.js'
 
 // Keep the next screen locked long enough to absorb the second click of a
 // native double-click. Releasing on the next render lets that click land on a
@@ -49,5 +49,14 @@ export function useGameCommand(createInitialState) {
 
   const clearCommandError = useCallback(() => setCommandError(null), [])
 
-  return { state, command, busy, commandError, clearCommandError }
+  const restoreState = useCallback((savedState) => {
+    const invalid = validateGameState(savedState)
+    if (invalid) return { ok: false, state: stateRef.current, error: invalid }
+    stateRef.current = savedState
+    setState(savedState)
+    setCommandError(null)
+    return { ok: true, state: savedState, error: null }
+  }, [])
+
+  return { state, command, restoreState, busy, commandError, clearCommandError }
 }

@@ -13,7 +13,7 @@
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env ELECTRON_IS_DEV=true electron .\"",
     "electron:build": "vite build && electron-builder",
     "build:web": "vite build --mode web",
-    "test": "node --test \"src/game/engine/*.test.js\"",
+    "test": "node --test \"src/game/**/*.test.js\"",
     "sim": "node scripts/sim.mjs",
     "optimize-images": "node scripts/optimize-images.mjs"
   },

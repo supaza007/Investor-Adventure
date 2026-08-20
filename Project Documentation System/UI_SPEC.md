@@ -281,3 +281,163 @@ FR ปัจจุบันกว้างเกินไป; Session 3 ต้�
 6. เพิ่ม semantic progress/live regions และแก้ text size/contrast/touch target
 7. รักษา deterministic engine; UI ห้ามสุ่มเอง
 8. ตกลง persistence/exit ก่อนเพิ่ม Continue/autosave
+
+## 13. Session 4 — Complete Feature-to-UX Specification
+
+This section is the authoritative player-facing mapping for every feature in `SYSTEM_SPEC.md` §9. A status of `Planned`, `Conditional` or `Partial` is intentional: the screen contract is designed, but the missing engine/backend/content dependency must be delivered before the screen is presented as implemented.
+
+### 13.1 Complete screen inventory
+
+| UI ID | Screen / interaction | Feature IDs | State/data owner | Implementation status |
+|---|---|---|---|---|
+| UI-001 | Cover / start | F-001, F-016, F-022 | App + content registry | Playable |
+| UI-002 | Style selection | F-001, F-013 reflection | style catalog, pre-profile | Playable / pre-profile Planned |
+| UI-003 | Allocation workspace | F-002, F-005, F-006, F-008 | allocation draft + selectors | Playable; HUD Partial |
+| UI-004 | Asset detail / lesson | F-005, F-022 | tool catalog + source IDs | Playable |
+| UI-005 | Mid-stage adjustment | F-004, F-006 | style permission + draft | Playable |
+| UI-006 | Allocation review/confirm | F-003, F-005, F-006 | preview contract | Planned |
+| UI-007 | Signal stage | F-007, F-021 | event hint/stage | Playable |
+| UI-008 | Reveal stage | F-007, F-010 | event/scam state | Playable |
+| UI-009 | Shock stage | F-007, F-008, F-022 | band/shock/profile | Playable; disclosure Partial |
+| UI-010 | Behavior decision review | F-009, F-006 | behavior draft + cash | Playable; rebound redesign Planned |
+| UI-011 | Scam offer modal | F-010, F-022 | scam offer/red flags/loss | Playable |
+| UI-012 | Chapter debrief | F-006, F-007, F-008, F-009, F-011 | history/events/ledger | Partial; ledger view Planned |
+| UI-013 | Retirement report | F-012, F-016, F-022 | report + readiness dimensions | Partial; four-dimensional report Planned |
+| UI-014 | Global feedback/error/retry | F-020, F-021 | command result + app boundary | Partial |
+| UI-015 | Pre-assessment onboarding | F-013 | assessment.pre, instrumentVersion | Planned |
+| UI-016 | Research consent | F-015, F-021 | consent, purpose, version | Planned |
+| UI-017 | Privacy/research settings | F-015, F-016, F-018 | consent status, withdrawal, export | Planned / Conditional backend |
+| UI-018 | Post-assessment | F-014 | assessment.post, domain scores | Planned |
+| UI-019 | Retirement readiness detail | F-012, F-022 | four dimensions, evidence IDs, missing flags | Planned |
+| UI-020 | Assumptions/source disclosure | F-007, F-008, F-012, F-022 | parameter registry/source registry | Planned |
+| UI-021 | Personal time/learning summary | F-014, F-016 | durations, pre/post, knowledgeGain | Planned |
+| UI-022 | Anonymous student statistics dashboard | F-017, F-018, F-022 | aggregate read model | Conditional; researcher only |
+| UI-023 | Dashboard access/role gate | F-017, F-018, F-021 | auth/role/RLS contract | Conditional |
+| UI-024 | Save/continue/replay | F-019 | versioned envelope/checksum | Planned |
+| UI-025 | Offline/recovery center | F-018, F-019, F-020, F-021 | queue/status/retry state | Planned; core game offline |
+| UI-026 | Transaction/event audit | F-011, F-022 | canonical ledger/domain events | Planned |
+
+### 13.2 End-to-end journeys
+
+#### J-001 First play
+
+`UI-001 → UI-015 → UI-016 → UI-002 → UI-003 → UI-006 → UI-007 → UI-008 → UI-011 (if triggered) → UI-009 → UI-010 → UI-012 → (repeat four chapters) → UI-018 → UI-013/UI-019 → UI-021`
+
+- Consent decline bypasses UI-016 research collection and does not block UI-002 or personal report.
+- Pre-assessment can be skipped only if Product approves; skip state is explicit `Not assessed`, never an invented score.
+- During chapters no assessment questions or research prompts interrupt play.
+
+#### J-002 Replay and comparison
+
+`UI-013/UI-021 → UI-024 (if save/replay exists) → UI-002 → same-seed disclosure → core loop → compare personal reports`
+
+Replay comparison must identify seed/rules/content versions and must not imply that a different outcome proves a real-world strategy.
+
+#### J-003 Research participant
+
+`UI-015 → UI-016 opt-in purpose → UI-001/core loop → UI-018 → UI-017 review/withdraw → UI-022 aggregate dashboard`
+
+Export is unavailable until consent for the exact purpose is active; withdrawal stops future collection and does not delete gameplay history unless the retention policy says so.
+
+#### J-004 Researcher/admin
+
+`UI-023 role/auth → UI-022 filters → aggregate view → de-identified export → audit/retention action`
+
+No player-level identifying data, raw clickstream, or non-consenting run appears in the dashboard.
+
+### 13.3 Screen contracts — onboarding, assessment and research
+
+Each row is a complete contract: Goal; Entry; Data; Primary; Validation; Error; Success; Accessibility; Acceptance.
+
+| UI ID | Goal / Entry / Data | Primary action and validation | Error / success | Accessibility / acceptance |
+|---|---|---|---|---|
+| UI-015 Pre-assessment | Goal: reflect starting risk knowledge/tolerance. Entry: first run before style. Data: versioned adapted questions, progress, answer draft; never call it official TSI. | “บันทึกแบบประเมิน” after all required answers; allow explicit “ยังไม่ตอบ” only if Product approves. | Invalid/missing answer stays on question and focuses it; content unavailable = skip as `Not assessed`; success stores `assessment.pre` + instrumentVersion and continues to UI-016/002. | Radio/choice group with fieldset/legend, keyboard arrow/Tab, progress text; acceptance: pre score/profile saved, no style lock, no mid-play prompt, no official-test claim.
+| UI-016 Research consent | Goal: informed opt-in. Entry: after pre-assessment or settings. Data: purpose, fields, retention, withdrawal, consentVersion, contact, “game still works if decline”. | Separate checkboxes per purpose (research telemetry/export); “ยินยอมและเริ่มเกม” or “ไม่ยินยอมแต่เล่นต่อ”; no pre-checked consent. | Missing required acknowledgement blocks only that purpose; copy/version load failure = safe decline + continue game; success records consent/version/time without blocking play. | Heading-first focus, plain Thai, checkbox labels, no color-only status, screen-reader summary; acceptance: decline preserves play, export disabled, withdrawal discoverable.
+| UI-017 Privacy/research settings | Goal: view/change consent and request withdrawal/deletion. Entry: settings or post-report. Data: active purposes/version, collected categories, retention, last sync, withdrawal/deletion request status. | “ถอนความยินยอม”, “หยุดส่งข้อมูล”, “ขอลบข้อมูล” where policy supports; destructive actions require confirmation. | Offline queues request locally and shows pending; server rejection gives retry and keeps prior consent truth; success shows effective timestamp/status. | Dialog focus trap, confirm copy states what stops/does not stop, no hidden destructive action; acceptance: future export filter honors new status.
+| UI-018 Post-assessment | Goal: measure learning, not investment performance. Entry: after final report, never during stages. Data: 3 domains (inflation/purchasing power, risk/diversification, fees/scam), pre answer reference, post answers, instrumentVersion. | “ส่งคำตอบและดูผลการเรียนรู้”; validation per domain; allow `Not assessed` for missing. | Invalid answer focuses field; content/version mismatch keeps report and marks domain `Not assessed`; success computes `knowledgeGain` separately from portfolio outcome/luck. | One question per screen or grouped fieldsets, progress, no timed pressure, announce result; acceptance: pre/post/domain gain separate, fixture tests, no claim of validated psychometric score.
+| UI-019 Retirement readiness detail | Goal: explain simulation readiness without real-world judgment. Entry: UI-013 report. Data: financial readiness, plan resilience, life/health readiness, financial capability/safety; evidence IDs; missing flags. | “ดูหลักฐาน/สิ่งที่ควรเรียนรู้ต่อ”; no action that changes game state. | Missing input renders `Not assessed` with reason; source registry unavailable shows parameter-only disclosure; success expands each dimension and links source IDs. | Each dimension heading, text equivalent for meters, no pass/fail or color-only band; acceptance: four dimensions separate, no real-life claim, missing never scored.
+| UI-020 Assumptions/source disclosure | Goal: distinguish research evidence from game parameters. Entry: help icon from events/report/assets. Data: parameter name/value/version, “simulation assumption” label, source ID/publisher/date/review date, formula explanation. | “กลับไปหน้าก่อน”; optional copy link only if platform supports. | Missing registry blocks unsupported claim and labels `Source pending`; success opens correct anchored source text. | `details/summary` keyboard support, readable citations, no external navigation required offline; acceptance: every numeric claim F-007/F-008/F-012/F-022 classified.
+| UI-021 Personal time/learning summary | Goal: show player their session time and learning reflection. Entry: report after UI-018. Data: run/chapter/stage durations in local timezone + UTC label, pre/post domains, knowledgeGain, portfolio outcome and luck separately. | “ดูสรุปของฉัน” / restart; no research export unless UI-016 active. | Missing timestamps shows `เวลาไม่พร้อมใช้`; clock anomaly shows “ตรวจสอบเวลา” not negative duration; success renders non-negative durations and reflection prompt. | Table has headers/units, no animation-only timing, screen reader reads domain separation; acceptance: no raw clickstream, durations tied to runId.
+
+### 13.4 Screen contracts — research dashboard, persistence and recovery
+
+| UI ID | Goal / Entry / Data | Primary action and validation | Error / success | Accessibility / acceptance |
+|---|---|---|---|---|
+| UI-022 Student statistics dashboard | Goal: researcher sees aggregate learning/game statistics. Entry: UI-023 authorized role. Data: consent-filtered counts, completion, chapter/stage durations, pre/post domain distributions, outcome/luck split, filters with cohort `TBD`; minimum cell-size suppression. | “ใช้ตัวกรอง/ดูตาราง/ส่งออกสรุป”; validate date/version/cohort ranges and suppress small groups. | No data = empty explanation + reset filters; offline = cached timestamp/read-only; unauthorized = UI-023; export failure preserves filters and offers retry. | Data table with caption, sortable headers announced, chart text alternative, keyboard filters, contrast; acceptance: aggregate/de-identified, no non-consenting runs, retention/deletion metadata visible.
+| UI-023 Dashboard access/role gate | Goal: enforce researcher/admin boundary. Entry: dashboard URL/settings. Data: auth status, role, RLS scope, environment. | “เข้าสู่ระบบ/กลับเกม”; validate role and session expiry. | Unauthorized/expired = no data fetch and clear retry/login; network unavailable = offline explanation; success shows role and scope. | No secret in UI/log, focus error heading, status not color-only; acceptance: RLS/security tests pass before enabling dashboard.
+| UI-024 Save/continue/replay | Goal: persist or replay a compatible run. Entry: cover “เล่นต่อ” or report comparison, only after F-019 approved. Data: save slots, schema/rules/content/RNG versions, checksum, timestamp, seed/commandSeq. | “โหลด”, “บันทึก”, “เริ่มใหม่”; validate version/checksum before state replacement and confirm destructive overwrite. | Corrupt/incompatible save remains untouched and offers restart; failed write preserves previous save; success announces slot/version. | Native dialog semantics, keyboard-confirm/cancel, explicit version text; acceptance: round-trip checksum/golden replay, no half-loaded state.
+| UI-025 Offline/recovery center | Goal: explain offline status and recover safely. Entry: network error, failed command, retry affordance. Data: core playable/offline status, queued consent/telemetry count, last sync, command error code, retryability. | “ลองอีกครั้ง”, “เล่นต่อแบบออฟไลน์”, “ล้างคิวที่รอส่ง” only with policy confirmation. | Offline core game remains playable; non-idempotent unknown result is held for reconciliation; retry only idempotent; success clears only acknowledged item. | `role=status/alert`, no spinner without text, keyboard reachable retry, acceptance: no data loss, no duplicate export, error code mapped without parsing message.
+| UI-026 Transaction/event audit | Goal: explain value movement and event valuation when ledger is approved. Entry: chapter debrief/report optional detail. Data: canonical transaction/domain-event IDs/order, opening, contribution, fee, scam loss, valuation, closing, replay version. | “ขยายรายละเอียด/กลับรายงาน”; no edit/delete. | Missing ledger marks audit unavailable and keeps report; reconciliation mismatch is fatal-to-audit but not silent; success shows equation within precision policy. | Table with units and signed values, expandable rows, accessible equation text; acceptance: opening + flows + valuation = closing, deterministic IDs/order, no new P/L formula in UI.
+
+### 13.5 Core feature acceptance expansion
+
+The existing UI-001–UI-014 contracts remain valid; the following acceptance scenarios close gaps in F-001–F-012 and F-020–F-022:
+
+| Feature | Required player-visible behavior | Scenario IDs |
+|---|---|---|
+| F-001/F-002 | start, valid style, allocation including 100% cash; money units visible | CORE-01..04 |
+| F-003/F-004 | draft cancel preserves committed portfolio; allowed/denied adjustment; one commit | ALLOC-01..05 |
+| F-005/F-006 | every asset detail has lesson/exposure; risk and HHI text alternative | ASSET-01..04 |
+| F-007/F-008 | signal hides event; reveal precedes shock; systemic profile disclosed; cash-only shows purchasing-power loss | EVENT-01..06 |
+| F-009/F-010 | behavior/scam required, locked after commit, red flags and loss amount shown | DEC-01..05 |
+| F-011/F-012 | ledger/audit and four readiness dimensions only when dependencies available; `Not assessed` otherwise | REPORT-01..06 |
+| F-020/F-021/F-022 | each error code has safe state preservation; keyboard/mobile/grayscale; assumptions/source labels | SAFE-01..08 |
+
+## 14. UI interaction contracts
+
+```text
+UI event → command adapter → executeCommand(snapshot, command)
+  ok=true  → replace committed state, clear transient error, announce success
+  ok=false → keep exact state reference and local draft, branch by error.code,
+             focus error.field when present, offer retry only when retryable
+```
+
+- Pre/post assessment and consent are local drafts until explicit submit; changing a checkbox/answer must not mutate committed game state.
+- Review surfaces show before/after, fee/risk delta and source/assumption label where applicable; cancel has no engine call.
+- Dashboard/export commands are separate from gameplay commands and require consent/role checks at the service boundary.
+- Save/load must validate envelope before replacing state; an incompatible replay can never partially enter the reducer.
+- Offline status never changes game rules; it only controls network-dependent research/persistence actions.
+
+## 15. Cross-feature UI state matrix
+
+| State | Player-visible treatment | Applicable screens |
+|---|---|---|
+| Initial | heading + purpose + no fake numeric value | UI-001,015,016,022–025 |
+| Loading | labelled skeleton/progress; controls disabled only when necessary | all data screens |
+| Ready | complete data, primary action, current scope/version | all |
+| Empty | explain why empty, safe next action, never blank panel | UI-005,013,017–022,026 |
+| Partial/Not assessed | identify missing dimension/field and what is not inferred | UI-018,019,021,022 |
+| Validation | inline field + summary + preserve draft/focus | UI-003,006,015,016,018,022–024 |
+| Recoverable error | code-specific copy, retry policy, state unchanged | UI-006,014,017,022–026 |
+| Fatal/system | no stack/secret; reference ID; restart or support path | UI-014,020,023–026 |
+| Success | `role=status`, result values/units, next action | all submit/commit screens |
+| Offline | core play continues; network actions show queue/last sync/retry | UI-017,022–025 |
+
+## 16. Accessibility and responsive acceptance
+
+- All UI-001–UI-026 have a single visible `h1`, landmark order, logical focus order and a keyboard path to every primary action.
+- Assessment uses semantic fieldsets; consent uses explicit labels and independent purpose controls; dashboard uses table captions and chart text alternatives.
+- Scores/meters show label + numeric/text status; never rely on green/red or a chart legend alone.
+- At 320×568, 390×844, 768×1024 and 1440×900: no document-level horizontal overflow, no clipped primary action, and dialog content remains scrollable.
+- At 200% zoom and text spacing overrides: content remains usable; at reduced motion, progress/shock animation has a static explanation.
+- Screen-reader announcements identify chapter/stage, money unit, assessment domain, consent purpose, error code category and success result without exposing secrets.
+
+## 17. Session 3 implementation handoff
+
+1. Implement UI-006 before/after preview and add selectors for fee, weighted exposure, concentration and cash purchasing-power delta.
+2. Implement UI-015 and content-reviewed question/instrument contracts; persist only the approved assessment envelope.
+3. Implement UI-016/017 with separate purpose consent, version, withdrawal and offline-safe state; do not couple consent to playability.
+4. Implement UI-018/019/020/021 after post-assessment/readiness/source registry contracts are approved; preserve `Not assessed` semantics.
+5. Implement UI-014/025 global recovery and offline state, including command error-code mapping and idempotent retry policy.
+6. Implement UI-022/023 only after backend/RLS/retention/consent-filter contracts are approved; dashboard is not a player screen.
+7. Implement UI-024/026 only after F-019/F-011 ledger and version/checksum contracts are approved; UI must not invent reconciliation.
+8. Add component/E2E/accessibility tests for CORE, ALLOC, ASSET, EVENT, DEC, REPORT and SAFE scenario IDs above.
+
+## 18. Implemented player journey evidence (2026-08-21)
+
+- UI-006 is Integrated/Playable: review shows pre/post value, engine fee preview, HHI and exact draft allocation; cancel closes without dispatch and confirm calls the authoritative allocation command once.
+- UI-015/UI-016 are Integrated/Playable: semantic fieldsets, explicit optional skip, no official-TSI claim, unselected consent and safe decline. This release clearly states that no telemetry leaves the device.
+- UI-018/UI-019/UI-020/UI-021 are Integrated/Playable: post reflection, four separate readiness dimensions, `Not assessed`, assumptions disclosure, session duration and learning gain separated from portfolio/luck.
+- UI-024 is Partial/Playable for one local slot: reload offers Continue and validates schema/phase before replacement; checksum/migrations/replay comparison remain Planned.
+- UI-017, UI-022, UI-023 and network portions of UI-025 remain Blocked/Conditional on approved governance/backend. UI-026 remains Planned with ADR-005.
+- Browser E2E completed the full first-play journey with consent decline, scam rejection, behavior decisions, all four chapters, post-assessment, report, reload/continue and restart. Console warnings/errors: 0. Document horizontal overflow: none at 390×844 and 1366×768.

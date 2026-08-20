@@ -15,7 +15,7 @@ const titleLogo = find('title-logo')
 const GAME_TITLE = 'พอร์ตพิชิตเงินเฟ้อ'
 
 // หน้าปกเกม: พื้นหลัง + ชื่อเกม + ปุ่ม Play
-export default function CoverScreen({ onPlay }) {
+export default function CoverScreen({ onPlay, onContinue = null, saveError = null }) {
   return (
     <div
       className="relative flex h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 text-center"
@@ -51,6 +51,10 @@ export default function CoverScreen({ onPlay }) {
         >
           ▶ PLAY
         </button>
+
+        {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
+
+        {saveError && <p role="alert" className="mt-3 max-w-lg bg-rose-950/90 p-2 text-xs text-rose-100">เปิดข้อมูลที่บันทึกไว้ไม่ได้ ({saveError}) เกมใหม่ยังเล่นได้ตามปกติ</p>}
 
         <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม PLAY เพื่อเริ่มการผจญภัย</p>
       </div>

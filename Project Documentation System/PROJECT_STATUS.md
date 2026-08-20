@@ -1,5 +1,39 @@
 # Project Status
 
+## End-to-End Feature Integration — 2026-08-21
+
+- Current release candidate: **Integrated — local browser QA passed; deployment pending**
+- Playable locally: core loop, allocation review/confirmation, systemic Black Swan and inflation implementation, optional pre-assessment, local consent decline/opt-in, post-assessment, four-dimensional simulation readiness, timing summary, assumptions disclosure, one-slot save/continue and restart.
+- Verification so far: `npm test` 68/68; `npm run build:web` Pass; full browser flow Pass; console warning/error 0; no horizontal overflow at 390×844 and 1366×768.
+- Blocked: Supabase/researcher statistics dashboard (ADR-014 Proposed; no approved governance, retention, RLS or credentials); canonical ledger/P&L (ADR-005 and precision unresolved).
+- Partial: save/load has schema validation and atomic restore but not checksum, migration, multi-slot or golden command replay; accessibility has semantic/keyboard/responsive evidence but no axe/screen-reader certification.
+- Pre-existing Session 1/2 documentation and concurrent `balance.js`/`encounter.js` changes were reviewed and preserved; no `.obsidian`, capture, output, prototype or tmp file is included.
+
+## Architecture Audit Baseline — 2026-08-21
+
+This section supersedes older status claims where they conflict with current source/test/UI evidence. No source code or deployment was changed in this audit.
+
+### Status vocabulary
+
+- **Designed**: rule/data/UI intent documented; no implementation evidence.
+- **Planned**: accepted work item with dependency/milestone, not implemented.
+- **Implemented**: source code exists and unit/integration evidence covers the behavior.
+- **Integrated**: source is wired through the actual UI/app or persistence boundary.
+- **Playable**: a user can complete the feature through the real UI flow.
+- **Deployed**: released to the target environment; no deployment evidence in this audit.
+
+### Read-only evidence snapshot
+
+- UI currently routes cover → style → allocation → stages → report through `App.jsx`; this is Playable for the core simulation.
+- Engine command boundary `executeCommand` is Implemented/Tested; UI-006 review is not integrated.
+- Current unit/command suite: `npm test` Pass 64/64; simulation and build evidence exists, but this audit did not rerun deployment.
+- State contains versions/consent/assessment/timing scaffolding, but no assessment UI, consent UI, telemetry transport, database, ledger, or persistence integration was found.
+- No Supabase dependency, client, migration, edge function, API route, or environment contract was found.
+
+### Feature status correction
+
+The feature inventory and status matrix in `SYSTEM_SPEC.md` §9 is authoritative for this audit. In particular, FR-020/021 are engine-level Implemented/Tested but not fully Playable as dedicated user-facing features; FR-022/023/024/ledger/research storage remain Designed or Planned until UI and integration evidence exists.
+
 ## Header
 
 - Overall: **Deployed — Playable**
@@ -230,6 +264,18 @@ Session 2 did not intentionally modify game logic/source files.
 - Build: `npm run build` pass; `npm run build:web` pass; `git diff --check` pass with line-ending warnings only.
 - Concurrent/pre-existing files preserved: `src/game/engine/balance.js`, `src/game/engine/encounter.js`, `.obsidian/`, `game-core-loop-captures/`, `output/`, `research-data-prototype-preview.html`, `tmp/`.
 - Remaining: browser-level responsive/accessibility audit and dedicated component test harness; UI-006 visual review remains separate from this contract migration.
+
+## UI/UX Feature-Complete Design Session (2026-08-21)
+
+- Objective: map every F-001–F-022 from `SYSTEM_SPEC.md` to implementable screens, journeys, states, contracts and acceptance scenarios.
+- Read-only source audit: core UI is playable through report; pre/post assessment, research consent/transport, readiness dimensions, dashboard, ledger view, persistence and full recovery surfaces are not integrated in source.
+- Changed: expanded `UI_SPEC.md` with UI-015–UI-026, complete feature mapping, first-play/replay/researcher journeys, screen contracts, state matrix, interaction contracts, accessibility acceptance and Session 3 handoff.
+- Changed: added player-experience journey to `GAME_DESIGN.md` without changing rules/balance/RNG.
+- Decisions: added Proposed ADR-2026-015 (optional assessment/research layer), ADR-2026-016 (separate player report/dashboard) and ADR-2026-017 (`Not assessed` for missing readiness data). Existing ADR-013/014 and concurrent changes preserved.
+- Feature coverage: F-001–F-022 each have UI mapping; Planned/Conditional features are explicitly not claimed as implemented.
+- Verification: documentation/source audit only; no source logic, deploy or database changes made in this session.
+- Session 3 dependencies: UI-006, UI-015–UI-021, UI-025 first; UI-022/023 only after auth/RLS/retention; UI-024/026 only after persistence/ledger contracts.
+- Known risks: target learner, assessment content/instrument approval, readiness scoring formula, source registry, consent wording, backend scope and save/ledger contracts remain owner/technical dependencies.
 
 ### Excluded working-tree items
 

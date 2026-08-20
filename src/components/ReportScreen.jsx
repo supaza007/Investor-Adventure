@@ -2,6 +2,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import { eventArtOf } from './art'
+import { buildReadiness } from '../game/learning.js'
 
 const BAND_STYLE = {
   fire: { cls: 'from-amber-800 to-amber-950 border-amber-400/60', text: 'text-amber-300', blurb: 'คุณเกษียณได้ก่อนกำหนดแบบสบายๆ' },
@@ -44,10 +45,14 @@ function ChapterRow({ c }) {
 }
 
 // รายงานผลเกษียณ — ไม่ใช่ win/lose แต่เป็นสเปกตรัม เทียบกับเกณฑ์อ้างอิง (ดีไซน์ข้อ 7)
-export default function ReportScreen({ report, onRestart }) {
+export default function ReportScreen({ report, session, learning, onRestart }) {
   const b = BAND_STYLE[report.band.id] ?? BAND_STYLE.tight
   const vsBench = report.finalValue / report.benchmark - 1
   const beat = vsBench >= 0
+  const readiness = buildReadiness(report, session.assessment)
+  const started = session.timing.startedAt ? Date.parse(session.timing.startedAt) : null
+  const ended = session.timing.endedAt ? Date.parse(session.timing.endedAt) : Date.now()
+  const durationMinutes = started && ended >= started ? Math.round((ended - started) / 60000) : null
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
@@ -99,6 +104,32 @@ export default function ReportScreen({ report, onRestart }) {
           {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอ Black Swan {report.blackSwanCount} ครั้ง ซึ่งไม่มีใครเตรียมตัวทันได้ — ไม่ใช่ความผิดของคุณ</div>}
           {report.scamVictim && <div className="mt-1 text-amber-200">คุณเคยตกเป็นเหยื่อมิจฉาชีพ จำไว้ว่า “การันตีผลตอบแทนสูง” + “ต้องตัดสินใจเดี๋ยวนี้” = โกงเสมอ</div>}
         </div>
+
+        <section className="pixel-frame mt-3 bg-slate-900/80 p-3" aria-labelledby="readiness-title">
+          <h2 id="readiness-title" className="text-base font-black text-emerald-300 sm:text-xl">ความพร้อม 4 มิติในสถานการณ์จำลอง</h2>
+          <p className="mt-1 text-xs text-white/60">ไม่ใช่คำวินิจฉัยหรือคำแนะนำการลงทุนสำหรับชีวิตจริง</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">{readiness.map((item) => <div key={item.id} className="pixel-chip bg-slate-800 p-2 text-xs">
+            <div className="font-bold">{item.label}</div>
+            <div className="mt-1 text-lg text-amber-300">{item.score == null ? 'Not assessed' : `${item.score}/100`}</div>
+            <div className="text-white/55">{item.evidence}</div>
+          </div>)}</div>
+        </section>
+
+        <section className="pixel-frame mt-3 bg-slate-900/80 p-3 text-xs" aria-labelledby="learning-title">
+          <h2 id="learning-title" className="text-base font-black text-sky-300 sm:text-xl">สรุปการเรียนรู้ของฉัน</h2>
+          <p className="mt-2">การเปลี่ยนแปลงคะแนนความรู้: <b>{learning.status === 'assessed' ? `${learning.knowledgeGain >= 0 ? '+' : ''}${learning.knowledgeGain}` : 'Not assessed'}</b></p>
+          <p>เวลาเล่นโดยประมาณ: <b>{durationMinutes == null ? 'เวลาไม่พร้อมใช้' : `${durationMinutes} นาที`}</b></p>
+          <p className="mt-1 text-white/55">คะแนนการเรียนรู้แยกจากผลพอร์ตและโชค ไม่มีข้อมูลถูกส่งออกจากอุปกรณ์นี้</p>
+        </section>
+
+        <details className="pixel-chip mt-3 bg-slate-900 p-3 text-xs">
+          <summary className="cursor-pointer font-bold text-violet-300">สมมติฐานและแหล่งอ้างอิง</summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-white/65">
+            <li>เงินเฟ้อ 2% ต่อปีเป็นค่ากลางของกรอบเป้าหมาย 1–3% และเป็นสมมติฐานเกม</li>
+            <li>HHI ใช้วัดการกระจุกตัวด้วยผลรวมสัดส่วนยกกำลังสอง</li>
+            <li>ผลตอบแทน เหตุการณ์ และ Black Swan เป็นพารามิเตอร์จำลอง ไม่ใช่การพยากรณ์</li>
+          </ul>
+        </details>
 
         <button type="button" onClick={onRestart} className="pixel-btn mt-3 mb-1 shrink-0 bg-emerald-500 py-2 text-sm font-bold text-emerald-950 sm:py-3 sm:text-lg">
           ↻ เล่นอีกครั้งด้วยสไตล์อื่น

@@ -15,6 +15,9 @@
 | ADR-2026-007 | ยืนยัน action ที่กระทบเงินหรือความเสี่ยงก่อน commit | Proposed | 2026-08-20 | UI/UX |
 | ADR-2026-008 | แสดง exposure หลายด้านและไม่พึ่งสี | Proposed | 2026-08-20 | UI/UX |
 | ADR-2026-009 | ใช้คะแนนความพร้อมเกษียณหลายมิติในสถานการณ์จำลอง | Active | 2026-08-20 | Project Owner |
+| ADR-2026-015 | Assessment และ research เป็นชั้นเสริม ไม่บล็อก core gameplay | Active | 2026-08-21 | Project Owner |
+| ADR-2026-016 | แยก player report กับ researcher dashboard | Active | 2026-08-21 | Project Owner |
+| ADR-2026-017 | Missing readiness data แสดง Not assessed | Active | 2026-08-21 | Project Owner |
 
 ## ADR-2026-001 — ใช้เอกสาร 6 ไฟล์เป็นหน่วยความจำกลาง
 
@@ -185,6 +188,56 @@ validate ทั้ง UI เพื่อ feedback และ engine เป็น 
 - References: SET TSI, BOT Financial Literacy Survey, OECD/INFE Toolkit, SEC investor education, GPPC PDPC
 
 ## Pending Decisions
+
+## ADR-2026-013 — ใช้สถานะหกระดับและไม่อนุมานจาก state scaffold
+
+- Status: Active
+- Date: 2026-08-21
+- Decision: ทุก feature ต้องแยก Designed, Planned, Implemented, Integrated, Playable และ Deployed. การมี state field หรือเอกสารเพียงอย่างเดียวไม่ถือว่า Implemented/Integrated/Playable
+- Consequence: `SYSTEM_SPEC.md` §9 เป็น inventory หลัก; status เก่าที่ขัดกันต้องถูกอ่านเป็น historical context ไม่ใช่หลักฐานปัจจุบัน
+
+## ADR-2026-014 — Supabase เป็น conditional scope
+
+- Status: Proposed
+- Date: 2026-08-21
+- Decision: ยังไม่ถือว่า Supabase อยู่ใน implementation scope จน owner/มหาวิทยาลัยยืนยัน research governance, data retention, RLS, deployment owner และงบประมาณ. หากอนุมัติให้ทำหลัง local-first consent/ledger/telemetry contract stable
+- Consequence: Session 3 ทำ schema/API contract แบบ adapter ได้ แต่ห้ามเพิ่ม dependency หรือส่งข้อมูลจริงก่อน approval
+
+## ADR-2026-015 — Assessment และ research เป็นชั้นเสริม ไม่บล็อก core gameplay
+
+- Status: Active (approved by the owner's explicit end-to-end implementation request on 2026-08-21)
+- Date: 2026-08-21
+- Owner: UI/UX
+- Scope: onboarding, consent, post-assessment and telemetry
+- Context: F-013–F-016 ต้องมีข้อมูล/consent เพิ่ม แต่เกม core ต้องยังเล่นได้เมื่อผู้เล่นไม่ตอบหรือปฏิเสธ research
+- Decision: pre/post assessment และ research consent เป็น explicit opt-in/optional layer; ไม่มีคำถามแทรกระหว่าง stages; decline ไม่เปลี่ยนกติกาและไม่บล็อก personal report
+- Consequences: Session 3 ต้องมี skip/Not assessed state และ local-first error behavior; ไม่เพิ่ม scoring rule ใหม่
+- Validation: E2E decline → complete run, no export; assessment fixture separates knowledgeGain from portfolioOutcome/luck
+- References: F-013–F-016, UI-015–UI-018, NFR-008
+
+## ADR-2026-016 — แยก player report กับ researcher dashboard
+
+- Status: Active (approved by the owner's explicit end-to-end implementation request on 2026-08-21)
+- Date: 2026-08-21
+- Owner: UI/UX
+- Scope: F-017/F-018
+- Context: ผู้เล่นต้องเห็นผลของตนเอง แต่สถิติรวมมี role, consent, retention และ de-identification constraints
+- Decision: UI-013/019/021 เป็น player-only; UI-022/023 เป็น researcher/admin route แยก boundary; dashboard แสดง aggregate เท่านั้นและ export ต้อง consent-filtered
+- Consequences: ห้ามใส่ dashboard/admin controls ใน gameplay bundle โดยไม่มี auth/RLS; Supabase ยังคง conditional
+- Validation: unauthorized/expired session ไม่ fetch data; minimum-cell suppression; no non-consenting run in export
+- References: F-017/F-018, UI-022/UI-023, ADR-2026-014
+
+## ADR-2026-017 — Missing readiness data แสดง Not assessed
+
+- Status: Active (approved by the owner's explicit end-to-end implementation request on 2026-08-21)
+- Date: 2026-08-21
+- Owner: UI/UX
+- Scope: F-012/F-014/F-022
+- Context: readiness direction มีสี่มิติ แต่ engine/assessment ยังไม่มี input ครบทุกมิติ
+- Decision: แสดงแต่ละ dimension แยกกัน; เมื่อ input/source ไม่พอใช้ `Not assessed` พร้อมเหตุผลและ next learning topic; ห้าม default 0 หรือเดาคะแนนจาก portfolio
+- Consequences: Session 3 ต้องส่ง missing flags/source IDs และ report ต้องไม่ใช้คำว่าพร้อมเกษียณจริง
+- Validation: fixture missing each dimension renders Not assessed and leaves other dimensions intact
+- References: UI-018/UI-019/UI-020, FR-019, NFR-013
 
 | Topic | Options/why | Owner | Needed by |
 |---|---|---|---|

@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
-import { netWorth } from '../game/engine/gameState.js'
+import { netWorth, applyAllocation } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
@@ -233,6 +233,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const [alloc, setAlloc] = useState(initial)
   const cashLeft = alloc.cash
   const [detailTool, setDetailTool] = useState(null)
+  const [reviewing, setReviewing] = useState(false)
   const errorRef = useRef(null)
 
   useEffect(() => {
@@ -257,11 +258,28 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
 
   const weights = Object.fromEntries(Object.entries(alloc).filter(([, v]) => v > 0).map(([k, v]) => [k, v / 100]))
   const investedPct = 100 - cashLeft
+  const preview = applyAllocation(state, weights)
+  const concentration = Object.entries(weights).filter(([id]) => id !== 'cash').reduce((sum, [, weight]) => sum + weight ** 2, 0)
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} onContinue={() => setIntroSeenFor(chapter.n)} />}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
+      {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>
+        <h1 className="text-xl font-black text-emerald-300">ทบทวนก่อนลงทุน</h1>
+        <p className="mt-2 text-sm text-white/70">ยังไม่มีการเปลี่ยนพอร์ตจนกด “ยืนยันพอร์ต”</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ก่อนปรับ</span><br /><b>{money(total)}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">หลังหักค่าธรรมเนียม</span><br /><b>{money(netWorth(preview))}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ค่าธรรมเนียมโดยประมาณ</span><br /><b>{money(preview.lastFee)}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">การกระจุกตัว HHI</span><br /><b>{concentration.toFixed(2)}</b></div>
+        </div>
+        <ul className="mt-3 max-h-40 overflow-y-auto text-sm">{Object.entries(alloc).filter(([, value]) => value > 0).map(([id, value]) => <li key={id} className="flex justify-between border-b border-white/10 py-1"><span>{id === 'cash' ? 'เงินสด' : tools.find((t) => t.id === id)?.name}</span><b>{value}%</b></li>)}</ul>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button type="button" disabled={submitting} className="pixel-btn bg-slate-700 p-3" onClick={() => setReviewing(false)}>กลับไปแก้ไข</button>
+          <button type="button" disabled={submitting} className="pixel-btn bg-emerald-500 p-3 font-bold text-emerald-950" onClick={() => onConfirm(weights)}>{submitting ? 'กำลังยืนยัน…' : 'ยืนยันพอร์ต'}</button>
+        </div>
+      </Modal>}
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
         <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
@@ -327,10 +345,10 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
             <button
               type="button"
               disabled={submitting}
-              onClick={() => onConfirm(weights)}
+              onClick={() => setReviewing(true)}
               className="pixel-btn shrink-0 bg-emerald-500 px-4 py-1.5 text-xs font-bold text-emerald-950 sm:px-8 sm:py-2.5 sm:text-base"
             >
-              {submitting ? 'กำลังยืนยัน…' : `ลงทุน ${investedPct}% ▶`}
+              {submitting ? 'กำลังยืนยัน…' : `ทบทวน ${investedPct}% ▶`}
             </button>
           </div>
         </div>

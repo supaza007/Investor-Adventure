@@ -6,6 +6,9 @@ import AllocationScreen from './components/AllocationScreen'
 import StageScreen from './components/StageScreen'
 import ReportScreen from './components/ReportScreen'
 import { useGameCommand } from './ui/useGameCommand.js'
+import { PreAssessmentScreen, ConsentScreen, PostAssessmentScreen } from './components/LearningScreens.jsx'
+import { buildLearningSummary } from './game/learning.js'
+import { createSession, parseSession, serializeSession, SESSION_STORAGE_KEY } from './game/sessionStore.js'
 
 // เสียงคลิกปุ่มแบบสังเคราะห์ด้วย Web Audio — ไม่ใช้ไฟล์เสียงเลย
 //
@@ -56,12 +59,67 @@ function useClickSound() {
 
 export default function App() {
   useClickSound()
-  const { state, command, busy, commandError, clearCommandError } = useGameCommand(() => createInitialState(Date.now()))
+  const { state, command, restoreState, busy, commandError, clearCommandError } = useGameCommand(() => createInitialState(Date.now()))
+  const [journey, setJourney] = useState('cover')
+  const [session, setSession] = useState(createSession)
+  const [savedRun, setSavedRun] = useState(null)
+  const [saveError, setSaveError] = useState(null)
 
   // เปิดหน้าจัดพอร์ตซ้อนระหว่างสเตจ (สำหรับสไตล์ที่ปรับพอร์ตกลางบทได้)
   const [adjusting, setAdjusting] = useState(false)
 
-  if (state.phase === 'cover') return <CoverScreen onPlay={() => command({ type: 'START' })} />
+  useEffect(() => {
+    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY)
+    if (!raw) return
+    const parsed = parseSession(raw)
+    if (parsed.ok) setSavedRun(parsed.value)
+    else setSaveError(parsed.error)
+  }, [])
+
+  useEffect(() => {
+    if (journey === 'cover' || state.phase === 'cover') return
+    try {
+      const raw = serializeSession(session, state)
+      window.localStorage.setItem(SESSION_STORAGE_KEY, raw)
+      setSavedRun(parseSession(raw).value)
+    } catch {
+      setSaveError('SAVE_WRITE_FAILED')
+    }
+  }, [state, session, journey])
+
+  const beginCore = (consent) => {
+    setSession((s) => ({ ...s, consent: { researchTelemetry: consent, consentVersion: 'research-consent-v1', decidedAt: new Date().toISOString() }, timing: { ...s.timing, startedAt: new Date().toISOString() } }))
+    command({ type: 'START' })
+    setJourney('game')
+  }
+
+  const continueSaved = () => {
+    if (!savedRun) return
+    const restored = restoreState(savedRun.gameState)
+    if (!restored.ok) { setSaveError(restored.error.code); return }
+    setSession(savedRun.session)
+    setJourney(savedRun.gameState.phase === 'report' ? 'report' : 'game')
+  }
+
+  const finishAssessment = (post) => {
+    setSession((s) => ({ ...s, assessment: { ...s.assessment, post }, timing: { ...s.timing, endedAt: new Date().toISOString() } }))
+    setJourney('report')
+  }
+
+  const restart = () => {
+    window.localStorage.removeItem(SESSION_STORAGE_KEY)
+    setSavedRun(null)
+    setSaveError(null)
+    setSession(createSession())
+    setJourney('cover')
+    setAdjusting(false)
+    command({ type: 'RESTART' })
+  }
+
+  if (journey === 'cover') return <CoverScreen onPlay={() => setJourney('pre')} onContinue={savedRun ? continueSaved : null} saveError={saveError} />
+  if (journey === 'pre') return <PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('consent') }} onSkip={() => setJourney('consent')} />
+  if (journey === 'consent') return <ConsentScreen onChoice={beginCore} />
+  if (state.phase === 'report' && journey === 'game') return <PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />
 
   if (state.phase === 'style') return <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId })} />
 
@@ -101,7 +159,7 @@ export default function App() {
   }
 
   if (state.phase === 'report') {
-    return <ReportScreen report={state.report} onRestart={() => command({ type: 'RESTART' })} />
+    return <ReportScreen report={state.report} session={session} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
   }
 
   return null

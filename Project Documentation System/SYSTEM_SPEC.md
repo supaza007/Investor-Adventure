@@ -177,9 +177,9 @@ executeCommand(state, { type: 'CONFIRM_ALLOCATION', weights: { stock: Infinity }
 | FR-020 | cash-only allocation | Must | explicit cash=100% is valid; inflation-adjusted purchasing power; no market return | Implemented/Testing |
 | FR-021 | systemic Black Swan profile | Must | every asset is shocked with deterministic asset-specific profile | Implemented/Testing |
 | FR-022 | pre/post assessment | Should | SET-inspired pre risk profile; post 3 domains; knowledgeGain separate from portfolio outcome | Proposed |
-| FR-023 | research consent | Must | opt-in separate from game terms; decline preserves gameplay; consent version recorded | Implemented/Testing |
-| FR-024 | gameplay timing telemetry | Should | run/chapter/stage start/end/duration with anonymous run ID | Implemented/Testing |
-| FR-025 | replay metadata | Must | rules/content/RNG versions and seed metadata | Implemented/Testing |
+| FR-023 | research consent | Must | opt-in separate from game terms; decline preserves gameplay; consent version recorded | Designed; state scaffold only |
+| FR-024 | gameplay timing telemetry | Should | run/chapter/stage start/end/duration with anonymous run ID | Designed; state scaffold only |
+| FR-025 | replay metadata | Must | rules/content/RNG versions and seed metadata | Partial; state fields only, no persistence/golden replay |
 | FR-019 | สร้างรายงาน Retirement Readiness หลายมิติ | Must | แสดง financial readiness, plan resilience, life/health readiness และ financial capability แยกกัน; ระบุ `Not assessed` เมื่อไม่มีข้อมูล; ห้ามอ้างว่าเป็นคำแนะนำส่วนบุคคล | Proposed |
 
 ## 6. Non-Functional Requirements
@@ -217,7 +217,72 @@ Storage/autosave/retention/migration are **TBD**. Minimum Proposed envelope: sch
 
 Required test layers: current unit tests; property/fuzz invalid commands; golden replay state hash; UI-engine integration; E2E full run/scam/restart/save-load; balance matrix across strategies×styles×behaviors×seeds; offline/accessibility smoke
 
-## 8. Technical Debt / Risks
+## 9. Complete Feature Inventory and Architecture Audit (2026-08-21)
+
+This is the authoritative feature inventory for Session 2/3 planning. Status claims require source, test, UI wiring, and deployment evidence as defined in `PROJECT_STATUS.md`.
+
+| Feature ID | Feature / player goal | State/data | Rules and player action | UI required | Acceptance criteria | Test criteria | Status |
+|---|---|---|---|---|---|---|---|
+| F-001 | Start run and choose style | phase, styleId, seed | valid style starts one deterministic run | Cover, StyleSelect | style selection creates allocation state | unit + full-run | Playable/Implemented |
+| F-002 | Allocate portfolio and cash | positions, cash, weights | non-negative finite weights; rebalance; fee | AllocationScreen | total conserved minus fee; cash-only valid | unit/property/E2E | Playable/Implemented |
+| F-003 | Review allocation before commit | draft weights, preview | cancel leaves committed state unchanged | UI-006 ReviewDialog | one confirm commits exactly once | component/E2E double-click | Planned/Proposed |
+| F-004 | Adjust portfolio at allowed stages | positions, style rules | only permitted style/stage can adjust | UI-005 overlay | denied adjustment is no-op with reason | matrix tests | Playable/Implemented |
+| F-005 | Asset catalog and lessons | tool definitions/exposure | four tools, cash separate; no live price | ToolCard/modal | every tool has valid data and fallback art | data tests | Playable/Implemented |
+| F-006 | Risk exposure/concentration | weighted exposure, HHI, band | deterministic formulas; no NaN | HUD/RiskExposure | values match engine and text equivalent | unit/property/visual | Partial: engine Playable; HUD integrated only partly |
+| F-007 | Systemic events and shock | eventOrder, event, band, shock | four tags; seeded shock; asset-specific Black Swan profile | Signal/Reveal/Shock | event hidden until reveal; no negative value | unit/seed matrix/E2E | Playable/Implemented |
+| F-008 | Inflation and cash purchasing power | inflation params, cash | `cash × (1+inflation)^(-years)` between chapters | allocation/report explanation | cash-only completes and shows purchasing-power loss | formula/unit/E2E | Engine Implemented/Tested; dedicated explanation Partial |
+| F-009 | Behavior decisions | behavior, rebound, aftershock | hold/cut/buy once; required before progress | Behavior confirmation | choice locked; effects reconciled | unit/E2E/anti-exploit | Playable/Implemented; rebound redesign Planned |
+| F-010 | Scam education | scam offer/accepted/lost | one offer/run; accept/reject required; cash-first loss | Scam modal | red flags and amount shown; no dismiss bypass | branch/E2E | Playable/Implemented |
+| F-011 | Transaction/Event ledger and P/L | transactions, domainEvents, balances | every transfer/fee and valuation event has deterministic ID/order | ledger-aware review/report (not yet built) | opening + flows + valuation = closing | property/golden replay | Planned |
+| F-012 | Retirement-readiness report | four dimensions, evidence IDs, Not assessed | no real-world readiness claim; show simulation only | Report + assessment summary | dimensions separate; missing input not scored | unit/content/E2E | Designed/Partial engine report only |
+| F-013 | Pre-assessment (SET-inspired) | assessment.pre, instrumentVersion | adapted questions; not official TSI; no gameplay lock | onboarding assessment | score/profile saved before run and disclosed | content/unit/UX | Planned |
+| F-014 | Post-assessment and knowledge gain | assessment.post, domain scores | inflation, risk/diversification, fees/scam; no mid-play questions | post-report assessment | pre/post/domain gain separate from portfolio/luck | psychometric pilot/unit | Planned |
+| F-015 | Research consent | consent, consentVersion, purpose | research opt-in separate from game terms; decline preserves play | consent screen/settings | no research export without opt-in; withdrawal path | privacy/unit/E2E | Engine scaffold only; UI/integration Planned |
+| F-016 | Timing telemetry | run/chapter/stage timestamps/durations | record start/end only; UTC canonical; no clickstream by default | optional privacy notice; researcher view | durations non-negative and tied to anonymous run | clock/unit/privacy | State scaffold only; transport Planned |
+| F-017 | Anonymous student statistics | anonymousPlayerId, runId, cohort metadata TBD | minimize fields; aggregate access; retention/deletion | researcher dashboard (not player UI) | export is consent-filtered and de-identified | schema/RLS/DSAR | Designed; no backend |
+| F-018 | Supabase integration | auth/db/API/storage TBD | only if scope approved; RLS and env secrets required | admin/research dashboard | migration, RLS, retry/reconcile, offline queue policy | integration/security/E2E | Out of current implementation; Proposed |
+| F-019 | Persistence/save/replay | schema/rules/content/RNG versions, commandSeq | versioned envelope; migration or explicit incompatible replay | save/continue/restart | round-trip checksum; failed save preserves state | migration/golden replay | Planned |
+| F-020 | Error/recovery/anti-exploit | structured command result, invariants | atomic rejection, stale guards, duplicate lock | global error/retry | invalid command leaves same state; recoverable/fatal paths distinct | unit/fuzz/E2E | Engine Implemented/Tested; UI Partial |
+| F-021 | Accessibility/responsive | semantic UI, labels, focus | WCAG target and no color-only meaning | all screens | keyboard/zoom/mobile/screen reader checks pass | axe/manual/visual | Specified; runtime Partial |
+| F-022 | Balance calibration and safety disclosure | parameter registry, source IDs | simulation parameters cannot masquerade as market facts | help/report disclosure | every numeric claim classified and versioned | matrix/sensitivity/content review | Planned |
+
+### Dependency graph
+
+```text
+F-001/F-005/F-020
+        ↓
+F-002/F-004/F-006/F-007/F-008/F-009/F-010
+        ↓
+F-011 (ledger + P/L) ─────┐
+        ↓                  ├─ F-012 retirement report
+F-019 persistence/replay ─┘
+
+F-013 pre-assessment → F-014 post-assessment → F-012 knowledge/readiness presentation
+F-015 consent → F-016 telemetry → F-017 statistics → F-018 Supabase (optional)
+F-022 calibration/content review constrains F-007/F-008/F-012/F-014
+F-021 accessibility applies to every player-facing F-001–F-016 screen
+```
+
+### Session 2 dependencies
+
+1. Product/owner: target learner, age/minor policy, cash-only semantics, retirement-report language, research purpose and consent wording.
+2. Finance/content: approve source registry, SET-inspired assessment adaptation, Black Swan profile policy, parameter classification and disclaimer.
+3. Technical: choose money precision, ledger canonical event schema, version policy, local-first vs online research collection, and whether Supabase is in scope.
+4. UX: approve UI-006 review, onboarding assessment, consent, post-assessment and report information architecture.
+
+### Session 3 implementation plan
+
+| Milestone | Scope | Deliverable | Exit evidence |
+|---|---|---|---|
+| M3.1 | Domain contract | transaction/domain-event ledger, P/L reconciliation, deterministic IDs | property tests and golden replay |
+| M3.2 | Player onboarding | SET-inspired pre-assessment, consent opt-in, privacy notice, anonymous run IDs | playable UI + consent E2E |
+| M3.3 | Learning assessment | post-assessment, domain scoring, knowledgeGain, Not assessed policy | content review + pre/post test fixtures |
+| M3.4 | Telemetry | run/chapter/stage timing, offline queue policy, consent filter | timing tests + export fixture |
+| M3.5 | Research backend (conditional) | Supabase schema, migrations, RLS, API contract, dashboard read model | security review + integration tests |
+| M3.6 | Report and calibration | four-dimensional readiness report, source registry, parameter disclosure, sensitivity matrix | expert review + simulation gates |
+| M3.7 | Persistence and hardening | save/load/migration, error boundary, accessibility/E2E | round-trip, fuzz, browser/accessibility evidence |
+
+## 10. Technical Debt / Risks
 
 | ID | Risk | Priority |
 |---|---|---|
@@ -229,3 +294,16 @@ Required test layers: current unit tests; property/fuzz invalid commands; golden
 | TD-006 | current image rights unknown | High |
 | TD-007 | Electron config references `build/icon.ico`; file inventory did not find it | Medium |
 | TD-008 | financial content lacks documented expert approval | High |
+
+## 11. End-to-End Learning Slice — implementation evidence (2026-08-21)
+
+- F-003/UI-006: allocation now remains a local draft until a review modal shows before/after value, estimated engine fee, allocation list and HHI; cancel performs no command and confirm performs one command.
+- F-012–F-016: versioned pre/post learning reflections, optional local research consent, session timing, knowledge-gain separation and four readiness dimensions are integrated in the player journey. Missing life/health or assessment input is rendered `Not assessed`.
+- F-019: local single-slot save/continue is partially integrated with `schemaVersion: 1` and corrupt/incompatible rejection. Checksum, migrations, command replay and multiple slots remain Planned; this is not a canonical replay implementation.
+- F-020/F-021/F-022: command errors remain code-driven; assessment fieldsets, consent labels, report text equivalents, focus styles and responsive overflow checks are covered. Full axe/screen-reader certification and content/finance review remain open.
+- F-011 remains Planned because ADR-005 and money precision are unresolved. The report history is not relabelled as a canonical ledger or P/L reconciliation.
+- F-017/F-018 remain Blocked/Conditional. No Supabase dependency, secret, network send or researcher dashboard is included while ADR-014, RLS, retention and governance are unapproved.
+
+### Learning/session contracts
+
+`AssessmentResult = {instrumentVersion, answers, scores, total, completedAt}`. Missing required answers return `null` and UI preserves the draft. `SessionEnvelope = {schemaVersion:1, session, gameState}`; parse returns `{ok:false,error:'CORRUPT_SAVE'|'INCOMPATIBLE_SAVE'}` without replacing live state. Research consent decline never blocks gameplay and all data remains local in this release.
