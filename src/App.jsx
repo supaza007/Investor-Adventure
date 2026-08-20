@@ -121,7 +121,10 @@ export default function App() {
   if (journey === 'consent') return <ConsentScreen onChoice={beginCore} />
   if (state.phase === 'report' && journey === 'game') return <PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />
 
-  if (state.phase === 'style') return <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId })} />
+  if (state.phase === 'style') return <div className={busy ? 'pointer-events-none opacity-75' : ''} aria-busy={busy}>
+    {busy && <div role="status" className="fixed inset-x-0 top-2 z-50 mx-auto w-fit bg-slate-950 px-4 py-2 text-sm text-white">กำลังเริ่มเกม…</div>}
+    <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId })} />
+  </div>
 
   if (state.phase === 'allocation') {
     return (
