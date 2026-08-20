@@ -2,13 +2,34 @@
 
 ## Header
 
-- Overall: Engine command contract verified and committed; UI integration handoff ready
-- Last updated: 2026-08-20
-- Updated by: Lead Developer / Integrator
+- Overall: **Deployed — Playable**
+- Last updated: 2026-08-21
+- Updated by: Release & Deployment Engineer
 - Branch: `release-clean`
+- Deployed URL: https://supaza007.github.io/Investor-Adventure/
+- Deployment configuration commit: `0841b9ffc3f05e31aac1e8bb20387dbd889c40b7`
+- Deployed revision verified by browser QA: `759eb401b2cd30f7ff42475a621d8bf0e70bacfd`
 - Engine contract commit: `3815cf4`
 - Build: Pass (`npm run build`, `npm run build:web`)
-- Tests: Pass, 62/62 (`npm test`)
+- Tests: Pass, 64/64 (`npm test`)
+
+## Deployment — 2026-08-21
+
+- Status: **Deployed — Playable**
+- Provider: GitHub Pages project site
+- Source: GitHub Actions, branch `release-clean`
+- URL: https://supaza007.github.io/Investor-Adventure/
+- Vite web base path: `/Investor-Adventure/`
+- Workflow: `.github/workflows/deploy.yml`
+- GitHub Actions run: `#20` — completed successfully
+- Repository environment `github-pages` allows `release-clean`; Pages source is GitHub Actions
+- Live HTTP verification: page, generated JavaScript and generated CSS returned HTTP 200
+- Browser QA: Cover → Style → Allocation → Confirm Allocation → 4 Chapters → Report completed on the deployed URL
+- Scam rejection, behavior selection/confirmation and restart were exercised successfully
+- Browser console: no errors or warnings during the verified full run
+- Asset loading: all displayed images completed with non-zero natural dimensions; deployed JS/CSS asset paths loaded below `/Investor-Adventure/assets/`
+- Responsive QA: no horizontal document overflow at desktop 1440×900 or mobile 390×844 on the tested report state
+- Concurrent/pre-existing balance, encounter, capture, output, prototype, Obsidian and temporary files were preserved and excluded from deployment commits
 
 ## Verified Snapshot
 
