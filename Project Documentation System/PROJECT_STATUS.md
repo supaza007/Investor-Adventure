@@ -2,9 +2,13 @@
 
 ## End-to-End Feature Integration — 2026-08-21
 
-- Current release candidate: **Integrated — local browser QA passed; deployment pending**
+- Current release: **Deployed — Playable**
+- Deployed URL: https://supaza007.github.io/Investor-Adventure/
+- Feature commit: `c05a6de10a7a000d6212871e917e878fd9e14a82`
+- Production defect-fix commit: `843d7283f2277ca1f77012cb243cb5960a02850a`
+- GitHub Actions: Deploy game to GitHub Pages run #23 completed successfully.
 - Playable locally: core loop, allocation review/confirmation, systemic Black Swan and inflation implementation, optional pre-assessment, local consent decline/opt-in, post-assessment, four-dimensional simulation readiness, timing summary, assumptions disclosure, one-slot save/continue and restart.
-- Verification so far: `npm test` 68/68; `npm run build:web` Pass; full browser flow Pass; console warning/error 0; no horizontal overflow at 390×844 and 1366×768.
+- Verification: `npm test` 68/68; `npm run sim` 7/7; `npm run build` Pass; `npm run build:web` Pass; `git diff --check` Pass. Production browser completed onboarding → consent decline → allocation review → scam → behavior → four chapters → post/report → restart; console warning/error 0 and assets loaded. Local responsive checks found no horizontal overflow at 390×844 and 1366×768; production desktop smoke passed.
 - Blocked: Supabase/researcher statistics dashboard (ADR-014 Proposed; no approved governance, retention, RLS or credentials); canonical ledger/P&L (ADR-005 and precision unresolved).
 - Partial: save/load has schema validation and atomic restore but not checksum, migration, multi-slot or golden command replay; accessibility has semantic/keyboard/responsive evidence but no axe/screen-reader certification.
 - Pre-existing Session 1/2 documentation and concurrent `balance.js`/`encounter.js` changes were reviewed and preserved; no `.obsidian`, capture, output, prototype or tmp file is included.
