@@ -1,4 +1,4 @@
-# อัปเดตเว็บอัตโนมัติทุกครั้งที่ push ขึ้น main
+# อัปเดตเว็บอัตโนมัติทุกครั้งที่ push ขึ้น release-clean
 # ไม่ต้อง build เองในเครื่อง ไม่ต้องลากไฟล์ไปวางที่ไหน — push แล้วรอ 1-2 นาที เว็บอัปเดตเอง
 #
 # ครั้งแรกต้องเปิดใช้งานก่อน: GitHub → Settings → Pages → Source เลือก "GitHub Actions"
@@ -7,7 +7,7 @@ name: Deploy game to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [release-clean]
   workflow_dispatch: # กดสั่ง deploy เองได้จากหน้า Actions
 
 permissions:

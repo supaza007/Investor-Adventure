@@ -18,8 +18,9 @@ export default defineConfig(({ mode }) => {
   const isWeb = mode === 'web'
 
   return {
-    // path แบบ relative — ใช้ได้ทั้งเปิดจากไฟล์ (file://) และวางใน subfolder ของ GitHub Pages
-    base: './',
+    // GitHub Pages project site ต้องโหลด assets ใต้ repository subpath
+    // ส่วน build ปกติยังใช้ relative path เพื่อเปิด dist/index.html แบบ file:// ได้
+    base: isWeb ? '/Investor-Adventure/' : './',
     plugins: [react(), tailwindcss(), ...(isWeb ? [] : [viteSingleFile()])],
     build: {
       outDir: isWeb ? 'dist-web' : 'dist',
