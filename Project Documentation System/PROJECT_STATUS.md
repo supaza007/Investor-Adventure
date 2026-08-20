@@ -195,6 +195,21 @@ Session 2 did not intentionally modify game logic/source files.
 4. Add UI integration tests for cancel/no commit, invalid allocation, duplicate submit, stale NEXT, scam/behavior gating and restart
 5. Run keyboard/accessibility/responsive QA after contract migration
 
+## UI Integration Session 3 Completion (2026-08-20)
+
+- Commit: this UI integration commit; final hash is reported in the session handoff below.
+- Outcome: UI event paths now call `executeCommand`; committed state changes only on `ok === true`.
+- Adapter: added `src/ui/useGameCommand.js`; owns committed state, structured error, processing lock and error dismissal.
+- Migrated raw paths: `START`, `SELECT_STYLE`, `CONFIRM_ALLOCATION`, `SET_ALLOCATION`, `ANSWER_SCAM`, `CHOOSE_BEHAVIOR`, `NEXT_STAGE`, `RESTART`.
+- `NEXT_STAGE` always sends `expectedStageIndex` from the render snapshot.
+- Allocation draft remains local to `AllocationScreen`; rejected commands do not replace parent state or draft.
+- Error UI branches by code for allocation/stage; `field` focuses the matching allocation control when available; `message` is fallback copy.
+- Duplicate submit is disabled by adapter ref lock and UI `submitting` state.
+- Tests: `npm test` pass 63/63; added command-contract restart coverage; existing invalid allocation/overflow, duplicate, stale, scam, behavior and full-run tests pass.
+- Build: `npm run build` pass; `npm run build:web` pass; `git diff --check` pass with line-ending warnings only.
+- Concurrent/pre-existing files preserved: `src/game/engine/balance.js`, `src/game/engine/encounter.js`, `.obsidian/`, `game-core-loop-captures/`, `output/`, `research-data-prototype-preview.html`, `tmp/`.
+- Remaining: browser-level responsive/accessibility audit and dedicated component test harness; UI-006 visual review remains separate from this contract migration.
+
 ### Excluded working-tree items
 
 The feature commit intentionally excludes pre-existing/concurrent UI, balance/Black-Swan, captures, prototype, output, tmp and `.obsidian` changes. They remain in the working tree and must be reviewed by their owning session; they were not deleted or overwritten.

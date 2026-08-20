@@ -275,7 +275,7 @@ FR ปัจจุบันกว้างเกินไป; Session 3 ต้�
 1. เพิ่ม FR แยก style/allocation/gated adjust/behavior/scam/report/recovery
 2. ส่ง selectors: portfolio/total value, chapter return, weighted exposure, concentration, fee/allocation preview
 3. ใช้ command result ที่ implement แล้ว `{ok, state, error:{code, field?, message}|null}`; transaction ID ยังไม่มีเพราะ ADR-005 เป็น Proposed
-4. Implement UI-006 ก่อน dispatch; ปัจจุบัน `App.jsx` ส่ง `CONFIRM_ALLOCATION` พร้อม weights จากหน้าจัดพอร์ตโดยยังไม่มี review UI
+4. UI command adapter is now implemented; `App.jsx` sends `CONFIRM_ALLOCATION(weights)` once from the allocation draft. A dedicated UI-006 review surface remains a separate product slice and is not inferred here.
 5. เพิ่ม error boundary/UI-014 และ double-submit protection
 6. เพิ่ม semantic progress/live regions และแก้ text size/contrast/touch target
 7. รักษา deterministic engine; UI ห้ามสุ่มเอง

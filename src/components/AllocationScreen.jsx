@@ -116,6 +116,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
       <div className="mt-1.5 flex items-center gap-1.5">
         <button
           type="button"
+          data-allocation-field={tool.id}
           {...subHold}
           disabled={percent === 0}
           className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-600 text-white'}`}
@@ -124,6 +125,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
         </button>
         <button
           type="button"
+          data-allocation-field={tool.id}
           {...addHold}
           disabled={!canAdd}
           className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-500 text-white'}`}
@@ -211,7 +213,7 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
 // หน้าจัดพอร์ต — ผู้เล่นบอกสัดส่วนที่อยากได้ เอนจินย้ายเงินให้เอง
 // สำคัญ: ตัดสินใจ "ก่อน" รู้ว่าบทนี้จะเจอเหตุการณ์อะไร (เสาหลักข้อ 2)
 // isChapterStart = true เฉพาะตอนเข้าบทใหม่จริงๆ (ไม่ใช่ตอนกดปุ่ม "ปรับพอร์ต" กลางบท) — คุมว่าจะโชว์ popup แนะนำบทไหม
-export default function AllocationScreen({ state, chapter, onConfirm, isChapterStart = false }) {
+export default function AllocationScreen({ state, chapter, onConfirm, isChapterStart = false, commandError = null, onDismissError, submitting = false }) {
   const total = netWorth(state)
   const tools = getTools()
 
@@ -231,6 +233,14 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const [alloc, setAlloc] = useState(initial)
   const cashLeft = alloc.cash
   const [detailTool, setDetailTool] = useState(null)
+  const errorRef = useRef(null)
+
+  useEffect(() => {
+    if (!commandError) return
+    const field = commandError.field?.split('.').pop()
+    const target = field ? document.querySelector(`[data-allocation-field="${field}"]`) : null
+    ;(target ?? errorRef.current)?.focus?.()
+  }, [commandError])
 
   // แสดง popup แนะนำบทแค่ครั้งเดียวต่อบท แม้ผู้เล่นจะลาก slider จน component re-render ก็ไม่โผล่ซ้ำ
   const [introSeenFor, setIntroSeenFor] = useState(null)
@@ -287,6 +297,16 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
         </div>
 
         <div className="mt-1.5 shrink-0">
+          {(commandError || state.validationError) && (
+            <div ref={errorRef} tabIndex={-1} role="alert" aria-live="assertive" className="pixel-chip mb-1.5 bg-rose-950/70 px-2 py-1 text-[10px] text-rose-100 sm:text-xs">
+              {commandError?.code === 'INVALID_ALLOCATION' && 'จัดสรรพอร์ตไม่สำเร็จ: '}
+              {commandError?.code === 'WRONG_PHASE' && 'ยังจัดพอร์ตในขั้นตอนนี้ไม่ได้: '}
+              {commandError?.code === 'STALE_COMMAND' && 'หน้าจอเปลี่ยนไปแล้ว: '}
+              {commandError?.code === 'INVALID_STATE' && 'สถานะเกมไม่ถูกต้อง: '}
+              {commandError?.message ?? state.validationError}
+              {onDismissError && <button type="button" className="ml-2 underline" onClick={onDismissError}>ปิดข้อความ</button>}
+            </div>
+          )}
           <div className="pixel-bar mb-1.5 flex h-3 w-full overflow-hidden bg-slate-950 sm:h-4">
             {tools.map((t) => alloc[t.id] > 0 && <div key={t.id} className={colorOf(t.id).bar} style={{ width: `${alloc[t.id]}%` }} />)}
             {cashLeft > 0 && <div className="bg-slate-500" style={{ width: `${cashLeft}%` }} />}
@@ -306,10 +326,11 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
             </div>
             <button
               type="button"
+              disabled={submitting}
               onClick={() => onConfirm(weights)}
               className="pixel-btn shrink-0 bg-emerald-500 px-4 py-1.5 text-xs font-bold text-emerald-950 sm:px-8 sm:py-2.5 sm:text-base"
             >
-              ลงทุน {investedPct}% ▶
+              {submitting ? 'กำลังยืนยัน…' : `ลงทุน ${investedPct}% ▶`}
             </button>
           </div>
         </div>

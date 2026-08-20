@@ -134,6 +134,16 @@ describe('command contract', () => {
     assert.equal(adjusted.ok, true)
     assert.ok(netWorth(adjusted.state) < before, 'trader ต้องเสียค่าธรรมเนียมจาก turnover')
   })
+
+  test('RESTART ผ่าน command contract และคืนหน้า cover', () => {
+    let state = run(createInitialState(110), { type: 'START' })
+    state = run(state, { type: 'SELECT_STYLE', styleId: 'medium' })
+    const result = executeCommand(state, { type: 'RESTART' })
+    assert.equal(result.ok, true)
+    assert.equal(result.state.phase, 'cover')
+    assert.equal(result.state.seed, state.seed)
+    assert.notEqual(result.state, state)
+  })
 })
 
 describe('command integration flow', () => {

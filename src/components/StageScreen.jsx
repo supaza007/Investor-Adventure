@@ -423,7 +423,7 @@ function ScamOffer({ scam, onAnswer }) {
   )
 }
 
-export default function StageScreen({ state, dispatch, onAdjust }) {
+export default function StageScreen({ state, command, commandError = null, onDismissError, submitting = false, onAdjust }) {
   const stage = currentStage(state)
   const event = currentEvent(state)
   const chapter = currentChapter(state)
@@ -452,12 +452,22 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
           {stage.key === 'signal' && <SignalStage event={event} />}
           {stage.key === 'reveal' && <RevealStage event={event} />}
           {stage.key === 'shock' && <ShockStage state={state} event={event} />}
-          {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => dispatch({ type: 'CHOOSE_BEHAVIOR', choice })} />}
+          {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => command({ type: 'CHOOSE_BEHAVIOR', choice })} />}
           {stage.key === 'debrief' && <DebriefStage state={state} event={event} />}
         </div>
 
         <div className="mt-1.5 shrink-0">
           <PortfolioPanel positions={state.positions} cash={state.cash} compact />
+          {commandError && (
+            <div role="alert" aria-live="assertive" className="pixel-chip mb-1.5 bg-rose-950/70 px-2 py-1 text-[10px] text-rose-100 sm:text-xs">
+              {commandError.code === 'DECISION_REQUIRED' && 'ต้องตัดสินใจก่อน: '}
+              {commandError.code === 'STALE_COMMAND' && 'หน้าจอเปลี่ยนไปแล้ว: '}
+              {commandError.code === 'WRONG_PHASE' && 'ยังทำรายการนี้ไม่ได้: '}
+              {commandError.code === 'INVALID_DECISION' && 'ตัวเลือกไม่ถูกต้อง: '}
+              {commandError.message}
+              {onDismissError && <button type="button" className="ml-2 underline" onClick={onDismissError}>ปิดข้อความ</button>}
+            </div>
+          )}
           <div className="mt-1.5 flex items-center justify-between gap-2">
             {canAdjust ? (
               <button type="button" onClick={onAdjust} className="pixel-btn bg-sky-600 px-3 py-1.5 text-[10px] font-bold sm:px-5 sm:py-2 sm:text-sm">
@@ -470,19 +480,19 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
             )}
             <button
               type="button"
-              disabled={needsBehavior}
-              onClick={() => dispatch({ type: 'NEXT_STAGE' })}
+              disabled={needsBehavior || submitting}
+              onClick={() => command({ type: 'NEXT_STAGE', expectedStageIndex: state.stageIndex })}
               className={`pixel-btn px-4 py-1.5 text-[11px] font-bold sm:px-8 sm:py-2 sm:text-base ${
                 needsBehavior ? 'cursor-not-allowed bg-slate-700 text-slate-500' : 'bg-emerald-500 text-emerald-950'
               }`}
             >
-              {needsBehavior ? 'เลือกก่อน' : state.stageIndex === BALANCE.stages.length - 1 ? 'ไปบทถัดไป ▶' : 'ต่อไป ▶'}
+              {submitting ? 'กำลังประมวลผล…' : needsBehavior ? 'เลือกก่อน' : state.stageIndex === BALANCE.stages.length - 1 ? 'ไปบทถัดไป ▶' : 'ต่อไป ▶'}
             </button>
           </div>
         </div>
       </div>
 
-      {showScam && <ScamOffer scam={state.scam} onAnswer={(accept) => dispatch({ type: 'ANSWER_SCAM', accept })} />}
+      {showScam && <ScamOffer scam={state.scam} onAnswer={(accept) => command({ type: 'ANSWER_SCAM', accept })} />}
     </div>
   )
 }
