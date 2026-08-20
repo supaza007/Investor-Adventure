@@ -213,3 +213,52 @@ Session 2 did not intentionally modify game logic/source files.
 ### Excluded working-tree items
 
 The feature commit intentionally excludes pre-existing/concurrent UI, balance/Black-Swan, captures, prototype, output, tmp and `.obsidian` changes. They remain in the working tree and must be reviewed by their owning session; they were not deleted or overwritten.
+
+## Final Integration Verification (2026-08-21)
+
+### Baseline
+
+- Branch: `release-clean`
+- UI baseline verified: `ea9082c1f80a0db9b4e30c65f146eeb3ff5e24c7`
+- Engine baseline verified: `3815cf4e279df2e92e9cf7f166eb14ec1a24dfcf`
+- `App.jsx` and `StageScreen.jsx` route all eight supported gameplay commands through `useGameCommand` → `executeCommand`
+- `NEXT_STAGE` sends the render-state `expectedStageIndex`; rejected commands retain committed state and allocation draft
+
+### Confirmed defect and fix
+
+- Browser double-click on allocation confirm reproduced a cross-screen click: first click committed allocation, the render-tick lock released immediately, and the second click landed on the new stage's Next control, advancing to reveal/scam without intent
+- Fixed only the UI adapter by keeping its processing lock for 300ms across navigation; engine contract, balance and rules are unchanged
+- Added regression assertion for the minimum cross-screen double-click lock and repeated the real browser double-click: result remained on signal with no dialog/stage advance
+
+### Browser, accessibility and responsive evidence
+
+- Completed real browser flow Cover → Style → Allocation → all 4 chapters → Report, including scam rejection and four behavior confirmations
+- Final report contained four chapter records and restart control; browser console had no errors/warnings
+- Keyboard focus verified on style controls with visible solid yellow outline; required chapter/scam dialogs received active dialog focus and existing focus trap semantics remained intact
+- Compact 320×568, medium 768×1024 and wide 1280×800 had no horizontal document overflow on tested Cover/Style/Allocation/Stage/Report states
+- Compact Report uses an internal vertical scroll container (`clientHeight 568`, `scrollHeight 789`); restart button remains reachable and meets 44px height
+- Error surfaces remain semantic `role="alert"`/`aria-live="assertive"`; invalid allocation fields focus via `error.field`; valid UI controls do not naturally generate malformed payloads
+
+### UI-006
+
+- Review surface remains Planned/Proposed under ADR-2026-007; not implemented during final verification because no defect required it
+
+### Verification results
+
+- `npm test`: Pass 64/64 after duplicate-lock regression test
+- `npm run sim`: Pass 7/7 balance gates, 2,000 runs per strategy
+- `npm run build`: Pass
+- `npm run build:web`: Pass
+- `git diff --check`: Pass with line-ending warnings only for preserved concurrent engine files
+
+### Preserved concurrent files
+
+- `src/game/engine/balance.js`
+- `src/game/engine/encounter.js`
+- `Project Documentation System/.obsidian/`
+- `game-core-loop-captures/`
+- `output/`
+- `research-data-prototype-preview.html`
+- `tmp/`
+
+These files were inventoried and not modified, staged, deleted or overwritten by Final Integration Verification.

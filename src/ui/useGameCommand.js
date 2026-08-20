@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { executeCommand } from '../game/engine/command.js'
 
+// Keep the next screen locked long enough to absorb the second click of a
+// native double-click. Releasing on the next render lets that click land on a
+// different button occupying the same coordinates after navigation.
+export const COMMAND_LOCK_MS = 300
+
 // UI-only adapter around the authoritative command boundary. It deliberately
 // keeps command errors outside GameState: rejected commands must preserve the
 // committed state object and the caller's local draft.
@@ -13,14 +18,13 @@ export function useGameCommand(createInitialState) {
 
   stateRef.current = state
 
-  // Keep the lock through the render caused by the command. This covers
-  // double clicks/key presses dispatched before React paints the new state.
+  // Keep the lock through the render and the browser's double-click window.
   useEffect(() => {
     if (!busy) return undefined
     const release = window.setTimeout(() => {
       inFlightRef.current = false
       setBusy(false)
-    }, 0)
+    }, COMMAND_LOCK_MS)
     return () => window.clearTimeout(release)
   }, [state, busy])
 

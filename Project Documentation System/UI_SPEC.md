@@ -58,11 +58,12 @@ UI ต้องเรียก `executeCommand(state, command)` จาก `src/g
 - Supported commands/required fields: `START`; `SELECT_STYLE(styleId)`; `SET_ALLOCATION(weights)`; `CONFIRM_ALLOCATION(weights)`; `ANSWER_SCAM(accept)`; `CHOOSE_BEHAVIOR(choice)`; `NEXT_STAGE(expectedStageIndex)`; `RESTART`
 - ทุก `NEXT_STAGE` ต้องส่งค่า `expectedStageIndex` จาก state snapshot ที่ใช้ render ปุ่ม ห้ามอ่านค่าจาก state ใหม่หลังเริ่ม submit
 - UI branch ด้วย `error.code`: `INVALID_ENVELOPE`, `UNKNOWN_COMMAND`, `WRONG_PHASE`, `INVALID_STYLE`, `INVALID_ALLOCATION`, `INVALID_DECISION`, `DECISION_REQUIRED`, `STALE_COMMAND`, `INVALID_STATE`
+- `useGameCommand` อาจคืน `DUPLICATE_SUBMIT` เป็น adapter-only no-op ระหว่าง processing lock; code นี้ไม่มาจากและไม่เปลี่ยน `executeCommand` contract, ไม่แก้ committed state และไม่ต้องแสดงเป็น system error
 - `error.field` ที่ UI อาจ focus/ผูก inline error: `styleId`, `weights`, `weights.<assetId>`, `accept`, `choice`, `expectedStageIndex`; field ของ `INVALID_STATE` เป็น system error ไม่ใช่ field ให้ผู้เล่นแก้
 - UI ห้าม parse `error.message`; ใช้เป็น fallback display เท่านั้น
 - Draft allocation อยู่ใน component/UI state และแก้ได้โดยไม่เรียก engine. `CONFIRM_ALLOCATION` เท่านั้นที่ commit draft ต้นบทแบบ atomic. `SET_ALLOCATION` เป็น committed adjustment สำหรับจุดที่ `canAdjustNow` อนุญาต ไม่ใช่ draft update
 - เมื่อ failure ให้คง draft, pending choice และ focus เดิม; committed portfolio ต้องอ้าง state เดิมจาก result
-- duplicate submit หลัง state เปลี่ยนจะได้ `WRONG_PHASE` หรือ `STALE_COMMAND`; UI ยังต้อง disable processing เพื่อ feedback ที่ชัดเจน
+- duplicate submit หลัง state เปลี่ยนจะได้ `WRONG_PHASE` หรือ `STALE_COMMAND`; adapter ต้องคง processing lock อย่างน้อย 300ms เพื่อกัน click ที่สองตกบน control ของหน้าจอใหม่ และ UI ต้อง disable processing เพื่อ feedback ที่ชัดเจน
 
 ## 4. Layout, Responsive and HUD
 

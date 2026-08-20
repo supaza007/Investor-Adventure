@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import { COMMAND_ERROR, executeCommand, validateGameState } from './command.js'
 import { createInitialState, currentStage, netWorth } from './gameState.js'
+import { COMMAND_LOCK_MS } from '../../ui/useGameCommand.js'
 
 const BALANCED = { bond: 1, fund: 1, stock: 1, crypto: 1 }
 
@@ -13,6 +14,10 @@ function run(state, command) {
 }
 
 describe('command contract', () => {
+  test('UI duplicate-submit lock ครอบคลุมช่วง double-click หลังเปลี่ยนหน้าจอ', () => {
+    assert.ok(COMMAND_LOCK_MS >= 250, 'lock ต้องยาวพอไม่ให้คลิกที่สองตกบนหน้าจอใหม่')
+  })
+
   test('invalid command คืน structured error และ state อ้างอิงเดิม', () => {
     const state = createInitialState(101)
     for (const [command, code] of [
