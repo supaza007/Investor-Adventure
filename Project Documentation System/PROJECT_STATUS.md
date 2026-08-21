@@ -422,3 +422,10 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Scope: added the Project Owner-supplied `SOV_BokThang.ttf` as the global game font for all screens.
 - Runtime delivery: the font is stored under `src/assets/fonts/` and loaded through `@font-face` with existing Thai/system fallbacks retained.
 - Constraint: no game logic, balance, RNG, engine contract, scoring, or assessment content changed in this typography step.
+
+## Incremental Frontend Step — Pre-assessment graphics (2026-08-21)
+
+- Scope: applied Project Owner-supplied graphics only to `UI-015 Pre-assessment onboarding`.
+- User-supplied mapping: `assessment-background.jpg` → full-screen pre-assessment background; `questionnaire-frame.png` → main questionnaire frame; `assessment-eyebrow.png`, `assessment-title.png` and `assessment-disclaimer-panel.png` → scroll frames behind live DOM text.
+- Text containment: title, disclaimer, question prompts, answer options and validation errors now wrap inside their frames/cards on mobile and desktop.
+- Constraint: no question text, scoring, risk profile classification, consent behavior, game logic, balance, RNG or engine contract changed.

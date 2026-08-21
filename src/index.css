@@ -328,6 +328,99 @@ button:focus-visible {
   background-color: #071426;
 }
 
+.pre-assessment-screen {
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.pre-assessment-panel {
+  width: min(100%, 58rem);
+  margin-inline: auto;
+  border: clamp(1.75rem, 4vw, 4rem) solid transparent;
+  border-image-slice: 112 132 fill;
+  border-image-width: clamp(1.75rem, 4vw, 4rem);
+  border-image-repeat: stretch;
+  background: linear-gradient(180deg, rgba(48, 137, 239, 0.86), rgba(28, 83, 190, 0.88));
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.55));
+}
+
+.pre-assessment-panel__content {
+  min-width: 0;
+  padding: clamp(0.25rem, 1vw, 1rem);
+}
+
+.assessment-scroll-label {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 236, 190, 0.55);
+}
+
+.assessment-scroll-label--eyebrow {
+  width: min(14rem, 66vw);
+  min-height: 2.6rem;
+  padding: 0.75rem 2.4rem;
+}
+
+.assessment-scroll-label--title {
+  width: min(38rem, 100%);
+  min-height: 5rem;
+  padding: 1rem clamp(2rem, 7vw, 4.5rem);
+}
+
+.assessment-scroll-label--disclaimer {
+  width: min(48rem, 100%);
+  min-height: 5rem;
+  padding: 1rem clamp(2rem, 7vw, 4.5rem);
+}
+
+.pre-assessment-questions {
+  max-height: none;
+}
+
+.assessment-question-card,
+.assessment-answer-row {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.assessment-answer-row {
+  background: rgba(12, 45, 91, 0.82);
+}
+
+.assessment-answer-row:has(input:checked) {
+  background: rgba(244, 191, 83, 0.28);
+  color: #fff7d0;
+}
+
+@media (max-width: 640px) {
+  .pre-assessment-panel {
+    border-width: 1.5rem;
+    border-image-width: 1.5rem;
+  }
+
+  .pre-assessment-panel__content {
+    padding: 0.25rem;
+  }
+
+  .assessment-scroll-label--eyebrow {
+    width: min(12rem, 78vw);
+    min-height: 2.4rem;
+    padding-inline: 2rem;
+  }
+
+  .assessment-scroll-label--title,
+  .assessment-scroll-label--disclaimer {
+    min-height: 4.25rem;
+    padding-inline: 1.7rem;
+  }
+}
+
 .cover-play-art {
   border: 0;
   background: transparent;
