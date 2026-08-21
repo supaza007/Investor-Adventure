@@ -401,3 +401,11 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Remaining visual polish: distinct hand-authored animation frames (including celebrate) and formal grayscale silhouette comparison are enhancements; they do not block Playable v1.
 - Deployment evidence: visual-overhaul commit `125a8cd17d1085432b8b9c3fca0dd26695fe2cbf` was pushed to `release-clean`; GitHub Pages workflow run `32491317895` (#33) completed successfully in 32 seconds.
 - Production QA: `https://supaza007.github.io/Investor-Adventure/` loaded all five Cover images, then passed the full four-chapter flow through Report and Restart. Production console warnings/errors = 0, broken images = 0, and horizontal overflow = false at 320×568, 390×844 and 1280×800.
+
+## Incremental Frontend Step — Cover graphics (2026-08-21)
+
+- Scope: retained the existing `CoverScreen` layout and replaced only the user-named graphic slots.
+- User-supplied mapping: `cover-background` → Background Artwork, `game-subtitle.png` → Game Subtitle, and `play-button.png` → PLAY Button. Existing logo and four-character lineup remain unchanged.
+- Runtime delivery: optimized WebP copies are 254.10 KB, 18.47 KB and under 10 KB respectively; original user-supplied files remain unchanged under `assets-source/user-supplied/cover/`.
+- Accessibility: subtitle retains meaningful Thai alt text; START artwork is decorative inside a real button whose accessible name remains `PLAY`; existing focus-visible behavior is retained.
+- Local browser QA: 390×844 and 1280×800 passed with the new background visibly applied, all images loaded, PLAY visible, and no horizontal overflow. No game logic, balance, RNG or engine contract changed.

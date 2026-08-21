@@ -1,4 +1,7 @@
 import { characterArtOf } from './art.js'
+import coverBackground from '../assets/ui/cover-background-user.webp'
+import gameSubtitle from '../assets/ui/game-subtitle-user.webp'
+import playButton from '../assets/ui/play-button-user.webp'
 
 // ⚠️ ไม่ import รูปหน้าปกตรงๆ ด้วยเหตุผลเดียวกับ art.js — ไฟล์รูปไม่ถูก commit ขึ้น git
 // เครื่องที่มีไฟล์ → ใช้โลโก้/พื้นหลังจริง · เครื่องที่ไม่มี (GitHub Actions) → ใช้ชื่อเกมแบบตัวอักษร
@@ -23,8 +26,8 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
     <div
       className="cozy-cover relative flex h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 text-center"
       style={
-        titleBg
-          ? { backgroundImage: `url(${titleBg})`, backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated' }
+        coverBackground || titleBg
+          ? { backgroundImage: `url(${coverBackground || titleBg})`, backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated' }
           : { background: 'radial-gradient(ellipse at 50% 35%, #1e293b 0%, #0b0c15 70%)' }
       }
     >
@@ -45,7 +48,7 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
           </h1>
         )}
 
-        <p className="game-subtitle mt-2 text-xs text-white/85 sm:text-base">เส้นทางชีวิตนักลงทุน · อายุ 20 ถึงเกษียณ</p>
+        <img src={gameSubtitle} alt="เส้นทางชีวิตนักลงทุน · อายุ 20 ถึงเกษียณ" className="mt-2 w-[min(80vw,30rem)] object-contain" />
 
         {heroes.length > 0 && <div className="cozy-hero-lineup mt-3 flex h-[min(30vh,15rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
           {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
@@ -54,9 +57,10 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
         <button
           type="button"
           onClick={onPlay}
-          className="cozy-primary pixel-btn play-pulse mt-4 px-10 py-3 text-xl font-extrabold tracking-widest sm:px-14 sm:py-4 sm:text-2xl"
+          className="cover-play-art pixel-btn play-pulse mt-4"
         >
-          ▶ PLAY
+          <img src={playButton} alt="" className="block w-[clamp(11rem,38vw,17rem)]" />
+          <span className="sr-only">PLAY</span>
         </button>
 
         {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}

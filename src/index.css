@@ -319,9 +319,22 @@ button:focus-visible {
 
 .cozy-cover {
   background-color: #071426;
-  background-image:
-    radial-gradient(circle at 50% 25%, rgba(255, 198, 92, 0.25), transparent 35%),
-    linear-gradient(180deg, #254c63 0%, #19344d 40%, #071426 100%) !important;
+}
+
+.cover-play-art {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.cover-play-art:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.06);
+}
+
+.cover-play-art:active:not(:disabled) {
+  transform: translateY(1px) scale(.99);
 }
 
 .cozy-hero-lineup {
