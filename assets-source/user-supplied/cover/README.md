@@ -21,6 +21,6 @@
 ## Integration log — 2026-08-21
 
 - `cover-background` → `Background Artwork`; converted to `src/assets/ui/cover-background-user.webp` without changing the Cover layout.
-- `game-subtitle.png` → `Game Subtitle`; converted to transparent WebP while preserving accessible Thai text.
-- `play-button.png` → `PLAY Button`; cropped to the supplied START artwork and converted to WebP. The real button retains the accessible `PLAY` label and keyboard focus behavior.
+- `game-subtitle.png` → `Game Subtitle`; converted to transparent WebP without trimming the original subtitle frame, while preserving accessible Thai text.
+- `play-button.png` → `PLAY Button`; kept the existing START crop for layout stability and removed the supplied blue background color from the runtime image. The real button retains the accessible `PLAY` label and keyboard focus behavior.
 - Existing `Game Logo`, `Hero Lineup`, overlays, Continue/Error states and layout positions were preserved.

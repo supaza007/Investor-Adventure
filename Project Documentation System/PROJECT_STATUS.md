@@ -409,3 +409,10 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Runtime delivery: optimized WebP copies are 254.10 KB, 18.47 KB and under 10 KB respectively; original user-supplied files remain unchanged under `assets-source/user-supplied/cover/`.
 - Accessibility: subtitle retains meaningful Thai alt text; START artwork is decorative inside a real button whose accessible name remains `PLAY`; existing focus-visible behavior is retained.
 - Local browser QA: 390×844 and 1280×800 passed with the new background visibly applied, all images loaded, PLAY visible, and no horizontal overflow. No game logic, balance, RNG or engine contract changed.
+
+## Incremental Frontend Step — Cover asset refinement (2026-08-21)
+
+- Scope: refined only the two user-supplied Cover assets already integrated in the existing `CoverScreen` layout.
+- `game-subtitle.png`: rebuilt the runtime file without trimming the source frame, so the subtitle now keeps the full original artwork bounds.
+- `play-button.png`: kept the current START-button crop for layout stability, but removed the supplied blue background color from the runtime image so only the button art remains visible on the Cover.
+- Constraint: no game logic, balance, RNG, engine contract, layout structure, or other screens changed in this refinement step.
