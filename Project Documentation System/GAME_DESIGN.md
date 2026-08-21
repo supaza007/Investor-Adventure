@@ -264,3 +264,14 @@ Required output: report must show each dimension separately, identify missing da
 - Cash-only ตั้งใจให้ valid หรือไม่; cash ควร decay หลังบท 4 หรือไม่
 - Money unit/currency/rounding; save/replay scope; ledger detail; benchmark fixed หรือ scenario-derived
 - Finance expert review และขอบเขต realism ของชื่อ asset/event
+
+### Cozy fantasy adventure presentation (approved 2026-08-21)
+
+- The player journey is presented as a contemporary fantasy adventure in a cozy pixel-art world; no Thai setting is required.
+- Investment styles are represented by four equally valid fantasy identities: Trader as a fast-reacting wizard, VI as a value-seeking druid, Medium-term as a courageous adaptive swordsman, and Long-term as a disciplined heavy knight.
+- These identities teach behavioral differences through silhouette, equipment and feedback. They do not add combat, skills, prediction, protection, stats or any business rule.
+- Chapter transitions use a top-down RPG journey map; gameplay uses front-facing illustrated scenes. The map communicates progress and must not imply free movement or selectable destinations that do not exist.
+- Events begin friendly and become visually more serious with impact. Black Swan may use boss-like staging but must remain non-violent, explicitly hard to avoid and non-blaming.
+- The visual reward is progression, character reaction and a clearer journey record—not a new currency, collectible, shop, costume or power ladder.
+- Mobile portrait is the primary composition. Decorative art yields space before player feedback, financial units or primary actions are reduced.
+- AI-generated final assets require stable canonical character references and owner approval. Visual references are mood inputs, not assets to copy.

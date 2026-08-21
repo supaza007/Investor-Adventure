@@ -21,6 +21,7 @@
 | ADR-2026-018 | ใช้ชุดคำถาม pre-assessment 10 ข้อของ Project Owner | Active | 2026-08-21 | Project Owner |
 | ADR-2026-019 | ใช้ student-first language และ layered disclosure สำหรับ UX หลัก | Active | 2026-08-21 | Project Owner |
 | ADR-2026-020 | แสดงที่มาของเงินเปลี่ยนระหว่างบทเป็น transition breakdown | Active | 2026-08-21 | Project Owner |
+| ADR-2026-021 | ใช้ Cozy Pixel Fantasy Adventure และ AI final-asset pipeline | Active | 2026-08-21 | Project Owner |
 
 ## ADR-2026-001 — ใช้เอกสาร 6 ไฟล์เป็นหน่วยความจำกลาง
 
@@ -289,6 +290,19 @@ validate ทั้ง UI เพื่อ feedback และ engine เป็น 
 | Save policy | none/local state/replay log | Project Owner/Technical | Milestone 3 |
 | Target learner/outcomes | affects rules/content/disclaimer | Owner/Finance reviewer | before content milestone |
 | Asset licensing | replace/license/remove | Project Owner | before official release |
+
+## ADR-2026-021 — ใช้ Cozy Pixel Fantasy Adventure และ AI final-asset pipeline
+
+- Status: Active
+- Date: 2026-08-21
+- Owner: Project Owner
+- Scope: Visual presentation for all player-facing UI; no engine/business-rule scope
+- Context: Project Owner ต้องการยกเครื่องกราฟิกจาก UI พิกเซลมืดและกรอบแข็งให้เป็นเกมเรียนรู้ชีวิตที่อบอุ่น เป็นมิตร สนุกและมีเหตุการณ์ให้ลุ้น พร้อมใช้ visual references ใน `game.pdf` เพื่อกำหนด mood เท่านั้น
+- Options: (1) คง dark retro/NES theme, (2) ใช้ Thai-inspired cozy fantasy, (3) ใช้ contemporary fantasy โดยไม่บังคับความเป็นไทย และสร้าง final raster assets ด้วย AI ภายใต้ Asset Bible
+- Decision: เลือกข้อ 3. Mobile portrait เป็น primary orientation; chapter transition ใช้ top-down RPG map และ gameplay ใช้ front-facing illustrated scene. Style identities คือ Trader wizard, VI druid, Medium-term courageous swordsman และ Long-term heavy knight. Event art น่ารักในระดับเบาและจริงจังขึ้นตามระดับ โดย Black Swan ใช้ boss-like staging แบบไม่รุนแรงและไม่ blame ผู้เล่น. AI assets ใช้เป็น final ได้เมื่อมี canonical reference, asset ID/version/provenance และ owner approval รายชิ้น
+- Consequences: Session ถัดไปต้องสร้าง/ขออนุมัติ character sheets 4 ชุดและ target mockups 5 หน้า ก่อน batch production; ต้องเพิ่ม background/frame/loading pipeline แบบแบ่งโหลดตามบท. Fantasy art ห้ามสร้าง combat, skill, prediction, immunity, shop, costume, reward currency, collectible หรือ free-roaming feature ที่ engine ไม่มี
+- Validation: ART-01–ART-10 ใน UI_SPEC §21; portrait mobile 390×844/320×568; grayscale silhouette identification; fallback/reduced motion; measured payload; no game-logic diff
+- References: UI_SPEC §21, GAME_DESIGN `Cozy fantasy adventure presentation`, ADR-2026-019, ADR-2026-020
 
 ## Template
 

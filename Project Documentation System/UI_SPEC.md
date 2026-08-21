@@ -630,3 +630,132 @@ Do not call this `กำไร`, `ผลตอบแทน`, or `P/L` unless ADR
 - The arithmetic is derived from `prevSummary.valueEnd`, current chapter income and current `netWorth(state)` through a pure presentation helper; no balance, RNG, inflation or command behavior changed.
 - Cash-only acceptance is covered by a unit test: 100฿ → approximately 142฿ renders +60฿ income, approximately -18฿ cash purchasing-power adjustment and +42฿ net transition.
 - An invested-portfolio fixture and invalid-data fallback are also covered. Browser QA confirmed the signed rows, accessible group label and visible primary action in the real chapter-2 modal.
+
+## 21. Approved visual-production direction — Cozy Pixel Fantasy Life Adventure
+
+Status: **Design approved; asset production and UI integration not yet implemented** (2026-08-21).
+
+### 21.1 Experience and visual principles
+
+- World: contemporary fantasy; no Thai setting is required.
+- Mood: cozy, friendly and adventurous. Ordinary events may be playful; visual seriousness increases with event severity.
+- Platform priority: mid-range mobile, portrait orientation first. Landscape/tablet/desktop remain supported responsive layouts.
+- Chapter transition: top-down RPG map. Gameplay: front-facing illustrated scene; this does not imply free character movement or a map-control mechanic.
+- Fantasy classes are presentation metaphors for existing investment styles only. They do not add combat, skills, stats, prediction, immunity or any engine behavior.
+- The visual layer must preserve ADR-019 student-first hierarchy: `เกิดอะไรขึ้น`, `ทำไมถึงเกิด`, `ต้องกดอะไรต่อ` remain more prominent than decoration.
+
+### 21.2 Character Bible v1
+
+All four characters have equal visual status. At 48–64 px they must remain distinguishable by silhouette and equipment, not color alone. No character may be presented as the best answer.
+
+| Character ID | Investment style | Fantasy identity | Personality and silhouette | Equipment/symbols | Core palette | Prohibited implication |
+|---|---|---|---|---|---|---|
+| `CHAR-TRADER` | Trader | พ่อมดแห่งจังหวะตลาด | เพรียว คล่องแคล่ว พร้อมตอบสนอง; หมวกแหลม/เสื้อคลุมสั้น | คทาหรือหนังสือเวทที่มีกราฟ, ประกายและลูกศรเคลื่อนไหว | ม่วงอมแดง, ฟ้าไฟฟ้า, ทอง | ทำนายอนาคตได้หรือเก่งกว่าสไตล์อื่น |
+| `CHAR-VI` | VI | Druid ผู้พิทักษ์คุณค่า | สงบ ช่างสังเกต; รูปทรงใบไม้/กิ่งไม้ | ไม้เท้า, เมล็ดพันธุ์, รากไม้, วงปี | เขียวป่า, น้ำตาลอุ่น, ทองอ่อน | รับประกันการเติบโต; ต้องแยกจาก Long-term ด้วยการเน้นค้นหา/ประเมินพื้นฐาน |
+| `CHAR-MEDIUM` | นักลงทุนระยะกลาง | นักดาบผู้ปรับตัวตามเส้นทาง | กล้าหาญอย่างมีสติ พร้อมเคลื่อนที่; เกราะเบา/กลางและผ้าคลุม | ดาบ, โล่เล็ก, กระเป๋าเดินทางหรือเข็มทิศ | ฟ้าน้ำทะเล, ส้มอุ่น, เงิน | ส่งเสริมการเสี่ยงโดยไม่คิดหรือชนะตลาดด้วยการต่อสู้ |
+| `CHAR-LONGTERM` | นักลงทุนระยะยาว | อัศวินผู้พิทักษ์แห่งกาลเวลา | ใหญ่ มั่นคง เคลื่อนไหวช้า; เกราะหนักทรงมน | โล่ใหญ่, นาฬิกาทราย/ต้นไม้ใหญ่/ดวงอาทิตย์ | น้ำเงินเข้ม, เงิน, เหลืองทอง | ไม่ขาดทุน ป้องกันได้ทุกเหตุการณ์ หรือมี immunity |
+
+Required visual states per character: `portrait`, `token`, `idle`, `selected`, `thinking`, `brace`, `hit`, `celebrate`, `recover`, `summary`.
+
+Do not produce attack animations unless a future approved game rule adds a real player action requiring them. Character demographics, facial details and final costume ornament remain art-production choices, but must avoid gender stereotypes, revealing armor and loss of readability at mobile size.
+
+### 21.3 Event severity language
+
+| Level | Use | Visual treatment | Feedback guardrail |
+|---|---|---|---|
+| 1 — Signal | ข่าว/สัญญาณ | small friendly event figure, bright scene, gentle motion | create curiosity; do not reveal hidden outcome |
+| 2 — Market event | normal event resolution | larger figure, changed wind/light/clouds | HUD and financial numbers remain dominant |
+| 3 — Crisis | material shock | lower saturation, stronger silhouette, character `brace`/`hit` | no violence; return to a calm explanation surface |
+| 4 — Black Swan | broad hard-to-avoid shock | boss-scale staging and heavier atmosphere | explicitly say it is broad and hard to avoid; never blame the player |
+
+Severity is a presentation mapping from existing event data. The implementer must not invent a new severity rule when the engine/content does not provide a reliable mapping; record it as a dependency instead.
+
+### 21.4 Portrait-first layout contract
+
+Reference viewport: `390×844`; minimum audit viewport: `320×568`.
+
+```text
+┌─────────────────────────┐
+│ Chapter / progress / ฿  │  persistent compact HUD
+├─────────────────────────┤
+│ scene + character/event │  flexible; reduce before text
+├─────────────────────────┤
+│ first-layer explanation │  scrollable only when necessary
+├─────────────────────────┤
+│ primary action          │  thumb-reachable safe area
+└─────────────────────────┘
+```
+
+- Target allocation: HUD ~15%, illustration ~35–40%, interaction/explanation ~35–40%, primary action/safe area remainder.
+- When height is constrained, reduce/crop decorative scene first; do not shrink essential Thai text below the established accessible mobile minimum.
+- Primary action must remain visible or have an obvious reachable scroll relationship.
+- Backgrounds require a low-detail UI-safe area and a contrast overlay. Never place essential text directly over uncontrolled illustration detail.
+- Map screens show progress and character token but must not imply tappable destinations unless destinations are real supported actions.
+
+### 21.5 AI final-asset production contract
+
+AI-generated art is approved for final assets, subject to owner review and per-asset revision. Before batch generation, create an Asset Bible containing:
+
+- canonical reference sheet for each character: silhouette, proportions, palette, face, costume and equipment;
+- shared pixel scale, outline weight, camera angle, lighting direction and detail density;
+- reusable prompt template and negative prompt;
+- transparent/background requirement, target dimensions, crop/safe area and export format;
+- asset ID, version, source prompt, reference inputs, revision status and approval status;
+- rights/provenance record; visual references in `game.pdf` are mood references and must not be copied directly.
+
+Naming examples: `CHAR-TRADER-PORTRAIT-01`, `CHAR-VI-HIT-01`, `BG-CHAPTER-02-DAY-01`, `EVENT-INFLATION-L2-01`, `BOSS-BLACK-SWAN-01`, `UI-PANEL-COZY-01`.
+
+Preferred delivery is optimized WebP for raster screens/sprites, with a static fallback for animation. Avoid GIF as the final default where WebP/sprite animation can provide smaller, controllable output.
+
+### 21.6 Loading and performance requirements
+
+- Initial bundle loads cover essentials, UI frame essentials and small style portraits only.
+- After style selection, load the chosen full character set; before a chapter, load that chapter background and required event assets.
+- Preload only the likely next surface; do not download every chapter at startup.
+- Every image has a placeholder/fallback and failure must not block commands or progression.
+- Starting targets pending measurement: background 150–350 KB, portrait/sprite 30–120 KB, optional short animation 100–400 KB, first interactive visual payload approximately 2–3 MB maximum.
+- These are UI performance budgets, not game rules. Session next must measure real compressed assets and record exceptions.
+
+### 21.7 Production inventory and screen mapping
+
+| Asset group | Minimum production set | Main screens |
+|---|---|---|
+| Characters | 4 canonical sheets × required states | UI-003, UI-004, UI-007–UI-013 |
+| Chapter worlds | cover, 4 chapter scenes, 4 map/transition variants | UI-001, UI-003, UI-005, UI-007–UI-012 |
+| Events | one approved illustration/state set per existing engine event | UI-007–UI-012 |
+| Financial icons | cash, income, inflation, fee, scam, risk, contributor, detractor | UI-005, UI-006, UI-009, UI-012, UI-013 |
+| UI surfaces | cozy frame, panel, modal, button, tab, tooltip, focus/error/success/disabled | all player screens |
+
+This inventory does not authorize new shops, costumes, rewards, currencies, collectible missions or free-roaming maps seen in visual references.
+
+### 21.8 Implementation phases and vertical slice
+
+1. Produce and approve one canonical reference sheet for each of the four characters.
+2. Produce five target mockups: Cover, Style Selection, Allocation, Event/Impact and Chapter Transition/Debrief.
+3. Lock design tokens, safe areas, frame system, background rules and asset manifest.
+4. Implement the first vertical slice: chapter 1 end → chapter-2 map/transition → allocation → event → debrief.
+5. Verify that the 100฿ → 142฿ transition explanation remains visible and understandable in the new art layer.
+6. Extend the approved system across remaining chapters/screens, then run responsive, accessibility and performance QA.
+
+Do not begin bulk asset production until the four canonical character sheets and five target mockups are approved. This prevents identity drift and expensive regeneration.
+
+### 21.9 Acceptance criteria for Session next
+
+- `ART-01`: Each character is correctly identified at 64 px in grayscale by silhouette/equipment.
+- `ART-02`: No fantasy effect claims an engine ability that does not exist.
+- `ART-03`: Five target mockups show real game content, primary action and HUD—not empty placeholders.
+- `ART-04`: At 390×844 and 320×568, essential copy and action remain readable without horizontal overflow.
+- `ART-05`: Background detail never reduces text contrast; keyboard focus and non-color gain/loss/risk cues remain visible.
+- `ART-06`: Reduced-motion mode retains all information and progression.
+- `ART-07`: Missing/failed chapter art falls back without blocking play.
+- `ART-08`: Initial and per-chapter visual payloads are measured and reported against §21.6.
+- `ART-09`: Asset manifest records ID, dimensions, format, screen/state use, version and approval.
+- `ART-10`: Existing balance, RNG, ledger/P&L, save/load and command behavior remain unchanged.
+
+### 21.10 Remaining approval gates
+
+- Canonical generated appearance for each character.
+- Five target screen mockups and final UI-frame family.
+- Exact event-to-severity mapping where current content does not declare one.
+- Final measured asset budgets and oldest supported device/browser.
+- Final provenance/licensing review before release.

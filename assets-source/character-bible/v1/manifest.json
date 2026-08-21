@@ -1,0 +1,52 @@
+{
+  "bibleVersion": "1.0-draft",
+  "status": "owner-review-required",
+  "createdAt": "2026-08-21",
+  "generator": "OpenAI built-in ImageGen",
+  "style": "cozy pixel fantasy adventure",
+  "shared": {
+    "dimensions": "1536x1024",
+    "format": "PNG",
+    "camera": "orthographic character-sheet presentation",
+    "background": "warm neutral parchment",
+    "runtimeApproved": false
+  },
+  "assets": [
+    {
+      "id": "CHAR-TRADER-SHEET-01",
+      "file": "drafts/CHAR-TRADER-SHEET-v1-draft.png",
+      "version": "1-draft",
+      "styleId": "trader",
+      "identity": "fast-reacting wizard",
+      "sha256": "0B467EDC68F6E95AA9B01BC8D1C8012DD233E57B8D4F9FB6CD88F2371C1D1732",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "CHAR-VI-SHEET-01",
+      "file": "drafts/CHAR-VI-SHEET-v1-draft.png",
+      "version": "1-draft",
+      "styleId": "vi",
+      "identity": "value-seeking druid",
+      "sha256": "108AC1B234DD3E2499A199E44E7D12F0A332A7B8FE9AB1DB0C59811BB6B0FAEC",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "CHAR-MEDIUM-SHEET-01",
+      "file": "drafts/CHAR-MEDIUM-SHEET-v1-draft.png",
+      "version": "1-draft",
+      "styleId": "medium",
+      "identity": "courageous adaptive swordsman",
+      "sha256": "DFD24D475F27F9D4EC7D57CFBFDB98182CEBA9F401EA9687C2C3CD5FE11FA17A",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "CHAR-LONGTERM-SHEET-01",
+      "file": "drafts/CHAR-LONGTERM-SHEET-v1-draft.png",
+      "version": "1-draft",
+      "styleId": "longterm",
+      "identity": "disciplined heavy knight of time",
+      "sha256": "415009E46A225776F556175703005CDAC7079181518D3E015FE43B6EDBB51320",
+      "approval": "pending-owner-review"
+    }
+  ]
+}

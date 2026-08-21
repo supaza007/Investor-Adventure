@@ -368,3 +368,18 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - `npm audit fix` updated vulnerable transitive dependencies; `npm audit` reports 0 vulnerabilities. Clean `npm ci` succeeds on Node 24 locally; deployment remains on Node 22, which satisfies Vite 8 requirements.
 - Local evidence: `npm test` 73/73, `npm run sim` 7/7 gates, single-file build Pass, web build Pass and browser flow through the chapter-2 transition Pass.
 - No game rules, balance values, RNG, inflation formula, engine command contract, ledger/P&L, Supabase or save/load behavior changed in this upgrade.
+
+## Approved Visual Production Foundation — 2026-08-21
+
+- Outcome: Project Owner approved the production direction `Cozy Pixel Fantasy Life Adventure` after review of the 18-page `game.pdf` visual-reference collection.
+- Decision: Added ADR-2026-021 as Active. The world is contemporary fantasy without a required Thai setting; mobile portrait is primary; chapter transitions use top-down RPG maps and gameplay uses front-facing illustrated scenes.
+- Character Bible v1: Trader = wizard, VI = druid, Medium-term = courageous adaptive swordsman, Long-term = heavy knight. Silhouette, equipment, palette, prohibited implications and required states are specified in `UI_SPEC.md` §21.
+- Event direction: friendly at signal/normal levels, increasingly serious for crisis, boss-like but non-violent/non-blaming for Black Swan.
+- Production model: AI-generated art may be final, with canonical character references, per-asset IDs/versions/prompts/provenance and Project Owner revision/approval.
+- Mobile delivery: assets load by chapter with placeholders/fallbacks; initial visual budget targets and portrait layout rules are documented. Budgets remain targets until measured with final assets.
+- Implementation roadmap: approve 4 canonical character sheets and 5 real-content target mockups, lock tokens/frames/manifest, implement chapter-1-end → chapter-2 transition → allocation → event → debrief vertical slice, then expand.
+- Acceptance: Added ART-01–ART-10 covering character recognition, no invented abilities, real-content mockups, portrait responsiveness, contrast, reduced motion, fallback, payload measurement, manifest completeness and no game-logic changes.
+- Character-sheet production evidence: generated four `v1-draft` canonical candidates on 2026-08-21 under `assets-source/character-bible/v1/drafts/` for Trader, VI, Medium-term and Long-term. The manifest records IDs, versions, prompts, SHA-256 provenance and `pending-owner-review` approval state.
+- Current gate: **Draft / Pending Project Owner approval**. The sheets are review artifacts only; no source UI, CSS, background, runtime character/event asset or loading behavior has changed. A playable visual overhaul still depends on approval, five real-content target mockups and subsequent integration.
+- Preserved concurrent changes: `src/game/engine/gameState.js`, `src/game/engine/gameState.test.js`, `.obsidian/`, captures, output, prototype and tmp were not edited, deleted or overwritten.
+- Next action: Project Owner reviews all four sheets for identity, silhouette, equipment, equal appeal and prohibited implications. After explicit approval or requested revisions, promote approved sheets and create the five real-content target mockups. Do not batch-generate final states or integrate screens before this gate passes.
