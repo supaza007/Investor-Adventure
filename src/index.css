@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
 /* ================= PIXEL ART THEME ================= */
+@font-face {
+  font-family: "SOV BokThang";
+  src: url("./assets/fonts/SOV_BokThang.ttf") format("truetype");
+  font-display: swap;
+}
+
 :root {
   --c-line: #0a0b12; /* เส้นขอบดำเข้ม */
   --c-shadow: rgba(0, 0, 0, 0.55); /* เงาแข็ง */
+  --font-game: "SOV BokThang", "Tahoma", "Segoe UI", ui-monospace, "Courier New", monospace;
 }
 
 html,
@@ -14,7 +21,7 @@ body,
 
 body {
   /* ฟอนต์คมสำหรับไทย + โมโนสเปซสำรอง (ฟอนต์พิกเซลจริงไม่รองรับไทย) */
-  font-family: "Tahoma", "Segoe UI", ui-monospace, "Courier New", monospace;
+  font-family: var(--font-game);
   background-color: #0b0c15;
   /* พื้นหลังจุด dithered แบบเกมเรโทร */
   background-image: radial-gradient(rgba(130, 130, 210, 0.08) 1px, transparent 1px);
@@ -170,7 +177,7 @@ button:focus-visible {
 .cover-title {
   position: relative;
   display: inline-block;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-game);
   font-weight: 900;
   font-style: italic;
   letter-spacing: 0.01em;

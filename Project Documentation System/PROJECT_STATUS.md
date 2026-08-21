@@ -416,3 +416,9 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - `game-subtitle.png`: rebuilt the runtime file without trimming the source frame, so the subtitle now keeps the full original artwork bounds.
 - `play-button.png`: kept the current START-button crop for layout stability, but removed the supplied blue background color from the runtime image so only the button art remains visible on the Cover.
 - Constraint: no game logic, balance, RNG, engine contract, layout structure, or other screens changed in this refinement step.
+
+## Incremental Frontend Step — Global game font (2026-08-21)
+
+- Scope: added the Project Owner-supplied `SOV_BokThang.ttf` as the global game font for all screens.
+- Runtime delivery: the font is stored under `src/assets/fonts/` and loaded through `@font-face` with existing Thai/system fallbacks retained.
+- Constraint: no game logic, balance, RNG, engine contract, scoring, or assessment content changed in this typography step.
