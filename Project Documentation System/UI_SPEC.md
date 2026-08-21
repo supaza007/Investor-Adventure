@@ -441,3 +441,83 @@ UI event → command adapter → executeCommand(snapshot, command)
 - UI-024 is Partial/Playable for one local slot: reload offers Continue and validates schema/phase before replacement; checksum/migrations/replay comparison remain Planned.
 - UI-017, UI-022, UI-023 and network portions of UI-025 remain Blocked/Conditional on approved governance/backend. UI-026 remains Planned with ADR-005.
 - Browser E2E completed the full first-play journey with consent decline, scam rejection, behavior decisions, all four chapters, post-assessment, report, reload/continue and restart. Console warnings/errors: 0. Document horizontal overflow: none at 390×844 and 1366×768.
+
+## 19. Student-first UX simplification (approved direction 2026-08-21)
+
+This section supersedes only the presentation hierarchy and copy rules of the affected screens. It does not change game rules, balance, RNG, ledger/P&L formulas, command contracts, save/load, or research governance.
+
+### 19.1 Layered disclosure rule
+
+Every player-facing gameplay screen must answer these three questions before exposing technical detail:
+
+1. เกิดอะไรขึ้น?
+2. ทำไมถึงเกิด?
+3. ตอนนี้ต้องกดอะไร?
+
+Technical detail belongs behind `ดูเพิ่ม`, `รายละเอียด`, `สมมติฐาน`, or an anchored disclosure. A high-school learner must be able to complete the game correctly without understanding finance/system terms such as `HHI`, `percentile`, `exposure`, `benchmark`, or `Black Swan`.
+
+### 19.2 Plain-language glossary
+
+| Technical term | Main-screen wording | Disclosure wording |
+|---|---|---|
+| `HHI` / concentration | พอร์ตกระจุกแค่ไหน | ระบบใช้ HHI เป็นสูตรวัดว่าสัดส่วนเงินไปรวมอยู่ที่สินทรัพย์ไม่กี่ตัวมากแค่ไหน |
+| exposure | โดนเหตุการณ์นี้มากแค่ไหน | Weighted exposure คือสัดส่วนพอร์ตที่อ่อนไหวต่อเหตุการณ์นี้ |
+| shock | แรงกระแทก | Shock คือผลกระทบที่ engine สุ่มจากช่วงของเหตุการณ์ |
+| percentile / luck | ดวงรอบนี้ไปทางดีหรือแย่ | Percentile คือจุดที่ผลสุ่มตกอยู่ในช่วงแย่สุด-ดีสุดของพอร์ตนี้ |
+| benchmark | เกณฑ์เทียบแบบถือยาว | Benchmark เป็นสมมติฐานเทียบ ไม่ใช่คำแนะนำลงทุนจริง |
+| Black Swan | เหตุการณ์หนักที่หลบยาก | Black Swan คือเหตุการณ์จำลองที่กระทบกว้างและเตรียมตัวหลบได้ยาก |
+| retirement readiness | ความพร้อมในเกมจำลอง | คะแนน readiness เป็นผลสะท้อนใน simulation ไม่ใช่การวินิจฉัยชีวิตจริง |
+| inflation | เงินเฟ้อกินกำลังซื้อ | เงินสดจำนวนเท่าเดิมซื้อของได้น้อยลงตามสมมติฐานเงินเฟ้อ |
+
+### 19.3 Screen simplification requirements
+
+| UI ID | Required simplified layer | Detail layer |
+|---|---|---|
+| UI-003 Allocation workspace | Show asset name, allocation %, value, simple risk level, cash left, and one primary `ทบทวน` action. Avoid showing `HHI` as a headline. | Asset modal shows full risk tags, volatility, lesson, formulas/source labels when available. |
+| UI-006 Allocation review | Use plain summary: before value, after fee, cash left, `พอร์ตกระจุกต่ำ/กลาง/สูง`. | Disclosure may show exact HHI, weighted exposure and fee preview. |
+| UI-007/UI-008 Event signal/reveal | Use story wording: `มีสัญญาณบางอย่าง`, `เหตุการณ์นี้กระทบด้าน...`. | Disclosure explains event tag, severity band and hidden/reveal rule. |
+| UI-009 Shock | Main layer: money changed, event name, one reason. Use `เหตุการณ์หนักที่หลบยาก` before `Black Swan`. | Disclosure shows shock %, range marker, percentile and source/assumption label. |
+| UI-012 Chapter debrief | Main layer starts with `เงินเปลี่ยนเพราะอะไร?` and shows top contributors/detractors. | Detail table shows every asset, cash, fee, scam, behavior/rebound and assumptions. |
+| UI-013 Report | Start with final value, status, one lesson. Fold chapter history, readiness, learning, benchmark and assumptions into clear sections. | Technical details remain available in report disclosures. |
+
+### 19.4 UI-012 gain/loss explanation contract
+
+At the end of every chapter, UI-012 must explain the source of portfolio change using the existing chapter state and approved engine fields. Until ADR-005 ledger/P&L is active, the UI must say `ผลต่อพอร์ตในบทนี้` rather than `กำไรจริง` or `P/L`.
+
+Required main copy:
+
+- If net chapter change is positive: `พอร์ตของคุณโตขึ้น {money}` and `ฮีโร่รอบนี้: {asset} {+money}`.
+- If net chapter change is negative: `พอร์ตของคุณลดลง {money}` and `ตัวที่ลากพอร์ตลงมากสุด: {asset} {-money}`.
+- Always include at least one balancing line when data exists: `ช่วยพยุงไว้: {asset/cash} {money}`.
+- Cash line must distinguish: `เงินสดไม่โต`, `ไม่โดนตลาด`, and when applicable `กำลังซื้อถูกเงินเฟ้อกิน`.
+- Fees, scam losses and behavior/rebound effects must appear as separate rows when non-zero or when the player decision is the reason for the change.
+- Black Swan copy must avoid blaming the player: `รอบนี้แทบทุกอย่างโดนพร้อมกัน ไม่ใช่เพราะคุณเลือกผิดทั้งหมด`.
+
+Detail rows use signed money and text labels, never color alone:
+
+| Row type | Positive example | Negative example |
+|---|---|---|
+| Asset | `หุ้นโลก +฿12,600 · ทำแต้มหลัก` | `หุ้นโลก -฿14,200 · โดนหนักสุด` |
+| Support | `ตราสารหนี้ +฿4,200 · ช่วยประคอง` | `ตราสารหนี้ +฿1,600 · ช่วยพยุงไว้` |
+| Cash | `เงินสด ฿0 · กระสุนสำรอง` | `เงินสด ฿0 · ไม่โดนตลาด แต่ไม่โต` |
+| Inflation | N/A | `เงินสด -฿x · กำลังซื้อถูกเงินเฟ้อกิน` |
+| Fee | N/A | `ค่าธรรมเนียม -฿x · ต้นทุนจากการปรับพอร์ต` |
+| Scam | N/A | `มิจฉาชีพ -฿x · สูญเสียจากการโอนเงิน` |
+| Behavior/rebound | `ตลาดฟื้นบางส่วน +฿x · หลังคุณเลือกถือต่อ` | `ซื้อเพิ่มทำให้ผลลัพธ์แรงขึ้น -฿x` |
+
+Acceptance scenarios:
+
+- `DEBRIEF-SOURCE-01`: Positive chapter shows top positive contributor and net positive value with explicit `+` money.
+- `DEBRIEF-SOURCE-02`: Negative chapter shows top detractor, at least one support/mitigation row when available, and no blame copy.
+- `DEBRIEF-SOURCE-03`: Cash-only or high-cash chapter explains cash as non-growing and separately explains inflation purchasing-power loss when present.
+- `DEBRIEF-SOURCE-04`: Fee/scam/behavior rows are separated from asset movement and are not described as market return.
+- `DEBRIEF-SOURCE-05`: Black Swan chapter uses plain wording on the main layer and keeps the term `Black Swan` in detail/disclosure.
+- `DEBRIEF-SOURCE-06`: The explanation uses signed money, text labels and icons/position; it remains understandable in grayscale and by screen reader.
+
+### 19.5 Copy and accessibility guardrails
+
+- Use Thai learner-first wording in the first layer; English finance terms appear only when teaching the term intentionally.
+- Avoid permanent good/bad claims about an asset. Say `รอบนี้`, `เหตุการณ์นี้`, or `ในบทนี้`.
+- Do not use color as the only cue for gain/loss/risk; combine sign, money amount and wording (`เพิ่ม`, `ลด`, `ช่วย`, `ลากลง`).
+- Every `ดูเพิ่ม` control must be keyboard reachable, have an accessible name, and return focus to the triggering control when closed.
+- Mobile first layer should keep the primary action visible without requiring the learner to read the technical disclosure.

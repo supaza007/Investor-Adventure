@@ -266,7 +266,7 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
           ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
       {isBlackSwan && (
         <div className="pixel-chip mt-1 bg-purple-950/50 px-1.5 py-1 text-[9px] leading-snug text-purple-200 sm:text-[11px]">
-          รอบนี้ทุกอย่างโดนเท่ากันหมด — Black Swan ไม่เลือกที่หลบ
+          รอบนี้แทบทุกอย่างโดนพร้อมกัน — ไม่ใช่เพราะคุณเลือกผิดทั้งหมด
         </div>
       )}
 
@@ -301,7 +301,7 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
           <div className="bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
             <div className="flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
               <span className="truncate text-white/60">เงินสด</span>
-              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนกระแทก</span>
+              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนตลาด แต่ไม่โต</span>
             </div>
           </div>
         )}
@@ -338,7 +338,7 @@ function DebriefStage({ state, event }) {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <div className="text-center text-sm font-bold sm:text-lg">เกิดอะไรขึ้นกับพอร์ตของคุณ</div>
+      <div className="text-center text-sm font-bold sm:text-lg">เงินเปลี่ยนเพราะอะไร?</div>
 
       <div className="pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
         <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[exposureTone(band.exposure)]}`}>
@@ -389,7 +389,10 @@ function DebriefStage({ state, event }) {
         )}
 
         {state.isBlackSwan && (
-          <div className="mt-1.5 text-purple-300">เหตุการณ์นี้คือ Black Swan — แม้นักลงทุนเก่งที่สุดในโลกก็เลี่ยงไม่ได้ ไม่ใช่ความผิดของคุณ</div>
+          <details className="mt-1.5 text-purple-200">
+            <summary className="cursor-pointer font-bold">เหตุการณ์หนักที่หลบยาก · ดูเพิ่ม</summary>
+            <div className="mt-1">ในแบบจำลองเรียกว่า Black Swan — กระทบกว้างและเตรียมหลบได้ยาก ไม่ใช่ความผิดของคุณ</div>
+          </details>
         )}
       </div>
 

@@ -38,6 +38,14 @@ Design pillars ที่ implement แล้ว: เรียนรู้ผ่�
 
 UX ไม่เปลี่ยน end condition, balance, RNG หรือผลการจำลอง; เป็นเพียงวิธีทำให้ข้อมูลและข้อจำกัดที่มีอยู่เข้าใจได้
 
+### Student-first feedback language (approved 2026-08-21)
+
+Player feedback must prioritize understanding over finance terminology. Each gameplay screen should first answer: เกิดอะไรขึ้น, ทำไมถึงเกิด, และตอนนี้ต้องกดอะไร. Technical terms such as `HHI`, `exposure`, `percentile`, `benchmark`, `shock` and `Black Swan` are learning details, not first-layer labels.
+
+Chapter debriefs must explain portfolio movement as `ผลต่อพอร์ตในบทนี้` until the canonical ledger/P&L decision is active. If the portfolio increases, the player should see what pushed it up (`ฮีโร่รอบนี้`, supporting assets, cash role, fee/scam/behavior effects). If the portfolio decreases, the player should see what dragged it down and what helped soften the loss. Black Swan copy must avoid blaming the player and explain that nearly everything was affected together.
+
+This feedback rule does not create a new return calculation, ledger, balance rule, or behavior effect. It only changes the order and wording used to present already-available engine results.
+
 End condition คือจบบท 4; ไม่มี game over กลางทาง ผลสุดท้ายเป็น `ruined`, `tight`, `adequate`, `comfortable`, `fire` ไม่ใช่ชนะ/แพ้ทวิภาค
 
 ## 3. Structure and Content

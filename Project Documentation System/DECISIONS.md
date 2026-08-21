@@ -19,6 +19,7 @@
 | ADR-2026-016 | แยก player report กับ researcher dashboard | Active | 2026-08-21 | Project Owner |
 | ADR-2026-017 | Missing readiness data แสดง Not assessed | Active | 2026-08-21 | Project Owner |
 | ADR-2026-018 | ใช้ชุดคำถาม pre-assessment 10 ข้อของ Project Owner | Active | 2026-08-21 | Project Owner |
+| ADR-2026-019 | ใช้ student-first language และ layered disclosure สำหรับ UX หลัก | Active | 2026-08-21 | Project Owner |
 
 ## ADR-2026-001 — ใช้เอกสาร 6 ไฟล์เป็นหน่วยความจำกลาง
 
@@ -251,6 +252,19 @@ validate ทั้ง UI เพื่อ feedback และ engine เป็น 
 - Consequences: pre-assessment เป็น risk profile เท่านั้น จึงไม่ประดิษฐ์ `knowledgeGain` จากคำถามก่อนเล่นชุดนี้; post-assessment 3 ด้านยังคงใช้วัด learning reflection หลังเล่นแยกจาก portfolio outcome/luck
 - Validation: ต้องมี test ว่า PRE_QUESTIONS มี 10 ข้อ, ต้องตอบครบก่อนบันทึก, total/maxScore/riskProfile deterministic และไม่มีข้อความอ้างว่าเป็นแบบประเมิน TSI ทางการ
 - References: F-013, UI-015, ADR-2026-012, ADR-2026-015
+
+## ADR-2026-019 — ใช้ student-first language และ layered disclosure สำหรับ UX หลัก
+
+- Status: Active
+- Date: 2026-08-21
+- Owner: Project Owner
+- Scope: UI-003, UI-006, UI-007, UI-008, UI-009, UI-012, UI-013; F-002, F-003, F-006, F-007, F-008, F-009, F-011, F-012, F-020, F-021, F-022
+- Context: Project Owner เห็นว่า gameplay UI เริ่มรกและใช้ศัพท์ทางเทคนิคมากเกินไปสำหรับนักเรียนมัธยมปลายที่ไม่มีประสบการณ์ลงทุน
+- Options: (1) คงศัพท์ technical บนหน้าหลักเพื่อความแม่นยำ, (2) ใช้คำง่ายบนหน้าหลักและย้ายศัพท์/สูตรไป `ดูเพิ่ม`, (3) ตัดศัพท์และสูตรออกจาก UI
+- Decision: เลือกข้อ 2. First-layer UI ต้องตอบ `เกิดอะไรขึ้น`, `ทำไมถึงเกิด`, `ต้องกดอะไรต่อ`; คำอย่าง `HHI`, `exposure`, `percentile`, `benchmark`, `shock`, `Black Swan` อยู่ในรายละเอียด/disclosure. Chapter debrief ต้องอธิบาย `เงินเปลี่ยนเพราะอะไร` ทั้งกรณีกำไรและขาดทุน โดยแยกสินทรัพย์ เงินสด ค่าธรรมเนียม scam และ behavior/rebound เมื่อมีข้อมูล
+- Consequences: Session 3/Integrator ต้องปรับ hierarchy/copy โดยไม่แก้ game logic; ถ้า ledger/P&L ยังไม่อนุมัติให้ใช้คำว่า `ผลต่อพอร์ตในบทนี้` ไม่ใช่ `กำไรจริง`
+- Validation: เด็ก ม.ปลายต้องเล่นต่อได้โดยไม่เข้าใจศัพท์ technical; gain/loss debrief ต้องมี top contributor/detractor, signed money, text label และ grayscale/screen-reader equivalent; Black Swan copy ต้องไม่ blame ผู้เล่น
+- References: UI_SPEC §19, GAME_DESIGN §2, ADR-2026-005, ADR-2026-007, ADR-2026-008
 
 | Topic | Options/why | Owner | Needed by |
 |---|---|---|---|

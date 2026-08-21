@@ -31,7 +31,7 @@ function ChapterRow({ c }) {
         <div className="min-w-0 flex-1">
           <div className="truncate text-[10px] font-bold sm:text-sm">
             บท {c.chapter} · อายุ {c.ageFrom}-{c.ageTo} — {c.eventName}
-            {c.isBlackSwan && <span className="ml-1 text-purple-300">(Black Swan)</span>}
+            {c.isBlackSwan && <span className="ml-1 text-purple-300">(เหตุการณ์หนักที่หลบยาก)</span>}
           </div>
           <div className="truncate text-[8px] text-white/50 sm:text-[10px]">
             {c.prep.text} · {c.luck.text}
@@ -107,7 +107,7 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
               บทที่ทำร้ายคุณมากสุดคือ <b className="text-rose-300">บท {report.worst.chapter} ({report.worst.eventName})</b> — {report.worst.prep.text}
             </div>
           )}
-          {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอ Black Swan {report.blackSwanCount} ครั้ง ซึ่งไม่มีใครเตรียมตัวทันได้ — ไม่ใช่ความผิดของคุณ</div>}
+          {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอเหตุการณ์หนักที่หลบยาก {report.blackSwanCount} ครั้ง ซึ่งกระทบแทบทุกอย่างพร้อมกัน — ไม่ใช่ความผิดของคุณ</div>}
           {report.scamVictim && <div className="mt-1 text-amber-200">คุณเคยตกเป็นเหยื่อมิจฉาชีพ จำไว้ว่า “การันตีผลตอบแทนสูง” + “ต้องตัดสินใจเดี๋ยวนี้” = โกงเสมอ</div>}
           {report.cashOnlyChapters > 0 && <div className="mt-1 text-slate-200">มี {report.cashOnlyChapters} บทที่คุณถือเงินสดทั้งหมด — ยังไม่มีการกระจายการลงทุน เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ</div>}
         </div>

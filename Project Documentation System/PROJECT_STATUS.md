@@ -334,3 +334,16 @@ The feature commit intentionally excludes pre-existing/concurrent UI, balance/Bl
 - `tmp/`
 
 These files were inventoried and not modified, staged, deleted or overwritten by Final Integration Verification.
+
+## Student-first UX Direction and Initial Integration (2026-08-21)
+
+- Outcome: Project Owner approved a UX direction to reduce screen clutter and replace first-layer technical wording with high-school learner-friendly language.
+- Changed: `UI_SPEC.md` now defines Student-first layered disclosure, plain-language glossary, simplified screen requirements and UI-012 gain/loss source explanation scenarios.
+- Changed: `GAME_DESIGN.md` now records the player-feedback rule: explain what happened, why it happened and what to do next before exposing technical terms.
+- Decision: `DECISIONS.md` adds ADR-2026-019 as Active for student-first language and layered disclosure.
+- Implemented initial playable slice: Allocation review now leads with a low/medium/high concentration label and keeps exact HHI under `ดูสูตร`; chapter debrief starts with `เงินเปลี่ยนเพราะอะไร?`; Black Swan uses learner-first wording with the technical term under `ดูเพิ่ม`; report copy uses the same learner-first wording.
+- Verification before deployment: `npm test` pass 70/70; `npm run sim` pass 7/7 balance gates; `npm run build` pass; `npm run build:web` pass; `git diff --check` pass with line-ending warnings only.
+- Important constraint: This integration changes presentation only. It does not change game logic, inflation handling, balance, RNG, ledger/P&L, save/load, deployment configuration or research governance.
+- Remaining implementation: UI-012 top-contributor/detractor signed-money summary and separate fee/scam/behavior rows require approved canonical data; broader technical-term disclosure work across shock/report remains Planned.
+- Copy guardrail: Until ADR-005 ledger/P&L is active, UI must say `ผลต่อพอร์ตในบทนี้` rather than `กำไรจริง`.
+- Preserved concurrent files: `src/game/engine/balance.js`, `src/game/engine/encounter.js`, `src/game/engine/gameState.js`, `src/game/engine/gameState.test.js`, plus untracked `.obsidian`, captures/output/tmp/prototype files were not changed by this integration.

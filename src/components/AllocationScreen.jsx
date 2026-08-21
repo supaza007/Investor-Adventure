@@ -260,6 +260,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const investedPct = 100 - cashLeft
   const preview = applyAllocation(state, weights)
   const concentration = Object.entries(weights).filter(([id]) => id !== 'cash').reduce((sum, [, weight]) => sum + weight ** 2, 0)
+  const concentrationLabel = concentration < 0.35 ? 'ต่ำ' : concentration < 0.65 ? 'ปานกลาง' : 'สูง'
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
@@ -272,7 +273,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
           <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ก่อนปรับ</span><br /><b>{money(total)}</b></div>
           <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">หลังหักค่าธรรมเนียม</span><br /><b>{money(netWorth(preview))}</b></div>
           <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ค่าธรรมเนียมโดยประมาณ</span><br /><b>{money(preview.lastFee)}</b></div>
-          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">การกระจุกตัว HHI</span><br /><b>{concentration.toFixed(2)}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">พอร์ตกระจุกแค่ไหน</span><br /><b>{concentrationLabel}</b><details className="mt-1 text-[10px] text-white/55"><summary className="cursor-pointer">ดูสูตร</summary>HHI {concentration.toFixed(2)}</details></div>
         </div>
         <ul className="mt-3 max-h-40 overflow-y-auto text-sm">{Object.entries(alloc).filter(([, value]) => value > 0).map(([id, value]) => <li key={id} className="flex justify-between border-b border-white/10 py-1"><span>{id === 'cash' ? 'เงินสด' : tools.find((t) => t.id === id)?.name}</span><b>{value}%</b></li>)}</ul>
         <div className="mt-4 grid grid-cols-2 gap-3">
