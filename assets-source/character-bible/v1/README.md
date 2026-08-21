@@ -1,6 +1,6 @@
 # Character Bible v1 — Owner Review Gate
 
-Status: Draft candidates. These files are not approved runtime assets and must not be wired into `src/assets` before Project Owner approval.
+Status: All four canonical character sheets were approved by the Project Owner on 2026-08-21. The five target mockups are review candidates and are not approved runtime screens yet.
 
 ## Shared art direction
 
@@ -19,6 +19,8 @@ Status: Draft candidates. These files are not approved runtime assets and must n
 5. Confirm Long-term reads as patient rather than invulnerable.
 6. Confirm all four remain equally appealing and distinguishable in grayscale.
 
-After all four are approved, promote revised sheets to `approved/`, update `manifest.json`, then create the five real-content target mockups. Do not batch-produce final states before that gate.
+Approved sheets are stored in `approved/`; original draft evidence remains in `drafts/`. Five real-content target mockups are stored in `mockups/` for the second owner-review gate. Thai text in AI mockups is layout evidence only: runtime implementation must use real DOM text from the application, not rasterized copy.
+
+Do not batch-produce final states or wire these images into `src/assets` until the five mockups and frame family are approved.
 
 Full generation prompts and negative constraints are recorded in [PROMPTS.md](PROMPTS.md).

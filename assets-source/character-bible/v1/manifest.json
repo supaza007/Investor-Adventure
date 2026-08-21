@@ -1,7 +1,9 @@
 {
-  "bibleVersion": "1.0-draft",
-  "status": "owner-review-required",
+  "bibleVersion": "1.0",
+  "status": "character-approved-mockup-review-required",
   "createdAt": "2026-08-21",
+  "characterApprovedAt": "2026-08-21",
+  "characterApprovedBy": "Project Owner",
   "generator": "OpenAI built-in ImageGen",
   "style": "cozy pixel fantasy adventure",
   "shared": {
@@ -14,38 +16,85 @@
   "assets": [
     {
       "id": "CHAR-TRADER-SHEET-01",
-      "file": "drafts/CHAR-TRADER-SHEET-v1-draft.png",
-      "version": "1-draft",
+      "file": "approved/CHAR-TRADER-SHEET-v1-approved.png",
+      "version": "1-approved",
       "styleId": "trader",
       "identity": "fast-reacting wizard",
       "sha256": "0B467EDC68F6E95AA9B01BC8D1C8012DD233E57B8D4F9FB6CD88F2371C1D1732",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "CHAR-VI-SHEET-01",
-      "file": "drafts/CHAR-VI-SHEET-v1-draft.png",
-      "version": "1-draft",
+      "file": "approved/CHAR-VI-SHEET-v1-approved.png",
+      "version": "1-approved",
       "styleId": "vi",
       "identity": "value-seeking druid",
       "sha256": "108AC1B234DD3E2499A199E44E7D12F0A332A7B8FE9AB1DB0C59811BB6B0FAEC",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "CHAR-MEDIUM-SHEET-01",
-      "file": "drafts/CHAR-MEDIUM-SHEET-v1-draft.png",
-      "version": "1-draft",
+      "file": "approved/CHAR-MEDIUM-SHEET-v1-approved.png",
+      "version": "1-approved",
       "styleId": "medium",
       "identity": "courageous adaptive swordsman",
       "sha256": "DFD24D475F27F9D4EC7D57CFBFDB98182CEBA9F401EA9687C2C3CD5FE11FA17A",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "CHAR-LONGTERM-SHEET-01",
-      "file": "drafts/CHAR-LONGTERM-SHEET-v1-draft.png",
-      "version": "1-draft",
+      "file": "approved/CHAR-LONGTERM-SHEET-v1-approved.png",
+      "version": "1-approved",
       "styleId": "longterm",
       "identity": "disciplined heavy knight of time",
       "sha256": "415009E46A225776F556175703005CDAC7079181518D3E015FE43B6EDBB51320",
+      "approval": "approved-by-project-owner"
+    }
+  ],
+  "mockups": [
+    {
+      "id": "MOCKUP-COVER-01",
+      "file": "mockups/MOCKUP-COVER-v1.png",
+      "version": "1-review",
+      "screen": "Cover",
+      "dimensions": "853x1844",
+      "sha256": "3863B2A090EF483BCE3C24439F5EBE1DFB4F4833CC6353CFFEED66276D81368B",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "MOCKUP-STYLE-01",
+      "file": "mockups/MOCKUP-STYLE-v1.png",
+      "version": "1-review",
+      "screen": "Style Selection",
+      "dimensions": "853x1844",
+      "sha256": "E52DAFBC6BFB3E867DF2576BB09B86BE53FA9E14C06994D1F2BE48FC4D76768B",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "MOCKUP-ALLOCATION-01",
+      "file": "mockups/MOCKUP-ALLOCATION-v1.png",
+      "version": "1-review",
+      "screen": "Allocation",
+      "dimensions": "853x1844",
+      "sha256": "1E0BAD23AD5DC206E1FD8594B313E214600C0F25A17B2E80B52EF155ADFA9610",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "MOCKUP-EVENT-IMPACT-01",
+      "file": "mockups/MOCKUP-EVENT-IMPACT-v1.png",
+      "version": "1-review",
+      "screen": "Event/Impact",
+      "dimensions": "853x1844",
+      "sha256": "71CFF1EDF4846CB271899F5E9FD63BFE34E43B1B3BE5C2184655AE8BE7372C18",
+      "approval": "pending-owner-review"
+    },
+    {
+      "id": "MOCKUP-CHAPTER-TRANSITION-01",
+      "file": "mockups/MOCKUP-CHAPTER-TRANSITION-v1.png",
+      "version": "1-review",
+      "screen": "Chapter Transition/Debrief",
+      "dimensions": "852x1846",
+      "sha256": "C625BD72B4F097ECEAFAB30104D8B31113C3537F9D86BC9DA7733C4CA1CE736F",
       "approval": "pending-owner-review"
     }
   ]

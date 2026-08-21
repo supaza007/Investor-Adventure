@@ -633,7 +633,7 @@ Do not call this `กำไร`, `ผลตอบแทน`, or `P/L` unless ADR
 
 ## 21. Approved visual-production direction — Cozy Pixel Fantasy Life Adventure
 
-Status: **Design approved; asset production and UI integration not yet implemented** (2026-08-21).
+Status: **Design and four canonical character sheets approved; five target mockups pending owner review; UI integration not yet implemented** (2026-08-21).
 
 ### 21.1 Experience and visual principles
 
@@ -730,8 +730,8 @@ This inventory does not authorize new shops, costumes, rewards, currencies, coll
 
 ### 21.8 Implementation phases and vertical slice
 
-1. Produce and approve one canonical reference sheet for each of the four characters.
-2. Produce five target mockups: Cover, Style Selection, Allocation, Event/Impact and Chapter Transition/Debrief.
+1. [Complete 2026-08-21] Produce and approve one canonical reference sheet for each of the four characters.
+2. [Produced; owner review pending] Produce five target mockups: Cover, Style Selection, Allocation, Event/Impact and Chapter Transition/Debrief.
 3. Lock design tokens, safe areas, frame system, background rules and asset manifest.
 4. Implement the first vertical slice: chapter 1 end → chapter-2 map/transition → allocation → event → debrief.
 5. Verify that the 100฿ → 142฿ transition explanation remains visible and understandable in the new art layer.
@@ -754,7 +754,6 @@ Do not begin bulk asset production until the four canonical character sheets and
 
 ### 21.10 Remaining approval gates
 
-- Canonical generated appearance for each character.
 - Five target screen mockups and final UI-frame family.
 - Exact event-to-severity mapping where current content does not declare one.
 - Final measured asset budgets and oldest supported device/browser.

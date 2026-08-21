@@ -17,3 +17,13 @@ Production-ready cozy pixel-art reference sheet for a youthful friendly gender-n
 ## CHAR-LONGTERM-SHEET-01
 
 Production-ready cozy pixel-art reference sheet for a youthful friendly gender-neutral disciplined heavy knight of time: large stable rounded silhouette, welcoming heavy armor, grounded oversized shield, hourglass/tree/sun motifs; deep navy, silver and golden yellow. Include portrait, turnaround, grayscale silhouette, token and required state explorations, including a visibly affected brace/hit state. No invulnerability, immunity, magic barrier, guaranteed safety/return, combat, stats, currency, readable text, logo or watermark.
+
+## Target mockups — review gate
+
+All mockups use a `390×844` portrait composition target. Generated review files are approximately `853×1844` pixels; exact per-file dimensions are recorded in the manifest. They preserve student-first hierarchy, one visible primary action, safe-area spacing and real game concepts. AI-rendered Thai copy is layout evidence only and must be live DOM text in runtime.
+
+- `MOCKUP-COVER-01`: four approved characters with equal status, contemporary fantasy road, title and PLAY action.
+- `MOCKUP-STYLE-01`: equal-weight 2×2 character choices, Medium-term selected, non-color check and confirm action.
+- `MOCKUP-ALLOCATION-01`: chapter 1, 100฿, bond/fund/stock at 25%, crypto 0%, cash 25%, review action. The first generation was rejected because it invented crystal/energy HUD resources; the stored revision removes them.
+- `MOCKUP-EVENT-IMPACT-01`: chapter-3 inflation impact with visibly affected Medium-term character, signed loss, what/why/next hierarchy and no combat.
+- `MOCKUP-CHAPTER-TRANSITION-01`: non-interactive chapter map and explicit 100฿ − 18฿ + 60฿ = 142฿ transition explanation.
