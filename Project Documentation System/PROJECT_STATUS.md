@@ -2,6 +2,7 @@
 
 ## End-to-End Feature Integration — 2026-08-21
 
+- Update: pre-assessment now uses the Project Owner's 10-question risk-profile draft in `learning-reflection-v2`; scoring is 0/1/2 per answer with conservative/balanced/aggressive profile displayed separately from knowledge gain. This remains an educational reflection adapted for the game, not the official SET TSI questionnaire.
 - Current release: **Deployed — Playable**
 - Deployed URL: https://supaza007.github.io/Investor-Adventure/
 - Feature commit: `c05a6de10a7a000d6212871e917e878fd9e14a82`

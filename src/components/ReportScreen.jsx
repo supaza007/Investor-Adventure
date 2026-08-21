@@ -12,6 +12,12 @@ const BAND_STYLE = {
   ruined: { cls: 'from-rose-900 to-rose-950 border-rose-400/60', text: 'text-rose-300', blurb: 'พอร์ตพังหมด ไม่เหลืออะไรเลย' },
 }
 
+const RISK_PROFILE_LABEL = {
+  conservative: 'ระมัดระวัง',
+  balanced: 'สมดุล',
+  aggressive: 'รับความเสี่ยงสูง',
+}
+
 function ChapterRow({ c }) {
   const down = c.change < 0
   return (
@@ -117,7 +123,8 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
 
         <section className="pixel-frame mt-3 bg-slate-900/80 p-3 text-xs" aria-labelledby="learning-title">
           <h2 id="learning-title" className="text-base font-black text-sky-300 sm:text-xl">สรุปการเรียนรู้ของฉัน</h2>
-          <p className="mt-2">การเปลี่ยนแปลงคะแนนความรู้: <b>{learning.status === 'assessed' ? `${learning.knowledgeGain >= 0 ? '+' : ''}${learning.knowledgeGain}` : 'Not assessed'}</b></p>
+          <p className="mt-2">โปรไฟล์ความเสี่ยงก่อนเล่น: <b>{learning.preRiskProfile ? RISK_PROFILE_LABEL[learning.preRiskProfile] : 'Not assessed'}</b></p>
+          <p>การเปลี่ยนแปลงคะแนนความรู้: <b>{learning.status === 'assessed' ? `${learning.knowledgeGain >= 0 ? '+' : ''}${learning.knowledgeGain}` : 'Not assessed'}</b></p>
           <p>เวลาเล่นโดยประมาณ: <b>{durationMinutes == null ? 'เวลาไม่พร้อมใช้' : `${durationMinutes} นาที`}</b></p>
           <p className="mt-1 text-white/55">คะแนนการเรียนรู้แยกจากผลพอร์ตและโชค ไม่มีข้อมูลถูกส่งออกจากอุปกรณ์นี้</p>
         </section>

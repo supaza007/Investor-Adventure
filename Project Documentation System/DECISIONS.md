@@ -18,6 +18,7 @@
 | ADR-2026-015 | Assessment และ research เป็นชั้นเสริม ไม่บล็อก core gameplay | Active | 2026-08-21 | Project Owner |
 | ADR-2026-016 | แยก player report กับ researcher dashboard | Active | 2026-08-21 | Project Owner |
 | ADR-2026-017 | Missing readiness data แสดง Not assessed | Active | 2026-08-21 | Project Owner |
+| ADR-2026-018 | ใช้ชุดคำถาม pre-assessment 10 ข้อของ Project Owner | Active | 2026-08-21 | Project Owner |
 
 ## ADR-2026-001 — ใช้เอกสาร 6 ไฟล์เป็นหน่วยความจำกลาง
 
@@ -238,6 +239,18 @@ validate ทั้ง UI เพื่อ feedback และ engine เป็น 
 - Consequences: Session 3 ต้องส่ง missing flags/source IDs และ report ต้องไม่ใช้คำว่าพร้อมเกษียณจริง
 - Validation: fixture missing each dimension renders Not assessed and leaves other dimensions intact
 - References: UI-018/UI-019/UI-020, FR-019, NFR-013
+
+## ADR-2026-018 — ใช้ชุดคำถาม pre-assessment 10 ข้อของ Project Owner
+
+- Status: Active
+- Date: 2026-08-21
+- Owner: Project Owner
+- Scope: F-013, onboarding pre-assessment
+- Context: Project Owner ต้องการให้คำถามประเมินความเสี่ยงช่วงแรกใช้ 10 ข้อที่ระบุเอง โดยยังคงหลักการเดิมว่าเป็นแบบดัดแปลงตามแนวคิด SET ไม่ใช่ TSI ทางการ
+- Decision: ใช้ชุดคำถาม 10 ข้อเป็น `learning-reflection-v2` ในเกมจริง ได้แก่ life stage, volatility view, investing style self view, loss attribution, one-year return/loss, windfall allocation, job-loss travel, game-show choice, land opportunity และ income preference
+- Consequences: pre-assessment เป็น risk profile เท่านั้น จึงไม่ประดิษฐ์ `knowledgeGain` จากคำถามก่อนเล่นชุดนี้; post-assessment 3 ด้านยังคงใช้วัด learning reflection หลังเล่นแยกจาก portfolio outcome/luck
+- Validation: ต้องมี test ว่า PRE_QUESTIONS มี 10 ข้อ, ต้องตอบครบก่อนบันทึก, total/maxScore/riskProfile deterministic และไม่มีข้อความอ้างว่าเป็นแบบประเมิน TSI ทางการ
+- References: F-013, UI-015, ADR-2026-012, ADR-2026-015
 
 | Topic | Options/why | Owner | Needed by |
 |---|---|---|---|

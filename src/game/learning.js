@@ -1,10 +1,17 @@
-export const ASSESSMENT_VERSION = 'learning-reflection-v1'
+export const ASSESSMENT_VERSION = 'learning-reflection-v2'
 export const CONSENT_VERSION = 'research-consent-v1'
 
 export const PRE_QUESTIONS = [
-  { id: 'risk', prompt: 'ถ้าพอร์ตลดลง 20% คุณคิดว่าตนเองจะทำอย่างไร', options: [['1', 'ขายทั้งหมดเพื่อลดความกังวล'], ['2', 'ทบทวนแผนก่อนตัดสินใจ'], ['3', 'ถือหรือปรับตามเป้าหมายเดิม']] },
-  { id: 'inflation', prompt: 'เงินเฟ้อส่งผลต่อเงินสดระยะยาวอย่างไร', options: [['0', 'ไม่มีผล'], ['2', 'กำลังซื้อมีโอกาสลดลง'], ['1', 'ทำให้เงินสดเพิ่มมูลค่า']] },
-  { id: 'diversification', prompt: 'การกระจายเงินหลายสินทรัพย์ช่วยเรื่องใด', options: [['2', 'ลดการกระจุกตัว แต่ไม่รับประกันกำไร'], ['0', 'รับประกันว่าไม่ขาดทุน'], ['1', 'ทำให้ผลตอบแทนสูงสุดเสมอ']] },
+  { id: 'life_stage', prompt: 'ตอนนี้คุณอยู่ช่วงไหนของชีวิต', options: [['2', 'a. ยังอายุไม่เกิน 30 ปี เพิ่งเริ่มทำงานหรือเริ่มเก็บเงิน'], ['1', 'b. อายุ 31-55 ปี อยู่ในวัยทำงานและเริ่มมีเงินเก็บ'], ['0', 'c. อายุเกิน 55 ปี ใกล้เกษียณและอยากใช้ชีวิตสบาย ๆ']] },
+  { id: 'volatility_view', prompt: 'ถ้าพูดถึง “ราคาขึ้นลงแรง” คุณคิดถึงอะไร', options: [['2', 'a. เป็นโอกาสทำกำไร ซื้อถูก ขายแพง'], ['1', 'b. เป็นความไม่แน่นอน ต้องระวัง'], ['0', 'c. น่ากลัว เพราะอาจขาดทุนได้']] },
+  { id: 'investing_style_self_view', prompt: 'ถ้าต้องลงทุน คุณคิดว่าสไตล์คุณเป็นแบบไหน', options: [['2', 'a. กล้าเสี่ยง กล้าตัดสินใจ เพื่อหวังกำไรสูง'], ['0', 'b. เน้นปลอดภัย ได้กำไรน้อยก็ไม่เป็นไร'], ['1', 'c. ยืดหยุ่น ดูจังหวะ บางครั้งเสี่ยงบ้าง']] },
+  { id: 'loss_attribution', prompt: 'ถ้าลงทุนแล้วขาดทุน คุณคิดว่าสาเหตุหลักคืออะไร', options: [['0', 'a. เราตัดสินใจผิดเอง'], ['1', 'b. ตลาดผันผวนและคาดเดายาก'], ['2', 'c. มีทั้งการตัดสินใจของเราและสภาพตลาด']] },
+  { id: 'one_year_return_loss', prompt: 'ถ้ามองไปอีก 1 ปี คุณอยากให้เงินลงทุนเป็นแบบไหน', options: [['0', 'a. ได้กำไรแน่นอนประมาณ 5%'], ['1', 'b. อยากได้กำไร 10% แต่ถ้าขาดทุน 5% ก็รับได้'], ['2', 'c. อยากได้กำไร 20% แต่ถ้าขาดทุน 10% ก็รับได้']] },
+  { id: 'windfall_allocation', prompt: 'ถ้าถูกลอตเตอรี่ได้เงิน 500,000 บาท คุณจะเอาไปทำอะไร', options: [['0', 'a. ฝากประจำหรือซื้อพันธบัตร เน้นเงินต้นปลอดภัย'], ['1', 'b. แบ่งครึ่งหนึ่งลงทุนหุ้น อีกครึ่งหนึ่งลงทุนแบบปลอดภัย'], ['2', 'c. ลงทุนหุ้นไปเลย หวังผลตอบแทนสูง']] },
+  { id: 'job_loss_travel', prompt: 'ถ้าวางแผนเที่ยวต่างประเทศไว้ แต่จู่ ๆ โดนเลิกจ้าง คุณจะทำยังไง', options: [['0', 'a. ยกเลิกทริปก่อน รอหางานใหม่ได้ค่อยไป'], ['1', 'b. เปลี่ยนเป็นทริปประหยัดแทน'], ['2', 'c. ไปเที่ยวตามแผนเดิม กลับมาค่อยหาทางต่อ']] },
+  { id: 'game_show_choice', prompt: 'ถ้าเล่นเกมโชว์มาถึงรอบตัดสินใจ คุณจะเลือกอะไร', options: [['0', 'a. หยุดเล่น รับเงินแน่นอน 30,000 บาท'], ['1', 'b. เล่นต่อ มี 2 ตัวเลือก ถ้าถูกรับ 60,000 บาท ถ้าผิดไม่ได้อะไร'], ['2', 'c. เล่นต่อ มี 4 ตัวเลือก ถ้าถูกรับ 120,000 บาท ถ้าผิดไม่ได้อะไร']] },
+  { id: 'land_opportunity', prompt: 'เพื่อนชวนลงทุนซื้อที่ดิน มีโอกาสราคาขึ้นเท่าตัวใน 1 ปี คุณจะลงทุนเมื่อไหร่', options: [['2', 'a. ถึงโอกาสขึ้นจะน้อย ก็อยากลองลงทุน'], ['1', 'b. ถ้ามีโอกาสขึ้นพอสมควร ถึงจะลงทุน'], ['0', 'c. ต้องมีโอกาสขึ้นสูงมาก ถึงจะลงทุน']] },
+  { id: 'income_preference', prompt: 'ถ้ามีคนชวนไปทำงาน และให้เลือกรูปแบบรายได้ คุณจะเลือกแบบไหน', options: [['0', 'a. เงินเดือนแน่นอนเป็นหลัก ค่านายหน้านิดหน่อย'], ['1', 'b. เงินเดือนครึ่งหนึ่ง ค่านายหน้าครึ่งหนึ่ง'], ['2', 'c. เงินเดือนน้อย แต่เน้นค่านายหน้าตามผลงาน']] },
 ]
 
 export const POST_QUESTIONS = [
@@ -16,14 +23,26 @@ export const POST_QUESTIONS = [
 export function scoreAssessment(questions, answers) {
   if (!answers || questions.some((q) => answers[q.id] == null)) return null
   const scores = Object.fromEntries(questions.map((q) => [q.id, Number(answers[q.id])]))
-  return { instrumentVersion: ASSESSMENT_VERSION, answers: { ...answers }, scores, total: Object.values(scores).reduce((a, b) => a + b, 0), completedAt: new Date().toISOString() }
+  const total = Object.values(scores).reduce((a, b) => a + b, 0)
+  const maxScore = questions.length * 2
+  const riskProfile = questions === PRE_QUESTIONS ? classifyRiskProfile(total, maxScore) : null
+  return { instrumentVersion: ASSESSMENT_VERSION, answers: { ...answers }, scores, total, maxScore, riskProfile, completedAt: new Date().toISOString() }
 }
 
 export function buildLearningSummary(pre, post) {
-  if (!pre || !post) return { status: 'not_assessed', knowledgeGain: null }
+  if (!pre) return { status: 'not_assessed', knowledgeGain: null, preRiskProfile: null }
+  if (!post) return { status: 'risk_profile_only', knowledgeGain: null, preRiskProfile: pre.riskProfile ?? null }
   const comparable = ['inflation', 'diversification'].filter((id) => pre.scores[id] != null && post.scores[id] != null)
-  if (!comparable.length) return { status: 'not_assessed', knowledgeGain: null }
-  return { status: 'assessed', knowledgeGain: comparable.reduce((sum, id) => sum + post.scores[id] - pre.scores[id], 0), domains: post.scores }
+  if (!comparable.length) return { status: 'risk_profile_only', knowledgeGain: null, preRiskProfile: pre.riskProfile ?? null, domains: post.scores }
+  return { status: 'assessed', knowledgeGain: comparable.reduce((sum, id) => sum + post.scores[id] - pre.scores[id], 0), preRiskProfile: pre.riskProfile ?? null, domains: post.scores }
+}
+
+export function classifyRiskProfile(total, maxScore) {
+  if (!Number.isFinite(total) || !Number.isFinite(maxScore) || maxScore <= 0) return null
+  const ratio = total / maxScore
+  if (ratio < 0.34) return 'conservative'
+  if (ratio < 0.67) return 'balanced'
+  return 'aggressive'
 }
 
 export function buildReadiness(report, assessment) {

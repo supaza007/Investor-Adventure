@@ -176,7 +176,7 @@ executeCommand(state, { type: 'CONFIRM_ALLOCATION', weights: { stock: Infinity }
 | FR-018 | P/L reconciliation | Should | opening+contribution-fee-scam+valuation=closing within policy | Proposed |
 | FR-020 | cash-only allocation | Must | explicit cash=100% is valid; inflation-adjusted purchasing power; no market return | Implemented/Testing |
 | FR-021 | systemic Black Swan profile | Must | every asset is shocked with deterministic asset-specific profile | Implemented/Testing |
-| FR-022 | pre/post assessment | Should | SET-inspired pre risk profile; post 3 domains; knowledgeGain separate from portfolio outcome | Proposed |
+| FR-022 | pre/post assessment | Should | SET-inspired pre risk profile 10 questions (`learning-reflection-v2`); post 3 domains; risk profile separate from portfolio outcome and knowledge score | Implemented/Playable locally; content review pending |
 | FR-023 | research consent | Must | opt-in separate from game terms; decline preserves gameplay; consent version recorded | Designed; state scaffold only |
 | FR-024 | gameplay timing telemetry | Should | run/chapter/stage start/end/duration with anonymous run ID | Designed; state scaffold only |
 | FR-025 | replay metadata | Must | rules/content/RNG versions and seed metadata | Partial; state fields only, no persistence/golden replay |
@@ -235,7 +235,7 @@ This is the authoritative feature inventory for Session 2/3 planning. Status cla
 | F-010 | Scam education | scam offer/accepted/lost | one offer/run; accept/reject required; cash-first loss | Scam modal | red flags and amount shown; no dismiss bypass | branch/E2E | Playable/Implemented |
 | F-011 | Transaction/Event ledger and P/L | transactions, domainEvents, balances | every transfer/fee and valuation event has deterministic ID/order | ledger-aware review/report (not yet built) | opening + flows + valuation = closing | property/golden replay | Planned |
 | F-012 | Retirement-readiness report | four dimensions, evidence IDs, Not assessed | no real-world readiness claim; show simulation only | Report + assessment summary | dimensions separate; missing input not scored | unit/content/E2E | Designed/Partial engine report only |
-| F-013 | Pre-assessment (SET-inspired) | assessment.pre, instrumentVersion | adapted questions; not official TSI; no gameplay lock | onboarding assessment | score/profile saved before run and disclosed | content/unit/UX | Planned |
+| F-013 | Pre-assessment (SET-inspired) | assessment.pre, instrumentVersion `learning-reflection-v2`, 10 answers, total/maxScore/riskProfile | adapted 10-question risk profile; not official TSI; no gameplay lock | onboarding assessment | all 10 questions shown; score/profile saved or explicit skip; profile separate from style and return | content/unit/UX | Implemented/Playable locally; content review pending |
 | F-014 | Post-assessment and knowledge gain | assessment.post, domain scores | inflation, risk/diversification, fees/scam; no mid-play questions | post-report assessment | pre/post/domain gain separate from portfolio/luck | psychometric pilot/unit | Planned |
 | F-015 | Research consent | consent, consentVersion, purpose | research opt-in separate from game terms; decline preserves play | consent screen/settings | no research export without opt-in; withdrawal path | privacy/unit/E2E | Engine scaffold only; UI/integration Planned |
 | F-016 | Timing telemetry | run/chapter/stage timestamps/durations | record start/end only; UTC canonical; no clickstream by default | optional privacy notice; researcher view | durations non-negative and tied to anonymous run | clock/unit/privacy | State scaffold only; transport Planned |
@@ -306,4 +306,13 @@ F-021 accessibility applies to every player-facing F-001–F-016 screen
 
 ### Learning/session contracts
 
-`AssessmentResult = {instrumentVersion, answers, scores, total, completedAt}`. Missing required answers return `null` and UI preserves the draft. `SessionEnvelope = {schemaVersion:1, session, gameState}`; parse returns `{ok:false,error:'CORRUPT_SAVE'|'INCOMPATIBLE_SAVE'}` without replacing live state. Research consent decline never blocks gameplay and all data remains local in this release.
+`AssessmentResult = {instrumentVersion, answers, scores, total, maxScore, riskProfile, completedAt}`. For pre-assessment version `learning-reflection-v2`, riskProfile is `conservative`, `balanced` or `aggressive` from the 10-question risk reflection score; post-assessment may set `riskProfile:null`. Missing required answers return `null` and UI preserves the draft. `SessionEnvelope = {schemaVersion:1, session, gameState}`; parse returns `{ok:false,error:'CORRUPT_SAVE'|'INCOMPATIBLE_SAVE'}` without replacing live state. Research consent decline never blocks gameplay and all data remains local in this release.
+
+### Pre-assessment v2 contract
+
+Input: 10 required radio answers from `PRE_QUESTIONS`, each encoded as `0`, `1` or `2`.
+Process: sum numeric answers, set `maxScore = 20`, classify `total/maxScore` as conservative `<0.34`, balanced `<0.67` or aggressive otherwise.
+Output: versioned assessment result stored in `session.assessment.pre`.
+Error: incomplete answer set returns `null`; UI keeps the local draft and asks the player to answer all questions or explicitly skip.
+
+The 10 owner-approved prompts are: life stage, view of volatility, self-described investing style, loss attribution, one-year return/loss preference, windfall allocation, job-loss travel response, game-show risk choice, land opportunity threshold and income preference. This instrument is for educational reflection only and must not be displayed as the official SET TSI questionnaire.
