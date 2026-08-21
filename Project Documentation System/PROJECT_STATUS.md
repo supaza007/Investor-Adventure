@@ -399,3 +399,5 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Responsive evidence: Cover and primary flow checked at 320×568, 390×844 and 1280×800; five Cover images loaded at each size and the primary action remained usable. Source focus rules retain a 3 px yellow `:focus-visible` outline; modal focus/focus-trap behavior is unchanged.
 - Scope guardrail: no game rule, balance, RNG, inflation formula, engine contract, ledger/P&L, Supabase or save/load behavior changed.
 - Remaining visual polish: distinct hand-authored animation frames (including celebrate) and formal grayscale silhouette comparison are enhancements; they do not block Playable v1.
+- Deployment evidence: visual-overhaul commit `125a8cd17d1085432b8b9c3fca0dd26695fe2cbf` was pushed to `release-clean`; GitHub Pages workflow run `32491317895` (#33) completed successfully in 32 seconds.
+- Production QA: `https://supaza007.github.io/Investor-Adventure/` loaded all five Cover images, then passed the full four-chapter flow through Report and Restart. Production console warnings/errors = 0, broken images = 0, and horizontal overflow = false at 320×568, 390×844 and 1280×800.
