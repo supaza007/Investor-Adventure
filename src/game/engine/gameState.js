@@ -318,6 +318,7 @@ function finishChapter(state) {
     percentile: state.shock?.percentile ?? 0,
     exposure: state.band?.exposure ?? 0,
     concentration: state.band?.concentration ?? 0,
+    cashOnly: totalValue(state.positions) <= 0 && state.cash > 0,
     behavior: state.behavior,
     scamAccepted: state.scam?.accepted ?? false,
     scamLost: state.scam?.lost ?? 0,

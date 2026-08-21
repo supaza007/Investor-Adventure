@@ -32,6 +32,10 @@ export function prepLabel(exposure, concentration) {
   return { text: 'พอร์ตกระจุกตรงจุดอ่อนพอดี', tone: 'bad', score }
 }
 
+export function cashOnlyPrepLabel() {
+  return { text: 'ถือเงินสดทั้งหมด — ยังไม่มีการกระจายการลงทุน', tone: 'neutral', score: null }
+}
+
 const BEHAVIOR_LABEL = {
   hold: 'ถือต่อ',
   cut: 'ตัดขาดทุน',
@@ -55,7 +59,7 @@ export function buildReport(state) {
       changePct: h.valueBefore > 0 ? change / h.valueBefore : 0,
       change,
       luck: luckLabel(h.percentile),
-      prep: prepLabel(h.exposure, h.concentration),
+      prep: h.cashOnly ? cashOnlyPrepLabel() : prepLabel(h.exposure, h.concentration),
       behaviorLabel: BEHAVIOR_LABEL[h.behavior] ?? '—',
     }
   })
@@ -74,6 +78,7 @@ export function buildReport(state) {
     band: isRuined ? { id: 'ruined', label: 'ล้มละลาย' } : bandFor(ratio),
     multiple: finalValue / contributed,
     chapters,
+    cashOnlyChapters: chapters.filter((c) => c.cashOnly).length,
     worst,
     best,
     scamVictim: chapters.some((c) => c.scamAccepted),

@@ -320,6 +320,8 @@ function DebriefStage({ state, event }) {
   // เทียบก่อน/หลังแรงกระแทกรายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
   // ไม่ย้อนคำนวณจาก band.exposure เพราะเคส margin call (เหลือ 0) กับเคสชนพื้น 10% ย้อนกลับไม่ได้
   const before = state.positionsBeforeShock ?? {}
+  const investedBefore = Object.values(before).reduce((sum, amount) => sum + amount, 0)
+  const cashOnly = investedBefore <= 0 && state.cash > 0
   const impacts = Object.keys(before)
     .filter((id) => before[id] > 0.5)
     .map((id) => {
@@ -342,9 +344,15 @@ function DebriefStage({ state, event }) {
         <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[exposureTone(band.exposure)]}`}>
           อ่อนไหวต่อ{event.name} <b>{Math.round(band.exposure * 100)}%</b> — {exposureNote(band.exposure)}
         </div>
-        <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
-          กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
-        </div>
+        {cashOnly ? (
+          <div className="pixel-frame mt-1.5 border border-slate-500/60 bg-slate-800/70 p-1.5 text-slate-200 sm:p-2">
+            ถือเงินสดทั้งหมด — <b>ยังไม่มีการกระจายการลงทุน</b> เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ
+          </div>
+        ) : (
+          <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
+            กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
+          </div>
+        )}
 
         {/* เดิมเขียนว่า "ผลออกมาที่ อันดับ N% ของช่วงที่เป็นไปได้" ซึ่งผู้เล่นอ่านไม่เข้าใจด้วย 3 เหตุผล:
               1. "อันดับ" ในภาษาไทยขั้วกลับด้าน — อันดับ 1 คือดีที่สุด คนอ่านเลยเข้าใจว่าเลขน้อย = ดี

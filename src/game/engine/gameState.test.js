@@ -335,6 +335,10 @@ describe('รายงานเกษียณ', () => {
     const { report } = playFullRun({ cash: 1 })
     assert.ok(report.finalValue < report.contributed, 'ถือเงินสดล้วนต้องได้น้อยกว่าเงินที่ใส่ไปทั้งหมด')
     assert.ok(report.finalValue > 0)
+    assert.equal(report.cashOnlyChapters, 4)
+    assert.ok(report.chapters.every((chapter) => chapter.cashOnly))
+    assert.ok(report.chapters.every((chapter) => chapter.prep.score === null))
+    assert.ok(report.chapters.every((chapter) => chapter.prep.text.includes('ยังไม่มีการกระจายการลงทุน')))
   })
 })
 

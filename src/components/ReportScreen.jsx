@@ -109,6 +109,7 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
           )}
           {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอ Black Swan {report.blackSwanCount} ครั้ง ซึ่งไม่มีใครเตรียมตัวทันได้ — ไม่ใช่ความผิดของคุณ</div>}
           {report.scamVictim && <div className="mt-1 text-amber-200">คุณเคยตกเป็นเหยื่อมิจฉาชีพ จำไว้ว่า “การันตีผลตอบแทนสูง” + “ต้องตัดสินใจเดี๋ยวนี้” = โกงเสมอ</div>}
+          {report.cashOnlyChapters > 0 && <div className="mt-1 text-slate-200">มี {report.cashOnlyChapters} บทที่คุณถือเงินสดทั้งหมด — ยังไม่มีการกระจายการลงทุน เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ</div>}
         </div>
 
         <section className="pixel-frame mt-3 bg-slate-900/80 p-3" aria-labelledby="readiness-title">
