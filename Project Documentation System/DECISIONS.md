@@ -20,6 +20,7 @@
 | ADR-2026-017 | Missing readiness data แสดง Not assessed | Active | 2026-08-21 | Project Owner |
 | ADR-2026-018 | ใช้ชุดคำถาม pre-assessment 10 ข้อของ Project Owner | Active | 2026-08-21 | Project Owner |
 | ADR-2026-019 | ใช้ student-first language และ layered disclosure สำหรับ UX หลัก | Active | 2026-08-21 | Project Owner |
+| ADR-2026-020 | แสดงที่มาของเงินเปลี่ยนระหว่างบทเป็น transition breakdown | Active | 2026-08-21 | Project Owner |
 
 ## ADR-2026-001 — ใช้เอกสาร 6 ไฟล์เป็นหน่วยความจำกลาง
 
@@ -265,6 +266,19 @@ validate ทั้ง UI เพื่อ feedback และ engine เป็น 
 - Consequences: Session 3/Integrator ต้องปรับ hierarchy/copy โดยไม่แก้ game logic; ถ้า ledger/P&L ยังไม่อนุมัติให้ใช้คำว่า `ผลต่อพอร์ตในบทนี้` ไม่ใช่ `กำไรจริง`
 - Validation: เด็ก ม.ปลายต้องเล่นต่อได้โดยไม่เข้าใจศัพท์ technical; gain/loss debrief ต้องมี top contributor/detractor, signed money, text label และ grayscale/screen-reader equivalent; Black Swan copy ต้องไม่ blame ผู้เล่น
 - References: UI_SPEC §19, GAME_DESIGN §2, ADR-2026-005, ADR-2026-007, ADR-2026-008
+
+## ADR-2026-020 — แสดงที่มาของเงินเปลี่ยนระหว่างบทเป็น transition breakdown
+
+- Status: Active
+- Date: 2026-08-21
+- Owner: Project Owner
+- Scope: UI-003 chapter intro, UI-012 chapter debrief, F-002, F-008, F-020, F-021, F-022
+- Context: Screenshot review พบว่า player จบบท 1 ที่ 100฿ (+0.0%) แล้วเริ่มบท 2 ที่ 142฿ จึงถามอย่างสมเหตุสมผลว่าเงินเพิ่ม 42฿ มาจากไหน
+- Options: (1) ปล่อยให้ผู้เล่นอนุมานจากกติกา, (2) เพิ่ม breakdown ระหว่างบทใน UI, (3) เปลี่ยนกติกาเงินเติม/เงินเฟ้อให้ไม่เกิดช่องว่างนี้
+- Decision: เลือกข้อ 2. UI ต้องแสดง transition breakdown ก่อนเริ่มจัดพอร์ตบทใหม่ โดยแยกเงินเติมจากช่วงชีวิตใหม่, เงินเฟ้อ/กำลังซื้อเงินสด และผลต่อพอร์ตจากบทก่อน. ห้ามเรียกส่วนต่างนี้ว่า `กำไร`, `ผลตอบแทน`, หรือ `P/L` จนกว่า ADR-005 ledger/P&L จะ active
+- Consequences: Session ถัดไปต้องทำ visible UI/content upgrade ที่ chapter intro modal หรือ surface ระหว่างบท; ห้ามแก้ income, cashDecay, balance, RNG หรือสูตร inflation เพื่อแก้ปัญหาความเข้าใจ
+- Validation: cash-only 100฿ → 142฿ ต้องแสดง +60฿ income, ประมาณ -18฿ inflation/cash purchasing power, net +42฿; player ต้องเห็นก่อนกด `เริ่มจัดพอร์ตบทนี้`; copy ต้องใช้ signed money และอ่านได้โดยไม่พึ่งสี
+- References: UI_SPEC §20, GAME_DESIGN §2, ADR-2026-005, ADR-2026-019
 
 | Topic | Options/why | Owner | Needed by |
 |---|---|---|---|

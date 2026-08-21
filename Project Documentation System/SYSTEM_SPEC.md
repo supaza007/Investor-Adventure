@@ -11,7 +11,7 @@
 
 ## 1. Implemented Architecture
 
-- React 18 + Vite 6 + Tailwind CSS 4; static GitHub Pages, offline single-file build และ Electron Windows wrapper
+- React 19 + Vite 8 + Tailwind CSS 4; static GitHub Pages, offline single-file build และ Electron Windows wrapper. GitHub Actions และ Vite 8 ใช้ Node.js 22 (ขั้นต่ำของ Vite 8 คือ Node 20.19 หรือ 22.12)
 - Framework-independent pure reducer ใน `src/game/engine/`; seeded RNG ไม่มี hidden randomness ใน reducer path
 - Runtime assets: `src/assets/`; source originals: `assets-source/`; tests: `src/game/engine/*.test.js`; simulation: `scripts/sim.mjs`
 - ไม่พบ persistence, backend, account หรือ external market API; มี timing/research state envelope แต่ยังไม่มี telemetry transport/sink

@@ -521,3 +521,112 @@ Acceptance scenarios:
 - Do not use color as the only cue for gain/loss/risk; combine sign, money amount and wording (`เพิ่ม`, `ลด`, `ช่วย`, `ลากลง`).
 - Every `ดูเพิ่ม` control must be keyboard reachable, have an accessible name, and return focus to the triggering control when closed.
 - Mobile first layer should keep the primary action visible without requiring the learner to read the technical disclosure.
+
+## 20. Visible UI/content upgrade handoff — chapter transition money breakdown
+
+This is an approved visible UI/content upgrade for the next implementation session. It is presentation-only unless the implementer discovers missing state fields and records a separate dependency. Do not change balance, RNG, cash decay, income, ledger/P&L or save/load to satisfy this UI.
+
+### 20.1 Problem to solve
+
+The player can finish chapter 1 with `พอร์ตปลายบท 100฿ (+0.0%)`, then enter chapter 2 with `ทรัพย์สินทั้งหมด 142฿`. A learner will reasonably ask: `เงินเพิ่ม 42฿ มาจากไหน?`
+
+The correct explanation is a transition breakdown, not market profit:
+
+```text
++60฿ เงินเติมจากช่วงชีวิตใหม่
+-18฿ เงินสดถูกเงินเฟ้อกินกำลังซื้อ
++42฿ เงินเพิ่มสุทธิเมื่อเริ่มบทใหม่
+```
+
+With current balance parameters, the cash-only example is:
+
+```text
+เงินปลายบท 1: 100฿
+เงินเฟ้อ 10 ปี: -18฿ โดยประมาณ
+เงินเติมต้นบท 2: +60฿
+= เงินเริ่มบท 2: 142฿
+```
+
+### 20.2 Required UI behavior
+
+Add a visible chapter-transition summary before the player starts allocation for chapters 2-4. The existing chapter intro modal is the preferred surface because it already appears between chapters and asks the player to prepare for the next decade.
+
+Required first-layer copy:
+
+```text
+เริ่มบทใหม่ คุณมี {startValue}฿
+
+เงินนี้ไม่ได้มาจากกำไรการลงทุนทั้งหมด
+ที่เปลี่ยนเพราะ:
++{income}฿ เงินเติมจากช่วงชีวิตใหม่
+{cashDecay}฿ เงินสดถูกเงินเฟ้อกินกำลังซื้อ (ถ้ามี)
+{marketOrCarry}฿ ผลต่อพอร์ตจากบทที่แล้ว (ถ้ามี)
+
+รวมสุทธิ {netChange}฿ จากปลายบทก่อน
+```
+
+For the screenshot case, the modal should say:
+
+```text
+จบบทที่ 1 พอร์ตไม่โตจากตลาด: +0฿
+
+เริ่มบทใหม่ คุณได้เงินเติมชีวิต +60฿
+แต่เงินสดเดิมถูกเงินเฟ้อกินไปประมาณ -18฿
+
+เงินเริ่มบทนี้: 142฿
+```
+
+### 20.3 Data contract for implementer
+
+Use existing engine values where available:
+
+- Previous chapter ending value: `prevSummary.valueEnd`
+- Previous chapter number/event: `prevSummary.chapter`, `prevSummary.eventName`
+- Next chapter income: `currentChapter.income`
+- Current start value: `netWorth(state)` on the allocation screen after transition
+- Cash decay estimate: `current start value - prevSummary.valueEnd - currentChapter.income`, labelled as `เงินสดถูกเงินเฟ้อกินกำลังซื้อ` when negative and tied to cash
+
+If the exact cash-decay component cannot be derived safely from current state, show a conservative breakdown:
+
+```text
+เงินปลายบทก่อนหน้า {prevValue}฿
+เงินเติมต้นบทนี้ +{income}฿
+เงินเฟ้อ/การปรับมูลค่าเงินสด {derivedDelta}฿
+เงินเริ่มบทนี้ {startValue}฿
+```
+
+Do not call this `กำไร`, `ผลตอบแทน`, or `P/L` unless ADR-005 ledger/P&L is implemented and reconciled.
+
+### 20.4 Edge cases
+
+- If previous chapter was cash-only and market change rounds to 0, say `พอร์ตไม่โตจากตลาด` rather than `กำไร +0%`.
+- If derived transition delta is 0, hide the row or show `ไม่มีการเปลี่ยนจากเงินเฟ้อ/เงินสดในช่วงนี้` only when useful.
+- If fees, scam, behavior/rebound or aftershock already affected `prevSummary.valueEnd`, do not repeat them as new transition money unless a canonical field says they occur during the transition.
+- If money values round to the same display number but percent is non-zero, prefer money explanation on the main layer and move percent to detail.
+- If `netChange` is positive because income is larger than cash decay, say `เงินเพิ่มสุทธิ` not `กำไร`.
+- If `netChange` is negative, say `เงินเริ่มบทนี้ลดลงสุทธิ` and show the rows; do not blame the player.
+
+### 20.5 Acceptance scenarios
+
+- `TRANSITION-MONEY-01`: Cash-only chapter 1 ending at 100฿ and chapter 2 starting at 142฿ shows +60฿ income, about -18฿ inflation/cash purchasing power and +42฿ net transition.
+- `TRANSITION-MONEY-02`: Chapter intro for chapters 2-4 always explains why start value differs from previous chapter ending value before the allocation action.
+- `TRANSITION-MONEY-03`: The transition summary never labels income or cash-decay arithmetic as investment profit.
+- `TRANSITION-MONEY-04`: The summary is visible in the modal first layer on 390×844 and 1366×768 without hiding the primary `เริ่มจัดพอร์ตบทนี้` action.
+- `TRANSITION-MONEY-05`: The breakdown remains understandable in grayscale and by screen reader: signed money, row labels and total are text.
+- `TRANSITION-MONEY-06`: If exact breakdown fields are missing, UI shows the conservative derived rows and records a dependency rather than inventing new engine rules.
+
+### 20.6 Session next implementation checklist
+
+1. Inspect `finishChapter`, `AllocationScreen`, `ChapterIntroModal`, `ReportScreen` and existing history fields.
+2. Implement a `ChapterTransitionBreakdown` view in the chapter intro modal or a small helper component reused by report if useful.
+3. Use existing state-derived arithmetic only; do not modify balance/RNG/inflation formulas.
+4. Add tests or browser assertions for the cash-only 100฿ → 142฿ case and one invested-portfolio case.
+5. Verify mobile modal height, focus order, screen-reader labels and no horizontal overflow.
+6. Update `PROJECT_STATUS.md` with implementation evidence, test/build results and any missing-data dependency.
+
+### 20.7 Implementation evidence (2026-08-21)
+
+- `ChapterIntroModal` now shows the transition breakdown for chapters 2–4 before allocation begins.
+- The arithmetic is derived from `prevSummary.valueEnd`, current chapter income and current `netWorth(state)` through a pure presentation helper; no balance, RNG, inflation or command behavior changed.
+- Cash-only acceptance is covered by a unit test: 100฿ → approximately 142฿ renders +60฿ income, approximately -18฿ cash purchasing-power adjustment and +42฿ net transition.
+- An invested-portfolio fixture and invalid-data fallback are also covered. Browser QA confirmed the signed rows, accessible group label and visible primary action in the real chapter-2 modal.

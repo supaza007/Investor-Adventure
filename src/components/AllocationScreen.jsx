@@ -5,6 +5,7 @@ import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
+import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
@@ -177,8 +178,14 @@ function ToolDetailModal({ tool, onClose }) {
 
 // popup กันหน้าจัดพอร์ต — บังคับให้อ่านว่ากำลังอยู่บทไหนก่อนเริ่มลาก slider
 // ถ้ามีบทก่อนหน้า (prevSummary) จะโชว์สรุปสั้นๆ ของบทที่เพิ่งจบด้วย เพื่อสะกิดให้คิดก่อนปรับพอร์ตใหม่
-function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
+function signedMoney(value) {
+  const rounded = Math.round(value)
+  return `${rounded > 0 ? '+' : ''}${money(rounded)}`
+}
+
+function ChapterIntroModal({ chapter, prevSummary, startValue, onContinue }) {
   const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
+  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue })
 
   return (
     // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
@@ -191,6 +198,17 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
               พอร์ตปลายบท <b className="text-white">{money(prevSummary.valueEnd)}</b>{' '}
               <span className={prevChangePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}>({pct(prevChangePct)})</span>
             </div>
+            {transition && (
+              <div className="mt-2 border-t border-white/10 pt-2" aria-label="ที่มาของเงินเมื่อเริ่มบทใหม่">
+                <div className="font-bold text-amber-200">เริ่มบทใหม่ เงินเปลี่ยนเพราะอะไร?</div>
+                <div className="mt-1 flex justify-between gap-3"><span>เงินเติมจากช่วงชีวิตใหม่</span><b>{signedMoney(transition.income)}</b></div>
+                {transition.cashAdjustment !== 0 && (
+                  <div className="flex justify-between gap-3"><span>เงินสดถูกเงินเฟ้อกินกำลังซื้อ</span><b>{signedMoney(transition.cashAdjustment)}</b></div>
+                )}
+                <div className="mt-1 flex justify-between gap-3 border-t border-white/10 pt-1 font-bold"><span>{transition.netChange >= 0 ? 'เงินเพิ่มสุทธิ' : 'เงินลดสุทธิ'}</span><span>{signedMoney(transition.netChange)}</span></div>
+                <div className="mt-1 text-white/60">เงินเริ่มบทนี้ <b className="text-white">{money(transition.startValue)}</b> · ไม่ใช่กำไรจากตลาดทั้งหมด</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -264,7 +282,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} onContinue={() => setIntroSeenFor(chapter.n)} />}
+      {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
       {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>
         <h1 className="text-xl font-black text-emerald-300">ทบทวนก่อนลงทุน</h1>

@@ -257,10 +257,19 @@ const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral
 // ทั้งสองทางคือ "ตัวที่กำหนดผลลัพธ์รอบนี้มากที่สุดอยู่บนสุดเสมอ" กล่องบทเรียนจึงอ้างแถวบนสุดได้
 function ImpactTable({ rows, cash, gained, isBlackSwan }) {
   const maxAbs = Math.max(1e-9, ...rows.map((r) => Math.abs(r.change)))
+  const lead = rows[0]
+  const leadRounded = lead ? Math.round(Math.abs(lead.change)) : 0
+  const leadSign = leadRounded === 0 ? '' : lead.change < 0 ? '-' : '+'
 
   return (
     <div className="mt-2">
-      <div className="text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยคุณบ้าง' : 'สินทรัพย์ไหนทำร้ายคุณบ้าง'}</div>
+      {lead && (
+        <div className="pixel-chip bg-slate-800/80 px-2 py-1.5 text-[10px] font-bold sm:text-xs">
+          {gained ? 'ฮีโร่รอบนี้' : 'ตัวที่ลากพอร์ตลงมากสุด'}: {lead.tool.name}{' '}
+          <span className={lead.change < 0 ? 'text-rose-300' : 'text-emerald-300'}>{leadSign}{money(Math.abs(lead.change))}</span>
+        </div>
+      )}
+      <div className="mt-1 text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยพอร์ตในรอบนี้' : 'สินทรัพย์ไหนได้รับผลกระทบในรอบนี้'}</div>
 
       {/* Black Swan บังคับ exposure เท่ากันหมดทุกตัว (encounter.js) ทุกแถวเลยได้ % เดียวกันเป๊ะ
           ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
@@ -385,7 +394,17 @@ function DebriefStage({ state, event }) {
         )}
 
         {state.lastFee > 0.5 && (
-          <div className="mt-1.5 text-rose-300/90">ค่าธรรมเนียมการซื้อขายรอบนี้ {money(state.lastFee)} — {style.name}จ่ายทุกครั้งที่แตะพอร์ต</div>
+          <div className="mt-1.5 text-rose-300/90">ค่าธรรมเนียม -{money(state.lastFee)} · ต้นทุนจากการปรับพอร์ตของ{style.name}</div>
+        )}
+
+        {state.scam?.lost > 0 && (
+          <div className="mt-1.5 text-rose-300/90">มิจฉาชีพ -{money(state.scam.lost)} · สูญเสียจากการโอนเงิน ไม่ใช่ผลจากตลาด</div>
+        )}
+
+        {state.behavior && (
+          <div className="mt-1.5 text-sky-200/90">
+            การตัดสินใจของคุณ: {state.behavior === 'hold' ? 'ถือต่อและรอดูการฟื้นตัว' : state.behavior === 'cut' ? 'ย้ายไปตราสารหนี้เพื่อลดแรงกระแทกถัดไป' : 'ใช้เงินสดซื้อเพิ่ม ทำให้ผลรอบถัดไปแรงขึ้น'}
+          </div>
         )}
 
         {state.isBlackSwan && (

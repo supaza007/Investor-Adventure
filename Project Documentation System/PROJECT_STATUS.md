@@ -347,3 +347,24 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Remaining implementation: UI-012 top-contributor/detractor signed-money summary and separate fee/scam/behavior rows require approved canonical data; broader technical-term disclosure work across shock/report remains Planned.
 - Copy guardrail: Until ADR-005 ledger/P&L is active, UI must say `ผลต่อพอร์ตในบทนี้` rather than `กำไรจริง`.
 - Preserved concurrent files: `src/game/engine/balance.js`, `src/game/engine/encounter.js`, `src/game/engine/gameState.js`, `src/game/engine/gameState.test.js`, plus untracked `.obsidian`, captures/output/tmp/prototype files were not changed by this integration.
+
+## Visible UI/Content Upgrade Handoff — Chapter Transition Money (2026-08-21)
+
+- Trigger: Screenshot review showed a learner-confusing transition: chapter 1 ends at 100฿ (+0.0%) but chapter 2 allocation starts at 142฿.
+- UX decision: Added ADR-2026-020. The UI must explain this as transition money, not investment profit.
+- Required copy: show that +42฿ net comes from +60฿ new chapter/life income and about -18฿ cash purchasing-power loss from inflation in the cash-only example.
+- Required surface: preferred location is `ChapterIntroModal` before the player presses `เริ่มจัดพอร์ตบทนี้`; UI-012/report may reuse the same explanation if useful.
+- Required wording: use `เงินเติมจากช่วงชีวิตใหม่`, `เงินสดถูกเงินเฟ้อกินกำลังซื้อ`, `เงินเพิ่มสุทธิ`, and avoid `กำไร`, `ผลตอบแทน`, or `P/L` for this transition.
+- Implementation constraint: derive from existing state/history/current chapter values where possible; do not change income, cashDecay, balance, RNG, inflation formula, ledger/P&L, save/load or command contract.
+- Next-session checklist: implement `ChapterTransitionBreakdown`, test cash-only 100฿ → 142฿, test one invested case, verify mobile modal height/focus/screen-reader labels, then run relevant tests/builds.
+- Grill-me acceptance: if a player asks `42฿ มาจากไหน` after seeing the UI, the UI/content upgrade has failed.
+
+## Full Update and Dependency Upgrade — 2026-08-21
+
+- ADR-020 is now Implemented/Integrated locally: chapter intro for chapters 2–4 explains previous ending value, new life-stage income, cash purchasing-power adjustment, net transition and current start value before allocation.
+- UI-012 student-first feedback now identifies the leading positive/negative asset and separates available fee, scam and behavior explanations without presenting them as canonical ledger/P&L.
+- Added pure presentation contract tests for cash-only 100฿ → 142฿, an invested transition and invalid inputs.
+- Dependencies upgraded to current compatible releases: React 19.2.8, React DOM 19.2.8, Vite 8.2.2, `@vitejs/plugin-react` 6.1.0, Tailwind CSS 4.3.3, Electron 43.4.1, Concurrently 10.0.5 and Wait-on 9.1.0.
+- `npm audit fix` updated vulnerable transitive dependencies; `npm audit` reports 0 vulnerabilities. Clean `npm ci` succeeds on Node 24 locally; deployment remains on Node 22, which satisfies Vite 8 requirements.
+- Local evidence: `npm test` 73/73, `npm run sim` 7/7 gates, single-file build Pass, web build Pass and browser flow through the chapter-2 transition Pass.
+- No game rules, balance values, RNG, inflation formula, engine command contract, ledger/P&L, Supabase or save/load behavior changed in this upgrade.

@@ -44,6 +44,8 @@ Player feedback must prioritize understanding over finance terminology. Each gam
 
 Chapter debriefs must explain portfolio movement as `ผลต่อพอร์ตในบทนี้` until the canonical ledger/P&L decision is active. If the portfolio increases, the player should see what pushed it up (`ฮีโร่รอบนี้`, supporting assets, cash role, fee/scam/behavior effects). If the portfolio decreases, the player should see what dragged it down and what helped soften the loss. Black Swan copy must avoid blaming the player and explain that nearly everything was affected together.
 
+Chapter transitions must also explain why the next chapter can start with a different amount than the previous chapter ended with. New chapter income and cash purchasing-power decay are life/transition effects, not investment profit. Example: if chapter 1 ends at 100฿ and chapter 2 starts at 142฿, copy should explain `+60฿ เงินเติมจากช่วงชีวิตใหม่`, about `-18฿ เงินสดถูกเงินเฟ้อกินกำลังซื้อ`, net `+42฿`, rather than implying the portfolio earned 42฿.
+
 This feedback rule does not create a new return calculation, ledger, balance rule, or behavior effect. It only changes the order and wording used to present already-available engine results.
 
 End condition คือจบบท 4; ไม่มี game over กลางทาง ผลสุดท้ายเป็น `ruined`, `tight`, `adequate`, `comfortable`, `fire` ไม่ใช่ชนะ/แพ้ทวิภาค
