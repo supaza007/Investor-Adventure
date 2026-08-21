@@ -103,6 +103,12 @@ try {
     await sleep(420)
   }
 
+  for (let attempt = 0; attempt < 25; attempt += 1) {
+    const ready = await evaluate(`(() => { const image = document.querySelector('[role="dialog"] img'); return Boolean(image?.complete && image.naturalWidth > 0) })()`)
+    if (ready) break
+    await sleep(200)
+  }
+
   const evidence = await evaluate(`(() => {
     const dialog = document.querySelector('[role="dialog"]')
     const image = dialog?.querySelector('img')
@@ -117,11 +123,12 @@ try {
       actionVisible: Boolean(rect && rect.top >= 0 && rect.bottom <= innerHeight),
       horizontalOverflow: document.documentElement.scrollWidth > innerWidth,
       focusedRole: document.activeElement?.getAttribute('role') ?? document.activeElement?.tagName,
+      mapRequests: performance.getEntriesByType('resource').filter((entry) => entry.name.includes('chapter-transition')).map((entry) => entry.name),
     }
   })()`)
 
   if (!evidence.dialogVisible || !evidence.hasExplanation || !evidence.hasStartValue || !evidence.mapLoaded || !evidence.actionVisible || evidence.horizontalOverflow) {
-    throw new Error(`Vertical-slice evidence failed: ${JSON.stringify(evidence)}`)
+    throw new Error(`Vertical-slice evidence failed: ${JSON.stringify({ evidence, browserErrors })}`)
   }
   if (browserErrors.length) throw new Error(`Browser errors: ${browserErrors.join(' | ')}`)
   console.log(JSON.stringify({ ok: true, viewport: `${viewportWidth}x${viewportHeight}`, evidence, browserErrors }, null, 2))
