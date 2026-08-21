@@ -633,7 +633,7 @@ Do not call this `กำไร`, `ผลตอบแทน`, or `P/L` unless ADR
 
 ## 21. Approved visual-production direction — Cozy Pixel Fantasy Life Adventure
 
-Status: **Design and four canonical character sheets approved; five target mockups pending owner review; UI integration not yet implemented** (2026-08-21).
+Status: **Design, four canonical character sheets and five target mockups approved; first vertical slice integrated** (2026-08-21).
 
 ### 21.1 Experience and visual principles
 
@@ -731,9 +731,9 @@ This inventory does not authorize new shops, costumes, rewards, currencies, coll
 ### 21.8 Implementation phases and vertical slice
 
 1. [Complete 2026-08-21] Produce and approve one canonical reference sheet for each of the four characters.
-2. [Produced; owner review pending] Produce five target mockups: Cover, Style Selection, Allocation, Event/Impact and Chapter Transition/Debrief.
-3. Lock design tokens, safe areas, frame system, background rules and asset manifest.
-4. Implement the first vertical slice: chapter 1 end → chapter-2 map/transition → allocation → event → debrief.
+2. [Approved 2026-08-21] Produce five target mockups: Cover, Style Selection, Allocation, Event/Impact and Chapter Transition/Debrief.
+3. [Vertical-slice tokens locked] Lock design tokens, safe areas, frame system, background rules and asset manifest.
+4. [Integrated 2026-08-21] Implement the first vertical slice: chapter 1 end → chapter-2 map/transition → allocation → event → debrief.
 5. Verify that the 100฿ → 142฿ transition explanation remains visible and understandable in the new art layer.
 6. Extend the approved system across remaining chapters/screens, then run responsive, accessibility and performance QA.
 
@@ -754,7 +754,7 @@ Do not begin bulk asset production until the four canonical character sheets and
 
 ### 21.10 Remaining approval gates
 
-- Five target screen mockups and final UI-frame family.
+- Expansion of the approved frame family and final character state assets across every remaining screen.
 - Exact event-to-severity mapping where current content does not declare one.
 - Final measured asset budgets and oldest supported device/browser.
 - Final provenance/licensing review before release.

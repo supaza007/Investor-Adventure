@@ -1,9 +1,11 @@
 {
   "bibleVersion": "1.0",
-  "status": "character-approved-mockup-review-required",
+  "status": "mockups-approved-vertical-slice-integrated",
   "createdAt": "2026-08-21",
   "characterApprovedAt": "2026-08-21",
   "characterApprovedBy": "Project Owner",
+  "mockupsApprovedAt": "2026-08-21",
+  "mockupsApprovedBy": "Project Owner",
   "generator": "OpenAI built-in ImageGen",
   "style": "cozy pixel fantasy adventure",
   "shared": {
@@ -59,7 +61,7 @@
       "screen": "Cover",
       "dimensions": "853x1844",
       "sha256": "3863B2A090EF483BCE3C24439F5EBE1DFB4F4833CC6353CFFEED66276D81368B",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "MOCKUP-STYLE-01",
@@ -68,7 +70,7 @@
       "screen": "Style Selection",
       "dimensions": "853x1844",
       "sha256": "E52DAFBC6BFB3E867DF2576BB09B86BE53FA9E14C06994D1F2BE48FC4D76768B",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "MOCKUP-ALLOCATION-01",
@@ -77,7 +79,7 @@
       "screen": "Allocation",
       "dimensions": "853x1844",
       "sha256": "1E0BAD23AD5DC206E1FD8594B313E214600C0F25A17B2E80B52EF155ADFA9610",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "MOCKUP-EVENT-IMPACT-01",
@@ -86,7 +88,7 @@
       "screen": "Event/Impact",
       "dimensions": "853x1844",
       "sha256": "71CFF1EDF4846CB271899F5E9FD63BFE34E43B1B3BE5C2184655AE8BE7372C18",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
     },
     {
       "id": "MOCKUP-CHAPTER-TRANSITION-01",
@@ -95,7 +97,20 @@
       "screen": "Chapter Transition/Debrief",
       "dimensions": "852x1846",
       "sha256": "C625BD72B4F097ECEAFAB30104D8B31113C3537F9D86BC9DA7733C4CA1CE736F",
-      "approval": "pending-owner-review"
+      "approval": "approved-by-project-owner"
+    }
+  ],
+  "runtimeAssets": [
+    {
+      "id": "BG-CHAPTER-TRANSITION-01",
+      "source": "../../../worlds/v1/chapter-transition-map-v1.png",
+      "runtimeFile": "src/assets/worlds/chapter-transition-map.webp",
+      "dimensions": "780x1386",
+      "format": "WebP",
+      "bytes": 235626,
+      "sha256": "092BD58B30D8A65088BA2180025D7BA25400853E52CF9B020DB582F1CE64EEA0",
+      "screen": "Chapter Transition/Debrief",
+      "approval": "derived-from-approved-mockup"
     }
   ]
 }

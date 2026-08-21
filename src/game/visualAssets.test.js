@@ -1,0 +1,12 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { stat } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+
+test('chapter transition background stays inside the approved 150–350 KB budget', async () => {
+  const path = fileURLToPath(new URL('../assets/worlds/chapter-transition-map.webp', import.meta.url))
+  const info = await stat(path)
+
+  assert.ok(info.size >= 150 * 1024, `background is unexpectedly small: ${info.size} bytes`)
+  assert.ok(info.size <= 350 * 1024, `background exceeds 350 KB: ${info.size} bytes`)
+})

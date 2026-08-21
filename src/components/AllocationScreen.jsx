@@ -6,6 +6,7 @@ import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
 import { buildChapterTransitionBreakdown } from '../game/presentation.js'
+import ChapterTransition from './ChapterTransition.jsx'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
@@ -281,8 +282,10 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const concentrationLabel = concentration < 0.35 ? 'ต่ำ' : concentration < 0.65 ? 'ปานกลาง' : 'สูง'
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />}
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      {showIntro && (prevSummary
+        ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />
+        : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />)}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
       {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>
         <h1 className="text-xl font-black text-emerald-300">ทบทวนก่อนลงทุน</h1>

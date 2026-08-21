@@ -18,6 +18,7 @@
     "build:web": "vite build --mode web",
     "test": "node --test \"src/game/**/*.test.js\"",
     "sim": "node scripts/sim.mjs",
+    "qa:vertical-slice": "node scripts/qa-vertical-slice.mjs",
     "optimize-images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
