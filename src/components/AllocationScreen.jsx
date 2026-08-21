@@ -1,12 +1,13 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
-import { netWorth, applyAllocation } from '../game/engine/gameState.js'
+import { netWorth, applyAllocation, currentStyle } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
 import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 import ChapterTransition from './ChapterTransition.jsx'
+import CharacterToken from './CharacterToken.jsx'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
@@ -235,6 +236,7 @@ function ChapterIntroModal({ chapter, prevSummary, startValue, onContinue }) {
 export default function AllocationScreen({ state, chapter, onConfirm, isChapterStart = false, commandError = null, onDismissError, submitting = false }) {
   const total = netWorth(state)
   const tools = getTools()
+  const style = currentStyle(state)
 
   // เริ่มจากสัดส่วนพอร์ตปัจจุบัน (บทแรกคือเงินสด 100%) ปัดเป็นช่อง 5% แล้วโยนเศษเข้าเงินสด
   const initial = useMemo(() => {
@@ -304,12 +306,15 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
       </Modal>}
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
-        <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
-          <div className="min-w-0">
+        <header className="cozy-hud mb-1.5 flex shrink-0 items-center justify-between gap-2 px-2 py-1.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <CharacterToken style={style} state="thinking" className="h-12 w-12 shrink-0" label={false} />
+            <div className="min-w-0">
             <div className="text-xs font-bold sm:text-base">
               บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
             </div>
             <div className="truncate text-[9px] text-white/55 sm:text-xs">{chapter.theme}</div>
+            </div>
           </div>
           <div className="shrink-0 text-right">
             <div className="text-[9px] text-white/50 sm:text-xs">ทรัพย์สินทั้งหมด</div>

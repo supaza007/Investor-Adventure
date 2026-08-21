@@ -217,7 +217,7 @@ export default function StyleSelect({ onSelect }) {
   const allDefensePct = styles.map((s) => Math.round((1 - s.shockMult) * 100))
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       {showDetail && (
         <StyleDetailModal
           style={style}

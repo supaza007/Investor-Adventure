@@ -633,7 +633,7 @@ Do not call this `กำไร`, `ผลตอบแทน`, or `P/L` unless ADR
 
 ## 21. Approved visual-production direction — Cozy Pixel Fantasy Life Adventure
 
-Status: **Design, four canonical character sheets and five target mockups approved; first vertical slice integrated** (2026-08-21).
+Status: **Design, four canonical character sheets and five target mockups approved; playable visual overhaul v1 integrated** (2026-08-21).
 
 ### 21.1 Experience and visual principles
 
@@ -656,6 +656,8 @@ All four characters have equal visual status. At 48–64 px they must remain dis
 | `CHAR-LONGTERM` | นักลงทุนระยะยาว | อัศวินผู้พิทักษ์แห่งกาลเวลา | ใหญ่ มั่นคง เคลื่อนไหวช้า; เกราะหนักทรงมน | โล่ใหญ่, นาฬิกาทราย/ต้นไม้ใหญ่/ดวงอาทิตย์ | น้ำเงินเข้ม, เงิน, เหลืองทอง | ไม่ขาดทุน ป้องกันได้ทุกเหตุการณ์ หรือมี immunity |
 
 Required visual states per character: `portrait`, `token`, `idle`, `selected`, `thinking`, `brace`, `hit`, `celebrate`, `recover`, `summary`.
+
+Playable v1 implementation uses the approved canonical full-body cutout for `portrait`, `token`, `idle`, `selected` and `summary`. Non-semantic CSS pose/motion treatments communicate `thinking`, `brace`, `hit` and `recover` without inventing abilities; event and report copy remain the authoritative information. A missing runtime cutout falls back to the style emoji. Distinct hand-authored frame sequences and `celebrate` art remain a future visual-polish enhancement, not a gameplay dependency.
 
 Do not produce attack animations unless a future approved game rule adds a real player action requiring them. Character demographics, facial details and final costume ornament remain art-production choices, but must avoid gender stereotypes, revealing armor and loss of readability at mobile size.
 

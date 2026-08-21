@@ -10,3 +10,12 @@ test('chapter transition background stays inside the approved 150–350 KB budge
   assert.ok(info.size >= 150 * 1024, `background is unexpectedly small: ${info.size} bytes`)
   assert.ok(info.size <= 350 * 1024, `background exceeds 350 KB: ${info.size} bytes`)
 })
+
+test('canonical runtime characters stay inside the approved 30–120 KB budget', async () => {
+  for (const id of ['trader', 'vi', 'medium', 'longterm']) {
+    const path = fileURLToPath(new URL(`../assets/characters/${id}-canonical.webp`, import.meta.url))
+    const info = await stat(path)
+    assert.ok(info.size >= 30 * 1024, `${id} is unexpectedly small: ${info.size} bytes`)
+    assert.ok(info.size <= 120 * 1024, `${id} exceeds 120 KB: ${info.size} bytes`)
+  }
+})

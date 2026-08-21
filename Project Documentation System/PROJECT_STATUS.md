@@ -388,3 +388,14 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 - Browser QA: automated real Chrome flow from Cover through chapter 1 into the new chapter-2 transition passed at 320×568, 390×844 and 1280×800. Map loaded, primary action stayed visible, dialog received focus, no horizontal overflow and no console/page errors were found.
 - Preserved concurrent changes: `src/game/engine/gameState.js`, `src/game/engine/gameState.test.js`, `.obsidian/`, captures, output, prototype and tmp were not edited, deleted or overwritten.
 - Next action: expand the approved frame family and canonical character states across Cover, Style Selection and the remaining chapters, then run full-game visual regression, reduced-motion, fallback and payload QA before marking the visual overhaul Playable.
+
+## Playable Cozy Visual Overhaul v1 — 2026-08-21
+
+- Outcome: all four Project Owner-approved canonical characters are integrated into the playable Cover, Style Selection, Allocation and gameplay HUD surfaces; the existing Report retains the selected style summary and real four-chapter history.
+- Runtime assets: four transparent WebP cutouts (`trader`, `vi`, `medium`, `longterm`) are 68–108 KB each, within the 30–120 KB portrait target. Source PNGs, generation prompts, runtime hashes, screen/state mapping and approval provenance are recorded under `assets-source/characters/runtime-v1/` and the v1 manifest.
+- State treatment: the canonical cutout supplies portrait/token/idle/selected/summary roles; lightweight CSS communicates thinking/reveal, shock/hit, behavior/brace and debrief/recover. Reduced-motion mode disables non-essential animation and all information remains in live text.
+- Reliability: character tokens fall back to the style emoji on missing/failed art; chapter-transition art retains its existing non-blocking gradient fallback.
+- Full browser QA on the local web build: Cover → optional assessment skip → research-consent decline → Style → allocation draft/review/confirm → all four chapters, including scam rejection and behavior confirmation → post-assessment skip → Report → Restart passed. No console warnings/errors, broken images or horizontal overflow were found.
+- Responsive evidence: Cover and primary flow checked at 320×568, 390×844 and 1280×800; five Cover images loaded at each size and the primary action remained usable. Source focus rules retain a 3 px yellow `:focus-visible` outline; modal focus/focus-trap behavior is unchanged.
+- Scope guardrail: no game rule, balance, RNG, inflation formula, engine contract, ledger/P&L, Supabase or save/load behavior changed.
+- Remaining visual polish: distinct hand-authored animation frames (including celebrate) and formal grayscale silhouette comparison are enhancements; they do not block Playable v1.

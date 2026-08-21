@@ -32,7 +32,7 @@ const byId = (files) => Object.fromEntries(Object.entries(files).map(([path, url
 export const CHARACTER_ART = byId(CHARACTER_FILES)
 export const EVENT_ART = byId(EVENT_FILES)
 
-export const characterArtOf = (id) => CHARACTER_ART[id] ?? null
+export const characterArtOf = (id) => CHARACTER_ART[`${id}-canonical`] ?? CHARACTER_ART[id] ?? null
 export const eventArtOf = (id) => EVENT_ART[id] ?? null
 
 // มีรูปครบไหม — ใช้ตอน debug ว่าทำไมบางจอขึ้น emoji แทนรูป

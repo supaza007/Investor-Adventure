@@ -6,6 +6,7 @@ import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
+import CharacterToken from './CharacterToken.jsx'
 import { eventArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
@@ -465,9 +466,10 @@ export default function StageScreen({ state, command, commandError = null, onDis
     <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
-        <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
-          <div className="text-[10px] font-bold sm:text-sm">
-            บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
+        <header className="cozy-hud mb-1.5 flex shrink-0 items-center justify-between gap-2 px-2 py-1.5">
+          <div className="flex items-center gap-2 text-[10px] font-bold sm:text-sm">
+            <CharacterToken style={currentStyle(state)} state={stage?.key ?? 'idle'} className="h-10 w-10 shrink-0" label={false} />
+            <span>บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}</span>
           </div>
           <StageTrack stageIndex={state.stageIndex} />
         </header>

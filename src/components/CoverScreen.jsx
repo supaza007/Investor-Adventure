@@ -1,3 +1,5 @@
+import { characterArtOf } from './art.js'
+
 // ⚠️ ไม่ import รูปหน้าปกตรงๆ ด้วยเหตุผลเดียวกับ art.js — ไฟล์รูปไม่ถูก commit ขึ้น git
 // เครื่องที่มีไฟล์ → ใช้โลโก้/พื้นหลังจริง · เครื่องที่ไม่มี (GitHub Actions) → ใช้ชื่อเกมแบบตัวอักษร
 // สไตล์ .cover-title (ตัวทองขอบคู่) มีอยู่ใน index.css อยู่แล้ว จึงไม่ได้ดูเหมือนของขาด
@@ -16,16 +18,17 @@ const GAME_TITLE = 'พอร์ตพิชิตเงินเฟ้อ'
 
 // หน้าปกเกม: พื้นหลัง + ชื่อเกม + ปุ่ม Play
 export default function CoverScreen({ onPlay, onContinue = null, saveError = null }) {
+  const heroes = ['trader', 'vi', 'medium', 'longterm'].map((id) => ({ id, src: characterArtOf(id) })).filter((hero) => hero.src)
   return (
     <div
-      className="relative flex h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 text-center"
+      className="cozy-cover relative flex h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 text-center"
       style={
         titleBg
           ? { backgroundImage: `url(${titleBg})`, backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated' }
           : { background: 'radial-gradient(ellipse at 50% 35%, #1e293b 0%, #0b0c15 70%)' }
       }
     >
-      <div className="absolute inset-0 bg-black/45" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-slate-950/45 to-slate-950/95" />
       <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_140px_60px_rgba(0,0,0,0.7)]" />
 
       <div className="relative z-10 flex flex-col items-center">
@@ -44,10 +47,14 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
 
         <p className="game-subtitle mt-2 text-xs text-white/85 sm:text-base">เส้นทางชีวิตนักลงทุน · อายุ 20 ถึงเกษียณ</p>
 
+        {heroes.length > 0 && <div className="cozy-hero-lineup mt-3 flex h-[min(30vh,15rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
+          {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
+        </div>}
+
         <button
           type="button"
           onClick={onPlay}
-          className="pixel-btn play-pulse mt-6 bg-emerald-500 px-10 py-3 text-xl font-extrabold tracking-widest text-emerald-950 sm:mt-10 sm:px-14 sm:py-4 sm:text-2xl"
+          className="cozy-primary pixel-btn play-pulse mt-4 px-10 py-3 text-xl font-extrabold tracking-widest sm:px-14 sm:py-4 sm:text-2xl"
         >
           ▶ PLAY
         </button>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, scoreAssessment } from '../game/learning.js'
 
 function Shell({ title, eyebrow, children }) {
-  return <main className="min-h-[100dvh] overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-3 py-5 text-white">
+  return <main className="cozy-screen min-h-[100dvh] overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-3 py-5 text-white">
     <div className="mx-auto max-w-2xl">
       <p className="text-xs uppercase tracking-widest text-emerald-300">{eyebrow}</p>
       <h1 className="mt-1 text-2xl font-black sm:text-4xl">{title}</h1>

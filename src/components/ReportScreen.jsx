@@ -61,7 +61,7 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
   const durationMinutes = started && ended >= started ? Math.round((ended - started) / 60000) : null
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-2 py-2 sm:px-4 sm:py-4">
         <div className="shrink-0 text-center">
           <div className="text-[10px] uppercase tracking-widest text-white/45 sm:text-xs">อายุ {BALANCE.retireAge} · รายงานผลเกษียณ</div>
