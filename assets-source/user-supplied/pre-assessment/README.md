@@ -37,9 +37,10 @@ Implementation notes:
 ## Integration log — 2026-08-21
 
 - `assessment-background.jpg` → `Assessment Screen Shell`; converted to `src/assets/ui/pre-assessment-background-user.webp` and used as the page background.
-- `questionnaire-frame.png` → questionnaire content frame; converted to `src/assets/ui/pre-assessment-frame-user.webp` and used behind the disclaimer and 10-question form.
+- `questionnaire-frame.png` → per-question frame; converted to `src/assets/ui/pre-assessment-frame-user.webp` and used once for each of the 10 question fieldsets.
 - `assessment-eyebrow.png` → scroll frame behind the "ก่อนเริ่มเกม" label; text remains live DOM text.
 - `assessment-title.png` → scroll frame behind the main title; text remains live DOM text.
 - `assessment-disclaimer-panel.png` → scroll frame behind the disclaimer; text remains live DOM text.
 - Text containment: question legends, answer rows and validation errors now wrap inside their frames on narrow screens.
+- Refinement: `questionnaire-frame` is no longer used as one large form wrapper and no longer overlaps the eyebrow/title/disclaimer scroll frames.
 - Scope guardrail: no question text, answer scoring, risk-profile bands, consent behavior or game rules changed.

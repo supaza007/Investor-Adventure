@@ -25,13 +25,15 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
     if (!result) { setError('กรุณาตอบทุกข้อ หรือเลือกข้ามแบบสะท้อนนี้'); return }
     onSubmit(result)
   }
-  return <form onSubmit={submit} className={`mt-4 space-y-4 ${className}`} noValidate>
-    {questions.map((q, index) => <fieldset key={q.id} className="assessment-question-card pixel-frame min-w-0 bg-slate-900/80 p-3">
-      <legend className="max-w-full break-words px-1 font-bold leading-snug">{index + 1}. {q.prompt}</legend>
-      <div className="mt-2 grid min-w-0 gap-2">{q.options.map(([value, label]) => <label key={value} className="assessment-answer-row pixel-chip flex min-h-11 min-w-0 cursor-pointer items-start gap-3 bg-slate-800 px-3 py-2 leading-snug">
-        <input className="mt-1 shrink-0" type="radio" name={q.id} value={value} checked={answers[q.id] === value} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
-        <span className="min-w-0 flex-1 break-words">{label}</span>
-      </label>)}</div>
+  return <form onSubmit={submit} className={`mt-4 space-y-5 ${className}`} noValidate>
+    {questions.map((q, index) => <fieldset key={q.id} className="assessment-question-card min-w-0" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
+      <div className="assessment-question-card__content">
+        <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug">{index + 1}. {q.prompt}</legend>
+        <div className="mt-2 grid min-w-0 gap-2">{q.options.map(([value, label]) => <label key={value} className="assessment-answer-row pixel-chip flex min-h-11 min-w-0 cursor-pointer items-start gap-3 bg-slate-800 px-3 py-2 leading-snug">
+          <input className="mt-1 shrink-0" type="radio" name={q.id} value={value} checked={answers[q.id] === value} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
+          <span className="min-w-0 flex-1 break-words">{label}</span>
+        </label>)}</div>
+      </div>
     </fieldset>)}
     {error && <p role="alert" className="pixel-chip min-w-0 break-words bg-rose-950 p-3 text-rose-100">{error}</p>}
     <div className="flex flex-wrap gap-3">
@@ -49,7 +51,7 @@ export function PreAssessmentScreen({ onComplete, onSkip }) {
     contentClassName="max-w-4xl"
     style={{ backgroundImage: `linear-gradient(180deg, rgba(3,7,18,.25), rgba(3,7,18,.86)), url(${preAssessmentBackground})` }}
   >
-    <section className="pre-assessment-panel mt-4" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
+    <section className="pre-assessment-panel mt-4">
       <div className="pre-assessment-panel__content">
         <p className="assessment-scroll-label assessment-scroll-label--eyebrow text-xs uppercase tracking-widest text-amber-950" style={{ backgroundImage: `url(${preAssessmentEyebrow})` }}>ก่อนเริ่มเกม</p>
         <h1 className="assessment-scroll-label assessment-scroll-label--title mt-1 break-words text-2xl font-black leading-tight text-amber-950 sm:text-4xl" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>แบบสะท้อนความรู้และความเสี่ยง</h1>
