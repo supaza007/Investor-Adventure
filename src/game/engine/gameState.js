@@ -104,21 +104,23 @@ function pickEvents(rng) {
   return chosen.map((e) => e.id)
 }
 
-function startRun(state, styleId) {
+function startRun(state, styleId, startedAt = null) {
   const style = getStyle(styleId)
   if (!style) return state
   const rng = rngFrom(state.seed)
   const eventOrder = pickEvents(rng)
   // มิจฉาชีพทักครั้งเดียวต่อรอบ สุ่มว่าบทไหน — ผู้เล่นได้เจอบทเรียนนี้เสมอ แต่เดาล่วงหน้าไม่ได้
   const scamChapter = Math.floor(rng() * BALANCE.chapters.length)
+  const next = createInitialState(rng.getSeed())
 
   return {
-    ...createInitialState(rng.getSeed()),
+    ...next,
     phase: 'allocation',
     styleId,
     eventOrder,
     scamChapter,
     cash: BALANCE.chapters[0].income, // ทุนตั้งต้นของบท 1
+    timing: startedAt ? { ...next.timing, runStartedAt: startedAt } : next.timing,
   }
 }
 
@@ -271,7 +273,7 @@ function chooseBehavior(state, choice) {
 // ปิดบท = ปล่อยให้ทศวรรษนั้นเดินจนจบ: ฟื้นตัว → คลื่นตาม → ทบต้น
 // ทำเหมือนกันทุกบทรวมถึงบทสุดท้าย (บทที่ 4 ก็คืออายุ 50-59 ซึ่งเป็นทศวรรษเต็มๆ เหมือนบทอื่น)
 // มีแค่ "รายได้ก้อนใหม่" เท่านั้นที่ไม่เข้าหลังบทสุดท้าย เพราะเกษียณแล้วไม่มีเงินเดือน
-function finishChapter(state) {
+function finishChapter(state, endedAt = null) {
   const rng = rngFrom(state.seed)
   const style = currentStyle(state)
   const chapter = currentChapter(state)
@@ -330,7 +332,8 @@ function finishChapter(state) {
 
   if (isLast) {
     const finished = { ...state, seed: rng.getSeed(), positions, cash, history, phase: 'report' }
-    return { ...finished, report: buildReport(finished) }
+    const timed = endedAt ? withTiming(finished, { scope: 'run', phase: 'end', at: endedAt }) : finished
+    return { ...timed, report: buildReport(timed) }
   }
 
   // 4) เงินสดถูกเงินเฟ้อกิน แล้วรายได้ก้อนใหม่เข้ามา
@@ -358,8 +361,8 @@ function finishChapter(state) {
   }
 }
 
-function nextStage(state) {
-  if (state.stageIndex >= STAGES.length - 1) return finishChapter(state)
+function nextStage(state, endedAt = null) {
+  if (state.stageIndex >= STAGES.length - 1) return finishChapter(state, endedAt)
   return enterStage(state, state.stageIndex + 1)
 }
 
@@ -377,7 +380,7 @@ export function gameReducer(state, action) {
       return state.phase === 'cover' ? { ...state, phase: 'style' } : state
 
     case 'SELECT_STYLE':
-      return state.phase === 'style' ? startRun(state, action.styleId) : state
+      return state.phase === 'style' ? startRun(state, action.styleId, action.at) : state
 
     case 'SET_ALLOCATION':
       if (!canAdjustNow(state)) return state
@@ -415,7 +418,7 @@ export function gameReducer(state, action) {
       if (currentStage(state).key === 'behavior' && !state.behavior) {
         return { ...state, validationError: 'กรุณาเลือกวิธีรับมือก่อนดำเนินเรื่องต่อ' }
       }
-      return { ...nextStage(state), validationError: null }
+      return { ...nextStage(state, action.at), validationError: null }
 
     case 'RESTART':
       return createInitialState(state.seed)
@@ -424,3 +427,4 @@ export function gameReducer(state, action) {
       return state
   }
 }
+

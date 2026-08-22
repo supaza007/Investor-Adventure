@@ -9,31 +9,47 @@
 // ถ้า import ตรงๆ แบบเดิม build บน GitHub จะพังทันทีเพราะหาไฟล์ไม่เจอ
 // วิธีนี้ทำให้โค้ดชุดเดียวใช้ได้ทั้งสองที่ โดยไม่ต้องแยกสาขาหรือแก้ไฟล์ก่อน deploy ทุกครั้ง
 //
-// เวลาเพิ่มรูปใหม่: วางไฟล์ชื่อ <id>.webp ลงในโฟลเดอร์ให้ตรงกับ id ใน data/ แล้วรัน
-// `npm run optimize-images` — ไม่ต้องแก้ไฟล์นี้เลย
+// เวลาเพิ่มรูปใหม่: วางไฟล์ชื่อ <id>.svg ลงในโฟลเดอร์ให้ตรงกับ id ใน data/ แล้วรัน
+// `npm run convert-assets-to-svg` — ไม่ต้องแก้ไฟล์นี้เลย
 
-const CHARACTER_FILES = import.meta.glob('../assets/characters/*.{webp,gif,png,jpg,jpeg}', {
+const CHARACTER_FILES = import.meta.glob('../assets/characters/*.svg', {
   eager: true,
   query: '?url',
   import: 'default',
 })
 
-const EVENT_FILES = import.meta.glob('../assets/events/*.{webp,gif,png,jpg,jpeg}', {
+const EVENT_FILES = import.meta.glob('../assets/events/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+const CHARACTER_RASTER_FILES = import.meta.glob('../assets/characters/*.{webp,gif}', {
   eager: true,
   query: '?url',
   import: 'default',
 })
 
-// '../assets/events/inflation.webp' → 'inflation'
+const EVENT_RASTER_FILES = import.meta.glob('../assets/events/*.{webp,gif}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
+// '../assets/events/inflation.svg' → 'inflation'
 const idOf = (path) => path.split('/').pop().replace(/\.[^.]+$/, '')
 
 const byId = (files) => Object.fromEntries(Object.entries(files).map(([path, url]) => [idOf(path), url]))
 
 export const CHARACTER_ART = byId(CHARACTER_FILES)
 export const EVENT_ART = byId(EVENT_FILES)
+export const CHARACTER_RASTER_ART = byId(CHARACTER_RASTER_FILES)
+export const EVENT_RASTER_ART = byId(EVENT_RASTER_FILES)
 
-export const characterArtOf = (id) => CHARACTER_ART[`${id}-canonical`] ?? CHARACTER_ART[id] ?? null
-export const eventArtOf = (id) => EVENT_ART[id] ?? null
+const ANIMATED_CHARACTER_IDS = new Set(['longterm', 'medium', 'trader'])
+const ANIMATED_EVENT_IDS = new Set(['inflation', 'pandemic', 'reserve_boss', 'scammer', 'tariff_boss', 'tomyumkung'])
+
+export const characterArtOf = (id) => CHARACTER_ART[id + '-canonical'] ?? (ANIMATED_CHARACTER_IDS.has(id) ? CHARACTER_RASTER_ART[id] ?? CHARACTER_ART[id] : CHARACTER_ART[id]) ?? null
+export const eventArtOf = (id) => (ANIMATED_EVENT_IDS.has(id) ? EVENT_RASTER_ART[id] ?? EVENT_ART[id] : EVENT_ART[id]) ?? null
 
 // มีรูปครบไหม — ใช้ตอน debug ว่าทำไมบางจอขึ้น emoji แทนรูป
 export const hasArt = () => Object.keys(EVENT_ART).length > 0

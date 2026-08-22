@@ -1,12 +1,13 @@
+import { useState } from 'react'
 import { characterArtOf } from './art.js'
-import coverBackground from '../assets/ui/cover-background-user.webp'
-import gameSubtitle from '../assets/ui/game-subtitle-user.webp'
-import playButton from '../assets/ui/play-button-user.webp'
+import coverBackground from '../assets/ui/cover-background-user.svg'
+import gameSubtitle from '../assets/ui/game-subtitle-user.svg'
+import playButton from '../assets/ui/play-button-user.svg'
 
 // ⚠️ ไม่ import รูปหน้าปกตรงๆ ด้วยเหตุผลเดียวกับ art.js — ไฟล์รูปไม่ถูก commit ขึ้น git
 // เครื่องที่มีไฟล์ → ใช้โลโก้/พื้นหลังจริง · เครื่องที่ไม่มี (GitHub Actions) → ใช้ชื่อเกมแบบตัวอักษร
 // สไตล์ .cover-title (ตัวทองขอบคู่) มีอยู่ใน index.css อยู่แล้ว จึงไม่ได้ดูเหมือนของขาด
-const ASSETS = import.meta.glob('../assets/title-*.{webp,png,jpg,jpeg}', {
+const ASSETS = import.meta.glob('../assets/title-*.svg', {
   eager: true,
   query: '?url',
   import: 'default',
@@ -21,10 +22,23 @@ const GAME_TITLE = 'พอร์ตพิชิตเงินเฟ้อ'
 
 // หน้าปกเกม: พื้นหลัง + ชื่อเกม + ปุ่ม Play
 export default function CoverScreen({ onPlay, onContinue = null, saveError = null }) {
+  const [studentName, setStudentName] = useState('')
+  const [classRoom, setClassRoom] = useState('')
+  const [inputError, setInputError] = useState('')
   const heroes = ['trader', 'vi', 'medium', 'longterm'].map((id) => ({ id, src: characterArtOf(id) })).filter((hero) => hero.src)
+  const start = (event) => {
+    event.preventDefault()
+    const name = studentName.trim()
+    const room = classRoom.trim()
+    if (!name || !room) {
+      setInputError('กรุณากรอกชื่อและห้องเรียนก่อนเริ่มเกม')
+      return
+    }
+    onPlay({ studentName: name, classRoom: room })
+  }
   return (
     <div
-      className="cozy-cover relative flex h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 text-center"
+      className="cozy-cover relative flex min-h-[100dvh] flex-col items-center justify-start overflow-y-auto px-4 py-6 text-center sm:justify-center"
       style={
         coverBackground || titleBg
           ? { backgroundImage: `url(${coverBackground || titleBg})`, backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated' }
@@ -54,14 +68,33 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
           {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
         </div>}
 
-        <button
-          type="button"
-          onClick={onPlay}
-          className="cover-play-art pixel-btn play-pulse mt-4"
-        >
-          <img src={playButton} alt="" className="block w-[clamp(11rem,38vw,17rem)]" />
-          <span className="sr-only">PLAY</span>
-        </button>
+        <form onSubmit={start} className="mt-3 flex w-[min(90vw,22rem)] flex-col items-stretch gap-2 text-left">
+          <label className="text-xs font-bold text-white/85" htmlFor="student-name">ชื่อผู้เล่น</label>
+          <input
+            id="student-name"
+            value={studentName}
+            onChange={(event) => { setStudentName(event.target.value); setInputError('') }}
+            className="pixel-chip min-h-11 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
+            placeholder="กรอกชื่อหรือนามแฝง"
+            maxLength={80}
+            autoComplete="off"
+          />
+          <label className="text-xs font-bold text-white/85" htmlFor="class-room">ห้องเรียน</label>
+          <input
+            id="class-room"
+            value={classRoom}
+            onChange={(event) => { setClassRoom(event.target.value); setInputError('') }}
+            className="pixel-chip min-h-11 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
+            placeholder="เช่น ม.6/3"
+            maxLength={30}
+            autoComplete="off"
+          />
+          {inputError && <p role="alert" className="text-xs text-rose-200">{inputError}</p>}
+          <button type="submit" className="cover-play-art pixel-btn play-pulse mt-1 self-center">
+            <img src={playButton} alt="" className="block w-[clamp(11rem,38vw,17rem)]" />
+            <span className="sr-only">PLAY</span>
+          </button>
+        </form>
 
         {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
 

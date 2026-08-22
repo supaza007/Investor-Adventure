@@ -4,6 +4,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
 import { characterArtOf } from './art'
+import chooseCharacterBackground from '../assets/ui/choose-character-background-user.webp'
 
 const STYLE_GRAD = {
   medium: 'from-sky-900/60 to-sky-950 border-sky-500/50',
@@ -14,8 +15,8 @@ const STYLE_GRAD = {
 
 // ตำแหน่งครอปตอน object-fit: cover — วัดจาก bounding box จริงของแต่ละภาพแล้วพบว่า
 // กรอบซ้าย (แคบ+สูง) ครอปแนวตั้งเป็นหลักกับภาพทั้ง 4 ใบ จึงเอียงไปทาง "top" เพื่อรักษาหน้า/หัว
-// ไว้ก่อน ยอมเสียเท้า/ขาส่วนล่างแทน — vi.webp โดนครอปหนักสุด (เข้าเนื้อตัวละครถึง ~146px
-// ถ้า center) ส่วน trader.webp ตัวละครไม่อยู่กึ่งกลาง canvas เลยเบี่ยงแนวนอนด้วย
+// ไว้ก่อน ยอมเสียเท้า/ขาส่วนล่างแทน — vi.svg โดนครอปหนักสุด (เข้าเนื้อตัวละครถึง ~146px
+// ถ้า center) ส่วน trader.svg ตัวละครไม่อยู่กึ่งกลาง canvas เลยเบี่ยงแนวนอนด้วย
 const PORTRAIT_POSITION = {
   medium: 'center top',
   longterm: 'center top',
@@ -217,7 +218,15 @@ export default function StyleSelect({ onSelect }) {
   const allDefensePct = styles.map((s) => Math.round((1 - s.shockMult) * 100))
 
   return (
-    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div
+      className="cozy-screen style-select-screen flex h-[100dvh] flex-col overflow-hidden text-white"
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.28) 0%, rgba(4, 16, 30, 0.54) 48%, rgba(3, 10, 18, 0.94) 100%), url(${chooseCharacterBackground})`,
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+      }}
+    >
       {showDetail && (
         <StyleDetailModal
           style={style}

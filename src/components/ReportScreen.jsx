@@ -1,8 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import { BALANCE } from '../game/engine/balance.js'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import { eventArtOf } from './art'
 import { buildReadiness } from '../game/learning.js'
+import { createPlayerRunPayload, submitPlayerRun } from '../lib/playerData.js'
+import { enqueuePlayerRun, flushPlayerDataQueue } from '../lib/playerDataQueue.js'
 
 const BAND_STYLE = {
   fire: { cls: 'from-amber-800 to-amber-950 border-amber-400/60', text: 'text-amber-300', blurb: 'คุณเกษียณได้ก่อนกำหนดแบบสบายๆ' },
@@ -51,15 +54,67 @@ function ChapterRow({ c }) {
 }
 
 // รายงานผลเกษียณ — ไม่ใช่ win/lose แต่เป็นสเปกตรัม เทียบกับเกณฑ์อ้างอิง (ดีไซน์ข้อ 7)
-export default function ReportScreen({ report, session, learning, onRestart }) {
+export default function ReportScreen({ report, session, styleId, gameTiming, learning, onRestart }) {
+  const submittedRef = useRef(false)
+  const sendingRef = useRef(false)
+  const [saveStatus, setSaveStatus] = useState('idle')
   const b = BAND_STYLE[report.band.id] ?? BAND_STYLE.tight
   const vsBench = report.finalValue / report.benchmark - 1
   const beat = vsBench >= 0
   const readiness = buildReadiness(report, session.assessment)
-  const started = session.timing.startedAt ? Date.parse(session.timing.startedAt) : null
-  const ended = session.timing.endedAt ? Date.parse(session.timing.endedAt) : Date.now()
-  const durationMinutes = started && ended >= started ? Math.round((ended - started) / 60000) : null
+  const durationMinutes = Number.isFinite(gameTiming?.runDurationSeconds) ? Math.round(gameTiming.runDurationSeconds / 60) : null
 
+  useEffect(() => {
+    if (submittedRef.current) return
+    submittedRef.current = true
+    if (!session.player?.studentName || !session.player?.classRoom) return
+
+    const run = createPlayerRunPayload({
+      player: session.player,
+      report,
+      styleId,
+      preAssessment: session.assessment?.pre,
+      postAssessment: session.assessment?.post,
+      learning,
+      timing: gameTiming,
+    })
+    if (!run) {
+      setSaveStatus('waiting')
+      return
+    }
+
+    const queued = enqueuePlayerRun(run)
+    const sendQueuedRuns = async () => {
+      if (sendingRef.current) return
+      sendingRef.current = true
+      setSaveStatus('sending')
+      try {
+        if (!queued.ok) {
+          const directResult = await submitPlayerRun(run)
+          setSaveStatus(directResult.ok ? 'saved' : 'waiting')
+          return
+        }
+
+        const result = await flushPlayerDataQueue()
+        setSaveStatus(result.sentSessionIds.includes(run.sessionId) ? 'saved' : 'waiting')
+      } catch (error) {
+        console.warn('[player-data] unable to save completed run', error)
+        setSaveStatus('waiting')
+      } finally {
+        sendingRef.current = false
+      }
+    }
+
+    void sendQueuedRuns()
+    const handleOnline = () => void sendQueuedRuns()
+    window.addEventListener('online', handleOnline)
+    const retryTimer = window.setInterval(sendQueuedRuns, 30000)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.clearInterval(retryTimer)
+    }
+  }, [])
   return (
     <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-2 py-2 sm:px-4 sm:py-4">
@@ -127,7 +182,10 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
           <p className="mt-2">โปรไฟล์ความเสี่ยงก่อนเล่น: <b>{learning.preRiskProfile ? RISK_PROFILE_LABEL[learning.preRiskProfile] : 'Not assessed'}</b></p>
           <p>การเปลี่ยนแปลงคะแนนความรู้: <b>{learning.status === 'assessed' ? `${learning.knowledgeGain >= 0 ? '+' : ''}${learning.knowledgeGain}` : 'Not assessed'}</b></p>
           <p>เวลาเล่นโดยประมาณ: <b>{durationMinutes == null ? 'เวลาไม่พร้อมใช้' : `${durationMinutes} นาที`}</b></p>
-          <p className="mt-1 text-white/55">คะแนนการเรียนรู้แยกจากผลพอร์ตและโชค ไม่มีข้อมูลถูกส่งออกจากอุปกรณ์นี้</p>
+          <p className="mt-1 text-white/55">คะแนนการเรียนรู้แยกจากผลพอร์ตและโชค ระบบจะส่งเฉพาะสถิติการเล่นเมื่อเชื่อมต่อฐานข้อมูล</p>
+          {saveStatus !== 'idle' && <p className="mt-1 text-emerald-300/80" aria-live="polite">
+            {saveStatus === 'saved' ? '✓ ส่งข้อมูลเข้าฐานข้อมูลแล้ว' : '… เก็บข้อมูลไว้ในเครื่อง จะส่งอัตโนมัติเมื่ออินเทอร์เน็ตกลับมา'}
+          </p>}
         </section>
 
         <details className="pixel-chip mt-3 bg-slate-900 p-3 text-xs">
@@ -146,3 +204,5 @@ export default function ReportScreen({ report, session, learning, onRestart }) {
     </div>
   )
 }
+
+

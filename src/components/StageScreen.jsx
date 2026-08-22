@@ -513,7 +513,7 @@ export default function StageScreen({ state, command, commandError = null, onDis
             <button
               type="button"
               disabled={needsBehavior || submitting}
-              onClick={() => command({ type: 'NEXT_STAGE', expectedStageIndex: state.stageIndex })}
+              onClick={() => command({ type: 'NEXT_STAGE', expectedStageIndex: state.stageIndex, at: new Date().toISOString() })}
               className={`pixel-btn px-4 py-1.5 text-[11px] font-bold sm:px-8 sm:py-2 sm:text-base ${
                 needsBehavior ? 'cursor-not-allowed bg-slate-700 text-slate-500' : 'bg-emerald-500 text-emerald-950'
               }`}

@@ -1,6 +1,12 @@
 # dependencies
 node_modules
 
+# Supabase / local environment secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
 # build output
 dist
 dist-web
@@ -46,3 +52,4 @@ public/
 รูปภาพจาก User/
 uploads/
 Sound Effect/
+

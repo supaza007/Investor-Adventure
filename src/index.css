@@ -19,6 +19,11 @@ body,
   height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+  background: #0b0c15;
+}
+
 body {
   /* ฟอนต์คมสำหรับไทย + โมโนสเปซสำรอง (ฟอนต์พิกเซลจริงไม่รองรับไทย) */
   font-family: var(--font-game);
@@ -28,6 +33,9 @@ body {
   background-size: 4px 4px;
   image-rendering: pixelated;
   letter-spacing: 0.3px;
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
 }
 
 /* ทุกอย่างเป็นเหลี่ยม ไม่มีมุมโค้ง = ฟีลพิกเซล */
@@ -39,6 +47,18 @@ body {
 
 img {
   image-rendering: pixelated;
+}
+
+button,
+label,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mobile-modal-panel {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 /* เส้นสแกนไลน์ CRT คลุมทั้งจอ */
@@ -316,6 +336,23 @@ button:focus-visible {
   }
 }
 
+/* ===== Safe mobile viewport ===== */
+@media (max-width: 640px) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .cozy-screen,
+  .pre-assessment-screen {
+    min-height: 100svh;
+  }
+
+  .mobile-modal-panel {
+    max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
 /* ===== Cozy Pixel Fantasy vertical slice ===== */
 .cozy-screen {
   background-color: #071426;
@@ -332,6 +369,8 @@ button:focus-visible {
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
+  /* UI textures are raster artwork; smooth fractional scaling prevents resize shimmer. */
+  image-rendering: auto;
 }
 
 .pre-assessment-panel {
@@ -351,7 +390,9 @@ button:focus-visible {
   place-items: center;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  /* Preserve the scroll artwork while scaling it to the text box. */
+  background-size: cover;
+  image-rendering: auto;
   text-align: center;
   text-shadow: 0 1px 0 rgba(255, 236, 190, 0.55);
 }
@@ -417,6 +458,7 @@ button:focus-visible {
   background-position: center;
   background-repeat: no-repeat;
   background-size: contain;
+  image-rendering: auto;
   color: #3b1b07;
   font-size: clamp(1rem, 2.2vw, 1.75rem);
   line-height: 1;
@@ -424,20 +466,35 @@ button:focus-visible {
 }
 
 .assessment-answer-row {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+  overflow: visible;
   overflow-wrap: anywhere;
   word-break: normal;
-  border: 0 !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-width: 0 clamp(4rem, 8vw, 5.5rem) !important;
+  border-image-slice: 0 110 0 110 fill;
+  border-image-width: 0 clamp(4rem, 8vw, 5.5rem);
+  border-image-repeat: stretch;
   background-color: transparent;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+
+  image-rendering: auto;
   box-shadow: none !important;
   color: #3b1b07;
-  min-height: clamp(3rem, 6.2vw, 4.4rem);
-  padding: clamp(0.7rem, 1.6vw, 1.05rem) clamp(1.6rem, 4vw, 3rem) clamp(0.7rem, 1.6vw, 1.05rem) clamp(4.6rem, 9vw, 6.8rem);
+  align-items: center;
+  min-height: clamp(3.4rem, 6vw, 4.75rem);
+  font-size: clamp(0.78rem, 0.7rem + 0.45vw, 1rem);
+  line-height: 1.35;
+  padding: clamp(0.7rem, 1.35vw, 1rem) clamp(0.45rem, 1.4vw, 0.9rem);
   text-shadow: 0 1px 0 rgba(255, 240, 190, 0.65);
 }
 
+.assessment-answer-row__text {
+  position: relative;
+  z-index: 1;
+}
 .assessment-answer-row input {
   width: 1rem;
   height: 1rem;
@@ -480,8 +537,10 @@ button:focus-visible {
   }
 
   .assessment-answer-row {
-    min-height: 3rem;
-    padding: 0.65rem 1.4rem 0.65rem 3.4rem;
+    min-height: 3.25rem;
+    border-width: 0 3.25rem !important;
+    border-image-width: 0 3.25rem;
+    padding: 0.7rem 0.4rem;
   }
 }
 
@@ -603,3 +662,11 @@ button:focus-visible {
   .cozy-ledger-row,
   .cozy-ledger-total { min-height: 1.65rem; padding-block: 0.2rem; }
 }
+
+
+
+
+
+
+
+

@@ -10,7 +10,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"vite\" \"npm test\"",
     "build": "vite build",
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && cross-env ELECTRON_IS_DEV=true electron .\"",
@@ -19,9 +19,12 @@
     "test": "node --test \"src/game/**/*.test.js\"",
     "sim": "node scripts/sim.mjs",
     "qa:vertical-slice": "node scripts/qa-vertical-slice.mjs",
-    "optimize-images": "node scripts/optimize-images.mjs"
+    "optimize-images": "node scripts/optimize-images.mjs",
+    "convert-assets-to-svg": "node scripts/convert-assets-to-svg.mjs",
+    "dev:web": "vite"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

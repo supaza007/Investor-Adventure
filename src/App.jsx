@@ -116,14 +116,14 @@ export default function App() {
     command({ type: 'RESTART' })
   }
 
-  if (journey === 'cover') return <CoverScreen onPlay={() => setJourney('pre')} onContinue={savedRun ? continueSaved : null} saveError={saveError} />
+  if (journey === 'cover') return <CoverScreen onPlay={(player) => { setSession((s) => ({ ...s, player })); setJourney('pre') }} onContinue={savedRun ? continueSaved : null} saveError={saveError} />
   if (journey === 'pre') return <PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('consent') }} onSkip={() => setJourney('consent')} />
   if (journey === 'consent') return <ConsentScreen onChoice={beginCore} />
   if (state.phase === 'report' && journey === 'game') return <PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />
 
   if (state.phase === 'style') return <div className={busy ? 'pointer-events-none opacity-75' : ''} aria-busy={busy}>
     {busy && <div role="status" className="fixed inset-x-0 top-2 z-50 mx-auto w-fit bg-slate-950 px-4 py-2 text-sm text-white">กำลังเริ่มเกม…</div>}
-    <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId })} />
+    <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId, at: new Date().toISOString() })} />
   </div>
 
   if (state.phase === 'allocation') {
@@ -162,7 +162,7 @@ export default function App() {
   }
 
   if (state.phase === 'report') {
-    return <ReportScreen report={state.report} session={session} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
+    return <ReportScreen report={state.report} session={session} styleId={state.styleId} gameTiming={state.timing} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
   }
 
   return null
