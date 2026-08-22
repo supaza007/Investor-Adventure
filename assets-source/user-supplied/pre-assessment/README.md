@@ -41,6 +41,9 @@ Implementation notes:
 - `assessment-eyebrow.png` → scroll frame behind the "ก่อนเริ่มเกม" label; text remains live DOM text.
 - `assessment-title.png` → scroll frame behind the main title; text remains live DOM text.
 - `assessment-disclaimer-panel.png` → scroll frame behind the disclaimer; text remains live DOM text.
+- `question-number-badge.png` → badge behind the live question number for each question.
+- `answer-option-frame.png` → normal frame behind each live answer option row.
+- `answer-option-selected.png` → selected-state frame behind the checked answer option row.
 - Text containment: question legends, answer rows and validation errors now wrap inside their frames on narrow screens.
 - Refinement: `questionnaire-frame` is no longer used as one large form wrapper and no longer overlaps the eyebrow/title/disclaimer scroll frames.
 - Scope guardrail: no question text, answer scoring, risk-profile bands, consent behavior or game rules changed.

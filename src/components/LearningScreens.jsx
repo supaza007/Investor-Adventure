@@ -4,6 +4,9 @@ import preAssessmentBackground from '../assets/ui/pre-assessment-background-user
 import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.webp'
 import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.webp'
 import preAssessmentFrame from '../assets/ui/pre-assessment-frame-user.webp'
+import preAssessmentOptionFrame from '../assets/ui/pre-assessment-answer-option-frame-user.webp'
+import preAssessmentOptionSelected from '../assets/ui/pre-assessment-answer-option-selected-user.webp'
+import preAssessmentQuestionBadge from '../assets/ui/pre-assessment-question-number-badge-user.webp'
 import preAssessmentTitle from '../assets/ui/pre-assessment-title-user.webp'
 
 function Shell({ title, eyebrow, children, className = '', style = {}, contentClassName = 'max-w-2xl' }) {
@@ -28,11 +31,22 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
   return <form onSubmit={submit} className={`mt-4 space-y-5 ${className}`} noValidate>
     {questions.map((q, index) => <fieldset key={q.id} className="assessment-question-card min-w-0" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
       <div className="assessment-question-card__content">
-        <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug">{index + 1}. {q.prompt}</legend>
-        <div className="mt-2 grid min-w-0 gap-2">{q.options.map(([value, label]) => <label key={value} className="assessment-answer-row pixel-chip flex min-h-11 min-w-0 cursor-pointer items-start gap-3 bg-slate-800 px-3 py-2 leading-snug">
-          <input className="mt-1 shrink-0" type="radio" name={q.id} value={value} checked={answers[q.id] === value} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
-          <span className="min-w-0 flex-1 break-words">{label}</span>
-        </label>)}</div>
+        <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug">
+          <span className="assessment-question-badge" style={{ backgroundImage: `url(${preAssessmentQuestionBadge})` }} aria-hidden="true">{index + 1}</span>
+          <span className="sr-only">ข้อ {index + 1}: </span>
+          <span className="min-w-0 flex-1 break-words">{q.prompt}</span>
+        </legend>
+        <div className="mt-3 grid min-w-0 gap-2">{q.options.map(([value, label]) => {
+          const selected = answers[q.id] === value
+          return <label
+            key={value}
+            className={`assessment-answer-row flex min-h-11 min-w-0 cursor-pointer items-start gap-3 px-3 py-2 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
+            style={{ backgroundImage: `url(${selected ? preAssessmentOptionSelected : preAssessmentOptionFrame})` }}
+          >
+            <input className="mt-1 shrink-0" type="radio" name={q.id} value={value} checked={selected} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
+            <span className="min-w-0 flex-1 break-words">{label}</span>
+          </label>
+        })}</div>
       </div>
     </fieldset>)}
     {error && <p role="alert" className="pixel-chip min-w-0 break-words bg-rose-950 p-3 text-rose-100">{error}</p>}

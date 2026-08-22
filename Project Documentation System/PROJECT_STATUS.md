@@ -427,6 +427,7 @@ These files were inventoried and not modified, staged, deleted or overwritten by
 
 - Scope: applied Project Owner-supplied graphics only to `UI-015 Pre-assessment onboarding`.
 - User-supplied mapping: `assessment-background.jpg` → full-screen pre-assessment background; `questionnaire-frame.png` → main questionnaire frame; `assessment-eyebrow.png`, `assessment-title.png` and `assessment-disclaimer-panel.png` → scroll frames behind live DOM text.
+- Added per-question/answer assets: `question-number-badge.png` is used behind each live question number; `answer-option-frame.png` and `answer-option-selected.png` are used behind normal and checked answer rows.
 - Text containment: title, disclaimer, question prompts, answer options and validation errors now wrap inside their frames/cards on mobile and desktop.
 - Refinement: `questionnaire-frame.png` is now applied once per question fieldset instead of as a single large wrapper, and it is separated from the eyebrow/title/disclaimer scroll frames.
 - Constraint: no question text, scoring, risk profile classification, consent behavior, game logic, balance, RNG or engine contract changed.

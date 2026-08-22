@@ -394,6 +394,9 @@ button:focus-visible {
 }
 
 .assessment-question-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   float: left;
   width: 100%;
   margin-bottom: 0.5rem;
@@ -405,18 +408,45 @@ button:focus-visible {
   clear: both;
 }
 
+.assessment-question-badge {
+  display: grid;
+  width: clamp(2.4rem, 5vw, 3.8rem);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  color: #3b1b07;
+  font-size: clamp(1rem, 2.2vw, 1.75rem);
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.7);
+}
+
 .assessment-answer-row {
   overflow-wrap: anywhere;
   word-break: normal;
+  border: 0 !important;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: none !important;
+  color: #3b1b07;
+  min-height: clamp(3rem, 6.2vw, 4.4rem);
+  padding: clamp(0.7rem, 1.6vw, 1.05rem) clamp(1.6rem, 4vw, 3rem) clamp(0.7rem, 1.6vw, 1.05rem) clamp(4.6rem, 9vw, 6.8rem);
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.65);
 }
 
-.assessment-answer-row {
-  background: rgba(12, 45, 91, 0.82);
+.assessment-answer-row input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #0f8a5f;
 }
 
-.assessment-answer-row:has(input:checked) {
-  background: rgba(244, 191, 83, 0.28);
-  color: #fff7d0;
+.assessment-answer-row--selected {
+  color: #053b2c;
+  text-shadow: 0 1px 0 rgba(236, 255, 229, 0.8);
 }
 
 @media (max-width: 640px) {
@@ -443,6 +473,15 @@ button:focus-visible {
 
   .assessment-question-card__content {
     padding: 0.2rem;
+  }
+
+  .assessment-question-legend {
+    gap: 0.4rem;
+  }
+
+  .assessment-answer-row {
+    min-height: 3rem;
+    padding: 0.65rem 1.4rem 0.65rem 3.4rem;
   }
 }
 
