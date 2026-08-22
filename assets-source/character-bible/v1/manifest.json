@@ -1,0 +1,156 @@
+{
+  "bibleVersion": "1.0",
+  "status": "approved-visual-overhaul-playable-v1",
+  "createdAt": "2026-08-21",
+  "characterApprovedAt": "2026-08-21",
+  "characterApprovedBy": "Project Owner",
+  "mockupsApprovedAt": "2026-08-21",
+  "mockupsApprovedBy": "Project Owner",
+  "generator": "OpenAI built-in ImageGen",
+  "style": "cozy pixel fantasy adventure",
+  "shared": {
+    "dimensions": "1536x1024",
+    "format": "PNG",
+    "camera": "orthographic character-sheet presentation",
+    "background": "warm neutral parchment",
+    "runtimeApproved": true
+  },
+  "assets": [
+    {
+      "id": "CHAR-TRADER-SHEET-01",
+      "file": "approved/CHAR-TRADER-SHEET-v1-approved.png",
+      "version": "1-approved",
+      "styleId": "trader",
+      "identity": "fast-reacting wizard",
+      "sha256": "0B467EDC68F6E95AA9B01BC8D1C8012DD233E57B8D4F9FB6CD88F2371C1D1732",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "CHAR-VI-SHEET-01",
+      "file": "approved/CHAR-VI-SHEET-v1-approved.png",
+      "version": "1-approved",
+      "styleId": "vi",
+      "identity": "value-seeking druid",
+      "sha256": "108AC1B234DD3E2499A199E44E7D12F0A332A7B8FE9AB1DB0C59811BB6B0FAEC",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "CHAR-MEDIUM-SHEET-01",
+      "file": "approved/CHAR-MEDIUM-SHEET-v1-approved.png",
+      "version": "1-approved",
+      "styleId": "medium",
+      "identity": "courageous adaptive swordsman",
+      "sha256": "DFD24D475F27F9D4EC7D57CFBFDB98182CEBA9F401EA9687C2C3CD5FE11FA17A",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "CHAR-LONGTERM-SHEET-01",
+      "file": "approved/CHAR-LONGTERM-SHEET-v1-approved.png",
+      "version": "1-approved",
+      "styleId": "longterm",
+      "identity": "disciplined heavy knight of time",
+      "sha256": "415009E46A225776F556175703005CDAC7079181518D3E015FE43B6EDBB51320",
+      "approval": "approved-by-project-owner"
+    }
+  ],
+  "mockups": [
+    {
+      "id": "MOCKUP-COVER-01",
+      "file": "mockups/MOCKUP-COVER-v1.png",
+      "version": "1-review",
+      "screen": "Cover",
+      "dimensions": "853x1844",
+      "sha256": "3863B2A090EF483BCE3C24439F5EBE1DFB4F4833CC6353CFFEED66276D81368B",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "MOCKUP-STYLE-01",
+      "file": "mockups/MOCKUP-STYLE-v1.png",
+      "version": "1-review",
+      "screen": "Style Selection",
+      "dimensions": "853x1844",
+      "sha256": "E52DAFBC6BFB3E867DF2576BB09B86BE53FA9E14C06994D1F2BE48FC4D76768B",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "MOCKUP-ALLOCATION-01",
+      "file": "mockups/MOCKUP-ALLOCATION-v1.png",
+      "version": "1-review",
+      "screen": "Allocation",
+      "dimensions": "853x1844",
+      "sha256": "1E0BAD23AD5DC206E1FD8594B313E214600C0F25A17B2E80B52EF155ADFA9610",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "MOCKUP-EVENT-IMPACT-01",
+      "file": "mockups/MOCKUP-EVENT-IMPACT-v1.png",
+      "version": "1-review",
+      "screen": "Event/Impact",
+      "dimensions": "853x1844",
+      "sha256": "71CFF1EDF4846CB271899F5E9FD63BFE34E43B1B3BE5C2184655AE8BE7372C18",
+      "approval": "approved-by-project-owner"
+    },
+    {
+      "id": "MOCKUP-CHAPTER-TRANSITION-01",
+      "file": "mockups/MOCKUP-CHAPTER-TRANSITION-v1.png",
+      "version": "1-review",
+      "screen": "Chapter Transition/Debrief",
+      "dimensions": "852x1846",
+      "sha256": "C625BD72B4F097ECEAFAB30104D8B31113C3537F9D86BC9DA7733C4CA1CE736F",
+      "approval": "approved-by-project-owner"
+    }
+  ],
+  "runtimeAssets": [
+    {
+      "id": "BG-CHAPTER-TRANSITION-01",
+      "source": "../../../worlds/v1/chapter-transition-map-v1.png",
+      "runtimeFile": "src/assets/worlds/chapter-transition-map.webp",
+      "dimensions": "780x1386",
+      "format": "WebP",
+      "bytes": 235626,
+      "sha256": "092BD58B30D8A65088BA2180025D7BA25400853E52CF9B020DB582F1CE64EEA0",
+      "screen": "Chapter Transition/Debrief",
+      "approval": "derived-from-approved-mockup"
+    },
+    {
+      "id": "CHAR-TRADER-IDLE-01",
+      "source": "../../../characters/runtime-v1/CHAR-TRADER-IDLE-v1.png",
+      "runtimeFile": "src/assets/characters/trader-canonical.webp",
+      "format": "WebP",
+      "bytes": 86906,
+      "sha256": "F4F47921EA11FF119AEA5348C5B36F040FD6CBD0F3AFD55920F947C1C9887FB3",
+      "screen": "Cover, Style Selection, Allocation, Stage",
+      "approval": "derived-from-approved-canonical-sheet"
+    },
+    {
+      "id": "CHAR-VI-IDLE-01",
+      "source": "../../../characters/runtime-v1/CHAR-VI-IDLE-v1.png",
+      "runtimeFile": "src/assets/characters/vi-canonical.webp",
+      "format": "WebP",
+      "bytes": 105484,
+      "sha256": "E8A3E4530A5086E294697CA2FADB5B5CD5E360B63CDDC8EC4DF75FD384FCE191",
+      "screen": "Cover, Style Selection, Allocation, Stage",
+      "approval": "derived-from-approved-canonical-sheet"
+    },
+    {
+      "id": "CHAR-MEDIUM-IDLE-01",
+      "source": "../../../characters/runtime-v1/CHAR-MEDIUM-IDLE-v1.png",
+      "runtimeFile": "src/assets/characters/medium-canonical.webp",
+      "format": "WebP",
+      "bytes": 68216,
+      "sha256": "768B907BE11D7900A2A0F98820495F631D10467047BF4D2015939F866F272FBC",
+      "screen": "Cover, Style Selection, Allocation, Stage",
+      "approval": "derived-from-approved-canonical-sheet"
+    },
+    {
+      "id": "CHAR-LONGTERM-IDLE-01",
+      "source": "../../../characters/runtime-v1/CHAR-LONGTERM-IDLE-v1.png",
+      "runtimeFile": "src/assets/characters/longterm-canonical.webp",
+      "format": "WebP",
+      "bytes": 107636,
+      "sha256": "EFFE1E75EEC1084D7F0B444C4913FB6A7E00897748F6CC5A8F9116316526CA2D",
+      "screen": "Cover, Style Selection, Allocation, Stage",
+      "approval": "derived-from-approved-canonical-sheet"
+    }
+  ]
+}

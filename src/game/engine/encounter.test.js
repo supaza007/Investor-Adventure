@@ -12,7 +12,7 @@ import { getStyles } from './data/styles.js'
 import { concentration, hhi, weights, totalValue, rebalance, applyGrowth } from './portfolio.js'
 import { portfolioExposure, outcomeBand, rollShock, applyShock, toolExposure } from './encounter.js'
 
-const EVEN_SPLIT = { bond: 100, esg: 100, fund: 100, stock: 100, derivatives: 100, crypto: 100 }
+const EVEN_SPLIT = { bond: 100, fund: 100, stock: 100, crypto: 100 }
 const ALL_BOND = { bond: 600 }
 const ALL_CRYPTO = { crypto: 600 }
 
@@ -30,9 +30,9 @@ describe('ความสมบูรณ์ของข้อมูล', () => {
     }
   })
 
-  test('เครื่องมือครบ 6 ชนิด มี exposure ครบทุก tag ในช่วง 0..1', () => {
+  test('เครื่องมือครบ 4 ชนิด มี exposure ครบทุก tag ในช่วง 0..1', () => {
     const tools = getTools()
-    assert.equal(tools.length, 6)
+    assert.equal(tools.length, 4)
     for (const t of tools) {
       for (const tag of TAGS) {
         const v = t.exposure[tag]
@@ -55,9 +55,9 @@ describe('คณิตศาสตร์พอร์ต', () => {
     assert.equal(concentration({}), 0)
   })
 
-  test('HHI: ทุ่มตัวเดียว = 1 · กระจายครบ 6 = 1/6', () => {
+  test('HHI: ทุ่มตัวเดียว = 1 · กระจายครบ 4 = 1/4', () => {
     assert.equal(hhi(ALL_BOND), 1)
-    assert.ok(Math.abs(hhi(EVEN_SPLIT) - 1 / 6) < 1e-9)
+    assert.ok(Math.abs(hhi(EVEN_SPLIT) - 1 / 4) < 1e-9)
   })
 
   test('concentration ปรับสเกลเป็น 0..1 ตามที่สูตร band ต้องการ', () => {
@@ -156,10 +156,9 @@ describe('การลงแรงกระแทกกับพอร์ตจ�
     assert.ok(bondLoss > cryptoLoss, 'เจอเงินเฟ้อ ตราสารหนี้ต้องเจ็บกว่าคริปโต')
   })
 
-  test('เฉพาะเลเวอเรจ/คริปโตเท่านั้นที่ตกถึง 0 ได้ (ล้มละลายจริง)', () => {
-    const wiped = applyShock({ crypto: 100, derivatives: 100, stock: 100 }, inflationEvent, -5)
+  test('เฉพาะคริปโตเท่านั้นที่ตกถึง 0 ได้ (ล้มละลายจริง)', () => {
+    const wiped = applyShock({ crypto: 100, stock: 100 }, inflationEvent, -5)
     assert.equal(wiped.crypto, 0)
-    assert.equal(wiped.derivatives, 0)
     assert.ok(wiped.stock > 0, 'หุ้นดัชนีไม่ควรเป็นศูนย์ ต่อให้เจอวิกฤตหนักแค่ไหน')
   })
 

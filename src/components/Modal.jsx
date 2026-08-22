@@ -75,7 +75,7 @@ export default function Modal({ children, onClose, label, panelClassName = '' })
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className={`max-h-[85vh] w-full overflow-y-auto focus:outline-none ${panelClassName}`}
+        className={`mobile-modal-panel max-h-[calc(100dvh-1.5rem)] w-full overflow-y-auto focus:outline-none sm:max-h-[85vh] ${panelClassName}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -83,3 +83,4 @@ export default function Modal({ children, onClose, label, panelClassName = '' })
     </div>
   )
 }
+

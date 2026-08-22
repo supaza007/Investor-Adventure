@@ -1,30 +1,28 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { viteSingleFile } from 'vite-plugin-singlefile'
 
-// build มี 2 โหมด เพราะ "ดับเบิลคลิกเปิดได้" กับ "โหลดเร็วบนเว็บ" ขัดกันโดยตรง
+// build มี 2 โหมด โดยทั้งสองโหมดเก็บไฟล์ภาพแยกไว้ให้ browser โหลดได้เสถียร
 //
-//   npm run build      → ไฟล์เดียว dist/index.html (รูปฝังเป็น base64)
-//                        ใช้กับ .exe / ส่งไฟล์ให้คนอื่น / ดับเบิลคลิกเปิดออฟไลน์
+//   npm run build      → dist/index.html + dist/assets/*
+//                        ใช้กับ .exe / เปิดจากไฟล์ในเครื่องได้ (ต้องส่งทั้งโฟลเดอร์ dist)
+//   npm run build:web  → dist-web/index.html + dist-web/assets/*
+//                        ใช้ตอนขึ้นเว็บและ cache รูปแยกใบได้
 //
-//   npm run build:web  → แยกไฟล์ตามปกติ (HTML + JS + รูปแยกใบ)
-//                        ใช้ตอนขึ้นเว็บ: เบราว์เซอร์โหลด HTML+JS ก่อนแล้วรูปทยอยตามมา
-//                        และ cache รูปแยกใบได้ เข้าเว็บครั้งที่ 2 แทบไม่ต้องโหลดใหม่
-//
-// ทำไมต้องแยก: โหมดไฟล์เดียวทำให้ผู้เล่นเห็นจอขาวจนกว่าจะโหลดครบทุกไบต์
-// ซึ่งบนเน็ตมือถือคือหลายวินาที — ยอมรับได้ตอนเปิดจากไฟล์ในเครื่อง แต่ไม่ใช่ตอนแชร์ลิงก์
+// ห้ามฝัง SVG ขนาดใหญ่ลงใน CSS data URL: Chromium จะตัด background-image ทิ้ง
+// เมื่อค่า style ใหญ่เกินขีดจำกัด แม้ไฟล์ SVG เองจะถูกต้องก็ตาม
 export default defineConfig(({ mode }) => {
   const isWeb = mode === 'web'
 
   return {
-    // path แบบ relative — ใช้ได้ทั้งเปิดจากไฟล์ (file://) และวางใน subfolder ของ GitHub Pages
-    base: './',
-    plugins: [react(), tailwindcss(), ...(isWeb ? [] : [viteSingleFile()])],
+    // GitHub Pages project site ต้องโหลด assets ใต้ repository subpath
+    // ส่วน build ปกติยังใช้ relative path เพื่อเปิด dist/index.html แบบ file:// ได้
+    base: isWeb ? '/Investor-Adventure/' : './',
+    plugins: [react(), tailwindcss()],
     build: {
       outDir: isWeb ? 'dist-web' : 'dist',
-      // โหมดไฟล์เดียวต้อง inline ทุกอย่าง · โหมดเว็บใช้ค่าปกติ (ไฟล์เล็กกว่า 4KB เท่านั้นที่ inline)
-      assetsInlineLimit: isWeb ? 4096 : 100 * 1024 * 1024,
+      // ให้ทุก asset ใช้ URL ไฟล์จริง เพื่อให้ background-image / border-image โหลดได้
+      assetsInlineLimit: 0,
     },
   }
 })

@@ -6,6 +6,7 @@ import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
+import CharacterToken from './CharacterToken.jsx'
 import { eventArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
@@ -257,16 +258,25 @@ const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral
 // ทั้งสองทางคือ "ตัวที่กำหนดผลลัพธ์รอบนี้มากที่สุดอยู่บนสุดเสมอ" กล่องบทเรียนจึงอ้างแถวบนสุดได้
 function ImpactTable({ rows, cash, gained, isBlackSwan }) {
   const maxAbs = Math.max(1e-9, ...rows.map((r) => Math.abs(r.change)))
+  const lead = rows[0]
+  const leadRounded = lead ? Math.round(Math.abs(lead.change)) : 0
+  const leadSign = leadRounded === 0 ? '' : lead.change < 0 ? '-' : '+'
 
   return (
     <div className="mt-2">
-      <div className="text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยคุณบ้าง' : 'สินทรัพย์ไหนทำร้ายคุณบ้าง'}</div>
+      {lead && (
+        <div className="pixel-chip bg-slate-800/80 px-2 py-1.5 text-[10px] font-bold sm:text-xs">
+          {gained ? 'ฮีโร่รอบนี้' : 'ตัวที่ลากพอร์ตลงมากสุด'}: {lead.tool.name}{' '}
+          <span className={lead.change < 0 ? 'text-rose-300' : 'text-emerald-300'}>{leadSign}{money(Math.abs(lead.change))}</span>
+        </div>
+      )}
+      <div className="mt-1 text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยพอร์ตในรอบนี้' : 'สินทรัพย์ไหนได้รับผลกระทบในรอบนี้'}</div>
 
       {/* Black Swan บังคับ exposure เท่ากันหมดทุกตัว (encounter.js) ทุกแถวเลยได้ % เดียวกันเป๊ะ
           ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
       {isBlackSwan && (
         <div className="pixel-chip mt-1 bg-purple-950/50 px-1.5 py-1 text-[9px] leading-snug text-purple-200 sm:text-[11px]">
-          รอบนี้ทุกอย่างโดนเท่ากันหมด — Black Swan ไม่เลือกที่หลบ
+          รอบนี้แทบทุกอย่างโดนพร้อมกัน — ไม่ใช่เพราะคุณเลือกผิดทั้งหมด
         </div>
       )}
 
@@ -301,7 +311,7 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
           <div className="bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
             <div className="flex items-center justify-between gap-1.5 text-[10px] sm:text-xs">
               <span className="truncate text-white/60">เงินสด</span>
-              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนกระแทก</span>
+              <span className="shrink-0 whitespace-nowrap text-white/55">{money(0)} · ไม่โดนตลาด แต่ไม่โต</span>
             </div>
           </div>
         )}
@@ -320,6 +330,8 @@ function DebriefStage({ state, event }) {
   // เทียบก่อน/หลังแรงกระแทกรายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
   // ไม่ย้อนคำนวณจาก band.exposure เพราะเคส margin call (เหลือ 0) กับเคสชนพื้น 10% ย้อนกลับไม่ได้
   const before = state.positionsBeforeShock ?? {}
+  const investedBefore = Object.values(before).reduce((sum, amount) => sum + amount, 0)
+  const cashOnly = investedBefore <= 0 && state.cash > 0
   const impacts = Object.keys(before)
     .filter((id) => before[id] > 0.5)
     .map((id) => {
@@ -336,15 +348,21 @@ function DebriefStage({ state, event }) {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <div className="text-center text-sm font-bold sm:text-lg">เกิดอะไรขึ้นกับพอร์ตของคุณ</div>
+      <div className="text-center text-sm font-bold sm:text-lg">เงินเปลี่ยนเพราะอะไร?</div>
 
       <div className="pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
         <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[exposureTone(band.exposure)]}`}>
           อ่อนไหวต่อ{event.name} <b>{Math.round(band.exposure * 100)}%</b> — {exposureNote(band.exposure)}
         </div>
-        <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
-          กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
-        </div>
+        {cashOnly ? (
+          <div className="pixel-frame mt-1.5 border border-slate-500/60 bg-slate-800/70 p-1.5 text-slate-200 sm:p-2">
+            ถือเงินสดทั้งหมด — <b>ยังไม่มีการกระจายการลงทุน</b> เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ
+          </div>
+        ) : (
+          <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
+            กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
+          </div>
+        )}
 
         {/* เดิมเขียนว่า "ผลออกมาที่ อันดับ N% ของช่วงที่เป็นไปได้" ซึ่งผู้เล่นอ่านไม่เข้าใจด้วย 3 เหตุผล:
               1. "อันดับ" ในภาษาไทยขั้วกลับด้าน — อันดับ 1 คือดีที่สุด คนอ่านเลยเข้าใจว่าเลขน้อย = ดี
@@ -377,11 +395,24 @@ function DebriefStage({ state, event }) {
         )}
 
         {state.lastFee > 0.5 && (
-          <div className="mt-1.5 text-rose-300/90">ค่าธรรมเนียมการซื้อขายรอบนี้ {money(state.lastFee)} — {style.name}จ่ายทุกครั้งที่แตะพอร์ต</div>
+          <div className="mt-1.5 text-rose-300/90">ค่าธรรมเนียม -{money(state.lastFee)} · ต้นทุนจากการปรับพอร์ตของ{style.name}</div>
+        )}
+
+        {state.scam?.lost > 0 && (
+          <div className="mt-1.5 text-rose-300/90">มิจฉาชีพ -{money(state.scam.lost)} · สูญเสียจากการโอนเงิน ไม่ใช่ผลจากตลาด</div>
+        )}
+
+        {state.behavior && (
+          <div className="mt-1.5 text-sky-200/90">
+            การตัดสินใจของคุณ: {state.behavior === 'hold' ? 'ถือต่อและรอดูการฟื้นตัว' : state.behavior === 'cut' ? 'ย้ายไปตราสารหนี้เพื่อลดแรงกระแทกถัดไป' : 'ใช้เงินสดซื้อเพิ่ม ทำให้ผลรอบถัดไปแรงขึ้น'}
+          </div>
         )}
 
         {state.isBlackSwan && (
-          <div className="mt-1.5 text-purple-300">เหตุการณ์นี้คือ Black Swan — แม้นักลงทุนเก่งที่สุดในโลกก็เลี่ยงไม่ได้ ไม่ใช่ความผิดของคุณ</div>
+          <details className="mt-1.5 text-purple-200">
+            <summary className="cursor-pointer font-bold">เหตุการณ์หนักที่หลบยาก · ดูเพิ่ม</summary>
+            <div className="mt-1">ในแบบจำลองเรียกว่า Black Swan — กระทบกว้างและเตรียมหลบได้ยาก ไม่ใช่ความผิดของคุณ</div>
+          </details>
         )}
       </div>
 
@@ -423,7 +454,7 @@ function ScamOffer({ scam, onAnswer }) {
   )
 }
 
-export default function StageScreen({ state, dispatch, onAdjust }) {
+export default function StageScreen({ state, command, commandError = null, onDismissError, submitting = false, onAdjust }) {
   const stage = currentStage(state)
   const event = currentEvent(state)
   const chapter = currentChapter(state)
@@ -432,12 +463,13 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
   const showScam = stage.key === 'reveal' && state.scam && state.scam.accepted === null
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
-        <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
-          <div className="text-[10px] font-bold sm:text-sm">
-            บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
+        <header className="cozy-hud mb-1.5 flex shrink-0 items-center justify-between gap-2 px-2 py-1.5">
+          <div className="flex items-center gap-2 text-[10px] font-bold sm:text-sm">
+            <CharacterToken style={currentStyle(state)} state={stage?.key ?? 'idle'} className="h-10 w-10 shrink-0" label={false} />
+            <span>บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}</span>
           </div>
           <StageTrack stageIndex={state.stageIndex} />
         </header>
@@ -452,12 +484,22 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
           {stage.key === 'signal' && <SignalStage event={event} />}
           {stage.key === 'reveal' && <RevealStage event={event} />}
           {stage.key === 'shock' && <ShockStage state={state} event={event} />}
-          {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => dispatch({ type: 'CHOOSE_BEHAVIOR', choice })} />}
+          {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => command({ type: 'CHOOSE_BEHAVIOR', choice })} />}
           {stage.key === 'debrief' && <DebriefStage state={state} event={event} />}
         </div>
 
         <div className="mt-1.5 shrink-0">
           <PortfolioPanel positions={state.positions} cash={state.cash} compact />
+          {commandError && (
+            <div role="alert" aria-live="assertive" className="pixel-chip mb-1.5 bg-rose-950/70 px-2 py-1 text-[10px] text-rose-100 sm:text-xs">
+              {commandError.code === 'DECISION_REQUIRED' && 'ต้องตัดสินใจก่อน: '}
+              {commandError.code === 'STALE_COMMAND' && 'หน้าจอเปลี่ยนไปแล้ว: '}
+              {commandError.code === 'WRONG_PHASE' && 'ยังทำรายการนี้ไม่ได้: '}
+              {commandError.code === 'INVALID_DECISION' && 'ตัวเลือกไม่ถูกต้อง: '}
+              {commandError.message}
+              {onDismissError && <button type="button" className="ml-2 underline" onClick={onDismissError}>ปิดข้อความ</button>}
+            </div>
+          )}
           <div className="mt-1.5 flex items-center justify-between gap-2">
             {canAdjust ? (
               <button type="button" onClick={onAdjust} className="pixel-btn bg-sky-600 px-3 py-1.5 text-[10px] font-bold sm:px-5 sm:py-2 sm:text-sm">
@@ -470,19 +512,19 @@ export default function StageScreen({ state, dispatch, onAdjust }) {
             )}
             <button
               type="button"
-              disabled={needsBehavior}
-              onClick={() => dispatch({ type: 'NEXT_STAGE' })}
+              disabled={needsBehavior || submitting}
+              onClick={() => command({ type: 'NEXT_STAGE', expectedStageIndex: state.stageIndex, at: new Date().toISOString() })}
               className={`pixel-btn px-4 py-1.5 text-[11px] font-bold sm:px-8 sm:py-2 sm:text-base ${
                 needsBehavior ? 'cursor-not-allowed bg-slate-700 text-slate-500' : 'bg-emerald-500 text-emerald-950'
               }`}
             >
-              {needsBehavior ? 'เลือกก่อน' : state.stageIndex === BALANCE.stages.length - 1 ? 'ไปบทถัดไป ▶' : 'ต่อไป ▶'}
+              {submitting ? 'กำลังประมวลผล…' : needsBehavior ? 'เลือกก่อน' : state.stageIndex === BALANCE.stages.length - 1 ? 'ไปบทถัดไป ▶' : 'ต่อไป ▶'}
             </button>
           </div>
         </div>
       </div>
 
-      {showScam && <ScamOffer scam={state.scam} onAnswer={(accept) => dispatch({ type: 'ANSWER_SCAM', accept })} />}
+      {showScam && <ScamOffer scam={state.scam} onAnswer={(accept) => command({ type: 'ANSWER_SCAM', accept })} />}
     </div>
   )
 }

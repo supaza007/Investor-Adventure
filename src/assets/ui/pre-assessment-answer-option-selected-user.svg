@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="96" viewBox="0 0 900 96" data-slice="110" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="selected-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff49a"/>
+      <stop offset=".24" stop-color="#ffc629"/>
+      <stop offset=".56" stop-color="#b85a08"/>
+      <stop offset=".82" stop-color="#ffdd4f"/>
+      <stop offset="1" stop-color="#692500"/>
+    </linearGradient>
+    <linearGradient id="selected-paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4ffcf"/>
+      <stop offset=".48" stop-color="#f7e9ae"/>
+      <stop offset="1" stop-color="#d9c471"/>
+    </linearGradient>
+    <radialGradient id="selected-gem" cx=".34" cy=".28" r=".78">
+      <stop offset="0" stop-color="#c8ffbe"/>
+      <stop offset=".18" stop-color="#38e28e"/>
+      <stop offset=".48" stop-color="#008b55"/>
+      <stop offset=".78" stop-color="#004532"/>
+      <stop offset="1" stop-color="#00261e"/>
+    </radialGradient>
+    <linearGradient id="selected-cap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#005a41"/>
+      <stop offset=".35" stop-color="#04a46a"/>
+      <stop offset=".72" stop-color="#00613f"/>
+      <stop offset="1" stop-color="#f8bd2e"/>
+    </linearGradient>
+    <pattern id="selected-speckle" width="74" height="38" patternUnits="userSpaceOnUse">
+      <circle cx="13" cy="10" r="1.3" fill="#6a7b23" opacity=".16"/>
+      <circle cx="57" cy="27" r="1.8" fill="#8a5f16" opacity=".12"/>
+      <path d="M31 7l3 2-2 3" fill="none" stroke="#178553" stroke-width="1" opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect x="9" y="10" width="882" height="82" rx="18" fill="#061a12" opacity=".68"/>
+  <rect x="7" y="3" width="886" height="82" rx="18" fill="url(#selected-gold)" stroke="#351303" stroke-width="5" vector-effect="non-scaling-stroke"/>
+  <rect x="14" y="10" width="872" height="68" rx="13" fill="#006447" stroke="#ffe256" stroke-width="3" vector-effect="non-scaling-stroke"/>
+  <rect x="22" y="15" width="856" height="58" rx="10" fill="url(#selected-paper)" stroke="#00875d" stroke-width="4" vector-effect="non-scaling-stroke"/>
+  <rect x="28" y="20" width="844" height="48" rx="7" fill="url(#selected-speckle)" opacity=".9"/>
+  <path d="M25 18H90l18 30-18 22H25L10 48Z" fill="url(#selected-cap)" stroke="#143306" stroke-width="4" vector-effect="non-scaling-stroke"/>
+  <path d="M34 22h50l16 26-16 18H34L20 48Z" fill="#e9bd36" opacity=".88"/>
+  <circle cx="60" cy="47" r="29" fill="#7f3704" stroke="#ffe75f" stroke-width="4" vector-effect="non-scaling-stroke"/>
+  <circle cx="60" cy="47" r="23" fill="url(#selected-gem)" stroke="#003f2d" stroke-width="4" vector-effect="non-scaling-stroke"/>
+  <ellipse cx="52" cy="38" rx="8" ry="6" fill="#fff" opacity=".66"/>
+  <path d="M94 17h9l8 31-8 23h-9l7-23Z" fill="#ffe45f" stroke="#6f2a03" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  <path d="M875 17h-50l-15 31 15 22h50l15-22Z" fill="#00a66d" stroke="#4e2503" stroke-width="4" vector-effect="non-scaling-stroke"/>
+  <path d="M849 29l12 19-12 18-12-18Z" fill="#ffe13c" stroke="#a25b07" stroke-width="2" vector-effect="non-scaling-stroke"/>
+  <path d="M118 25H807M118 67H807" fill="none" stroke="#fffbd7" stroke-width="2" opacity=".7" vector-effect="non-scaling-stroke"/>
+</svg>

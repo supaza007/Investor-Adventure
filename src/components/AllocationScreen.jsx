@@ -1,10 +1,13 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
-import { netWorth } from '../game/engine/gameState.js'
+import { netWorth, applyAllocation, currentStyle } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
+import { buildChapterTransitionBreakdown } from '../game/presentation.js'
+import ChapterTransition from './ChapterTransition.jsx'
+import CharacterToken from './CharacterToken.jsx'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
@@ -116,6 +119,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
       <div className="mt-1.5 flex items-center gap-1.5">
         <button
           type="button"
+          data-allocation-field={tool.id}
           {...subHold}
           disabled={percent === 0}
           className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${percent === 0 ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-600 text-white'}`}
@@ -124,6 +128,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
         </button>
         <button
           type="button"
+          data-allocation-field={tool.id}
           {...addHold}
           disabled={!canAdd}
           className={`pixel-btn flex-1 touch-manipulation select-none py-0.5 text-sm font-bold ${!canAdd ? 'cursor-not-allowed bg-slate-800 text-slate-400' : 'bg-slate-500 text-white'}`}
@@ -175,8 +180,14 @@ function ToolDetailModal({ tool, onClose }) {
 
 // popup กันหน้าจัดพอร์ต — บังคับให้อ่านว่ากำลังอยู่บทไหนก่อนเริ่มลาก slider
 // ถ้ามีบทก่อนหน้า (prevSummary) จะโชว์สรุปสั้นๆ ของบทที่เพิ่งจบด้วย เพื่อสะกิดให้คิดก่อนปรับพอร์ตใหม่
-function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
+function signedMoney(value) {
+  const rounded = Math.round(value)
+  return `${rounded > 0 ? '+' : ''}${money(rounded)}`
+}
+
+function ChapterIntroModal({ chapter, prevSummary, startValue, onContinue }) {
   const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
+  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue })
 
   return (
     // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
@@ -189,6 +200,17 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
               พอร์ตปลายบท <b className="text-white">{money(prevSummary.valueEnd)}</b>{' '}
               <span className={prevChangePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}>({pct(prevChangePct)})</span>
             </div>
+            {transition && (
+              <div className="mt-2 border-t border-white/10 pt-2" aria-label="ที่มาของเงินเมื่อเริ่มบทใหม่">
+                <div className="font-bold text-amber-200">เริ่มบทใหม่ เงินเปลี่ยนเพราะอะไร?</div>
+                <div className="mt-1 flex justify-between gap-3"><span>เงินเติมจากช่วงชีวิตใหม่</span><b>{signedMoney(transition.income)}</b></div>
+                {transition.cashAdjustment !== 0 && (
+                  <div className="flex justify-between gap-3"><span>เงินสดถูกเงินเฟ้อกินกำลังซื้อ</span><b>{signedMoney(transition.cashAdjustment)}</b></div>
+                )}
+                <div className="mt-1 flex justify-between gap-3 border-t border-white/10 pt-1 font-bold"><span>{transition.netChange >= 0 ? 'เงินเพิ่มสุทธิ' : 'เงินลดสุทธิ'}</span><span>{signedMoney(transition.netChange)}</span></div>
+                <div className="mt-1 text-white/60">เงินเริ่มบทนี้ <b className="text-white">{money(transition.startValue)}</b> · ไม่ใช่กำไรจากตลาดทั้งหมด</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -211,9 +233,10 @@ function ChapterIntroModal({ chapter, prevSummary, onContinue }) {
 // หน้าจัดพอร์ต — ผู้เล่นบอกสัดส่วนที่อยากได้ เอนจินย้ายเงินให้เอง
 // สำคัญ: ตัดสินใจ "ก่อน" รู้ว่าบทนี้จะเจอเหตุการณ์อะไร (เสาหลักข้อ 2)
 // isChapterStart = true เฉพาะตอนเข้าบทใหม่จริงๆ (ไม่ใช่ตอนกดปุ่ม "ปรับพอร์ต" กลางบท) — คุมว่าจะโชว์ popup แนะนำบทไหม
-export default function AllocationScreen({ state, chapter, onConfirm, isChapterStart = false }) {
+export default function AllocationScreen({ state, chapter, onConfirm, isChapterStart = false, commandError = null, onDismissError, submitting = false }) {
   const total = netWorth(state)
   const tools = getTools()
+  const style = currentStyle(state)
 
   // เริ่มจากสัดส่วนพอร์ตปัจจุบัน (บทแรกคือเงินสด 100%) ปัดเป็นช่อง 5% แล้วโยนเศษเข้าเงินสด
   const initial = useMemo(() => {
@@ -231,6 +254,15 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const [alloc, setAlloc] = useState(initial)
   const cashLeft = alloc.cash
   const [detailTool, setDetailTool] = useState(null)
+  const [reviewing, setReviewing] = useState(false)
+  const errorRef = useRef(null)
+
+  useEffect(() => {
+    if (!commandError) return
+    const field = commandError.field?.split('.').pop()
+    const target = field ? document.querySelector(`[data-allocation-field="${field}"]`) : null
+    ;(target ?? errorRef.current)?.focus?.()
+  }, [commandError])
 
   // แสดง popup แนะนำบทแค่ครั้งเดียวต่อบท แม้ผู้เล่นจะลาก slider จน component re-render ก็ไม่โผล่ซ้ำ
   const [introSeenFor, setIntroSeenFor] = useState(null)
@@ -247,19 +279,42 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
 
   const weights = Object.fromEntries(Object.entries(alloc).filter(([, v]) => v > 0).map(([k, v]) => [k, v / 100]))
   const investedPct = 100 - cashLeft
+  const preview = applyAllocation(state, weights)
+  const concentration = Object.entries(weights).filter(([id]) => id !== 'cash').reduce((sum, [, weight]) => sum + weight ** 2, 0)
+  const concentrationLabel = concentration < 0.35 ? 'ต่ำ' : concentration < 0.65 ? 'ปานกลาง' : 'สูง'
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {showIntro && <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} onContinue={() => setIntroSeenFor(chapter.n)} />}
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      {showIntro && (prevSummary
+        ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />
+        : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />)}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
+      {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>
+        <h1 className="text-xl font-black text-emerald-300">ทบทวนก่อนลงทุน</h1>
+        <p className="mt-2 text-sm text-white/70">ยังไม่มีการเปลี่ยนพอร์ตจนกด “ยืนยันพอร์ต”</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ก่อนปรับ</span><br /><b>{money(total)}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">หลังหักค่าธรรมเนียม</span><br /><b>{money(netWorth(preview))}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">ค่าธรรมเนียมโดยประมาณ</span><br /><b>{money(preview.lastFee)}</b></div>
+          <div className="pixel-chip bg-slate-800 p-2"><span className="text-white/55">พอร์ตกระจุกแค่ไหน</span><br /><b>{concentrationLabel}</b><details className="mt-1 text-[10px] text-white/55"><summary className="cursor-pointer">ดูสูตร</summary>HHI {concentration.toFixed(2)}</details></div>
+        </div>
+        <ul className="mt-3 max-h-40 overflow-y-auto text-sm">{Object.entries(alloc).filter(([, value]) => value > 0).map(([id, value]) => <li key={id} className="flex justify-between border-b border-white/10 py-1"><span>{id === 'cash' ? 'เงินสด' : tools.find((t) => t.id === id)?.name}</span><b>{value}%</b></li>)}</ul>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button type="button" disabled={submitting} className="pixel-btn bg-slate-700 p-3" onClick={() => setReviewing(false)}>กลับไปแก้ไข</button>
+          <button type="button" disabled={submitting} className="pixel-btn bg-emerald-500 p-3 font-bold text-emerald-950" onClick={() => onConfirm(weights)}>{submitting ? 'กำลังยืนยัน…' : 'ยืนยันพอร์ต'}</button>
+        </div>
+      </Modal>}
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
-        <header className="mb-1.5 flex shrink-0 items-center justify-between gap-2">
-          <div className="min-w-0">
+        <header className="cozy-hud mb-1.5 flex shrink-0 items-center justify-between gap-2 px-2 py-1.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <CharacterToken style={style} state="thinking" className="h-12 w-12 shrink-0" label={false} />
+            <div className="min-w-0">
             <div className="text-xs font-bold sm:text-base">
               บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
             </div>
             <div className="truncate text-[9px] text-white/55 sm:text-xs">{chapter.theme}</div>
+            </div>
           </div>
           <div className="shrink-0 text-right">
             <div className="text-[9px] text-white/50 sm:text-xs">ทรัพย์สินทั้งหมด</div>
@@ -287,6 +342,16 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
         </div>
 
         <div className="mt-1.5 shrink-0">
+          {(commandError || state.validationError) && (
+            <div ref={errorRef} tabIndex={-1} role="alert" aria-live="assertive" className="pixel-chip mb-1.5 bg-rose-950/70 px-2 py-1 text-[10px] text-rose-100 sm:text-xs">
+              {commandError?.code === 'INVALID_ALLOCATION' && 'จัดสรรพอร์ตไม่สำเร็จ: '}
+              {commandError?.code === 'WRONG_PHASE' && 'ยังจัดพอร์ตในขั้นตอนนี้ไม่ได้: '}
+              {commandError?.code === 'STALE_COMMAND' && 'หน้าจอเปลี่ยนไปแล้ว: '}
+              {commandError?.code === 'INVALID_STATE' && 'สถานะเกมไม่ถูกต้อง: '}
+              {commandError?.message ?? state.validationError}
+              {onDismissError && <button type="button" className="ml-2 underline" onClick={onDismissError}>ปิดข้อความ</button>}
+            </div>
+          )}
           <div className="pixel-bar mb-1.5 flex h-3 w-full overflow-hidden bg-slate-950 sm:h-4">
             {tools.map((t) => alloc[t.id] > 0 && <div key={t.id} className={colorOf(t.id).bar} style={{ width: `${alloc[t.id]}%` }} />)}
             {cashLeft > 0 && <div className="bg-slate-500" style={{ width: `${cashLeft}%` }} />}
@@ -306,10 +371,11 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
             </div>
             <button
               type="button"
-              onClick={() => onConfirm(weights)}
+              disabled={submitting}
+              onClick={() => setReviewing(true)}
               className="pixel-btn shrink-0 bg-emerald-500 px-4 py-1.5 text-xs font-bold text-emerald-950 sm:px-8 sm:py-2.5 sm:text-base"
             >
-              ลงทุน {investedPct}% ▶
+              {submitting ? 'กำลังยืนยัน…' : `ทบทวน ${investedPct}% ▶`}
             </button>
           </div>
         </div>

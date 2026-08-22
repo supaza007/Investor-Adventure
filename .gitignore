@@ -1,6 +1,12 @@
 # dependencies
 node_modules
 
+# Supabase / local environment secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
 # build output
 dist
 dist-web
@@ -41,3 +47,9 @@ public/
 
 # settings.local.json = สิทธิ์/ค่าตั้งเฉพาะเครื่องที่นั่งทำงานอยู่ ไม่ใช่ของโปรเจกต์
 .claude/settings.local.json
+
+# ต้นฉบับก่อนบีบ + ซากเสียงเก่า — ไม่ทราบเจ้าของลิขสิทธิ์ อยู่บนดิสก์เครื่องพัฒนาได้ แต่ไม่ขึ้น repo สาธารณะ
+รูปภาพจาก User/
+uploads/
+Sound Effect/
+

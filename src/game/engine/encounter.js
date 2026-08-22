@@ -82,8 +82,9 @@ export function applyShock(positions, event, shockPct, options = {}) {
 
     // แจกแรงกระแทกตามสัดส่วนความอ่อนไหวของแต่ละชิ้นเทียบกับค่าเฉลี่ยพอร์ต
     // (ผลรวมยังเท่ากับ shockPct ที่สุ่มได้ แต่คนที่ถือคริปโตเจ็บหนักกว่าคนที่ถือตราสารหนี้ในพอร์ตเดียวกัน)
-    const own = bs ? BALANCE.blackSwanExposure : toolExposure(toolId, event)
-    const ratio = avgExposure > 0 ? own / avgExposure : 1
+    const own = bs ? (BALANCE.blackSwanShockProfile[toolId] ?? 1) : toolExposure(toolId, event)
+    const bsAvg = bs ? Object.values(BALANCE.blackSwanShockProfile).reduce((s, x) => s + x, 0) / Object.keys(BALANCE.blackSwanShockProfile).length : avgExposure
+    const ratio = (bs ? bsAvg : avgExposure) > 0 ? own / (bs ? bsAvg : avgExposure) : 1
     const toolShock = shockPct * ratio
 
     // Margin call — เลเวอเรจโดนบังคับขายทีเดียวหมด ไม่ใช่ค่อยๆ ลด

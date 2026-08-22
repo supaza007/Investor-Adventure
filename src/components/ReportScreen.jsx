@@ -1,7 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
 import { BALANCE } from '../game/engine/balance.js'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import { eventArtOf } from './art'
+import { buildReadiness } from '../game/learning.js'
+import { createPlayerRunPayload, submitPlayerRun } from '../lib/playerData.js'
+import { enqueuePlayerRun, flushPlayerDataQueue } from '../lib/playerDataQueue.js'
 
 const BAND_STYLE = {
   fire: { cls: 'from-amber-800 to-amber-950 border-amber-400/60', text: 'text-amber-300', blurb: 'คุณเกษียณได้ก่อนกำหนดแบบสบายๆ' },
@@ -9,6 +13,12 @@ const BAND_STYLE = {
   adequate: { cls: 'from-sky-800 to-sky-950 border-sky-400/60', text: 'text-sky-300', blurb: 'พออยู่ได้ แต่ต้องระวังค่าใช้จ่าย' },
   tight: { cls: 'from-orange-900 to-orange-950 border-orange-400/60', text: 'text-orange-300', blurb: 'เงินไม่ค่อยพอ อาจต้องทำงานต่อ' },
   ruined: { cls: 'from-rose-900 to-rose-950 border-rose-400/60', text: 'text-rose-300', blurb: 'พอร์ตพังหมด ไม่เหลืออะไรเลย' },
+}
+
+const RISK_PROFILE_LABEL = {
+  conservative: 'ระมัดระวัง',
+  balanced: 'สมดุล',
+  aggressive: 'รับความเสี่ยงสูง',
 }
 
 function ChapterRow({ c }) {
@@ -24,7 +34,7 @@ function ChapterRow({ c }) {
         <div className="min-w-0 flex-1">
           <div className="truncate text-[10px] font-bold sm:text-sm">
             บท {c.chapter} · อายุ {c.ageFrom}-{c.ageTo} — {c.eventName}
-            {c.isBlackSwan && <span className="ml-1 text-purple-300">(Black Swan)</span>}
+            {c.isBlackSwan && <span className="ml-1 text-purple-300">(เหตุการณ์หนักที่หลบยาก)</span>}
           </div>
           <div className="truncate text-[8px] text-white/50 sm:text-[10px]">
             {c.prep.text} · {c.luck.text}
@@ -44,13 +54,69 @@ function ChapterRow({ c }) {
 }
 
 // รายงานผลเกษียณ — ไม่ใช่ win/lose แต่เป็นสเปกตรัม เทียบกับเกณฑ์อ้างอิง (ดีไซน์ข้อ 7)
-export default function ReportScreen({ report, onRestart }) {
+export default function ReportScreen({ report, session, styleId, gameTiming, learning, onRestart }) {
+  const submittedRef = useRef(false)
+  const sendingRef = useRef(false)
+  const [saveStatus, setSaveStatus] = useState('idle')
   const b = BAND_STYLE[report.band.id] ?? BAND_STYLE.tight
   const vsBench = report.finalValue / report.benchmark - 1
   const beat = vsBench >= 0
+  const readiness = buildReadiness(report, session.assessment)
+  const durationMinutes = Number.isFinite(gameTiming?.runDurationSeconds) ? Math.round(gameTiming.runDurationSeconds / 60) : null
 
+  useEffect(() => {
+    if (submittedRef.current) return
+    submittedRef.current = true
+    if (!session.player?.studentName || !session.player?.classRoom) return
+
+    const run = createPlayerRunPayload({
+      player: session.player,
+      report,
+      styleId,
+      preAssessment: session.assessment?.pre,
+      postAssessment: session.assessment?.post,
+      learning,
+      timing: gameTiming,
+    })
+    if (!run) {
+      setSaveStatus('waiting')
+      return
+    }
+
+    const queued = enqueuePlayerRun(run)
+    const sendQueuedRuns = async () => {
+      if (sendingRef.current) return
+      sendingRef.current = true
+      setSaveStatus('sending')
+      try {
+        if (!queued.ok) {
+          const directResult = await submitPlayerRun(run)
+          setSaveStatus(directResult.ok ? 'saved' : 'waiting')
+          return
+        }
+
+        const result = await flushPlayerDataQueue()
+        setSaveStatus(result.sentSessionIds.includes(run.sessionId) ? 'saved' : 'waiting')
+      } catch (error) {
+        console.warn('[player-data] unable to save completed run', error)
+        setSaveStatus('waiting')
+      } finally {
+        sendingRef.current = false
+      }
+    }
+
+    void sendQueuedRuns()
+    const handleOnline = () => void sendQueuedRuns()
+    window.addEventListener('online', handleOnline)
+    const retryTimer = window.setInterval(sendQueuedRuns, 30000)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.clearInterval(retryTimer)
+    }
+  }, [])
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-2 py-2 sm:px-4 sm:py-4">
         <div className="shrink-0 text-center">
           <div className="text-[10px] uppercase tracking-widest text-white/45 sm:text-xs">อายุ {BALANCE.retireAge} · รายงานผลเกษียณ</div>
@@ -96,9 +162,40 @@ export default function ReportScreen({ report, onRestart }) {
               บทที่ทำร้ายคุณมากสุดคือ <b className="text-rose-300">บท {report.worst.chapter} ({report.worst.eventName})</b> — {report.worst.prep.text}
             </div>
           )}
-          {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอ Black Swan {report.blackSwanCount} ครั้ง ซึ่งไม่มีใครเตรียมตัวทันได้ — ไม่ใช่ความผิดของคุณ</div>}
+          {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอเหตุการณ์หนักที่หลบยาก {report.blackSwanCount} ครั้ง ซึ่งกระทบแทบทุกอย่างพร้อมกัน — ไม่ใช่ความผิดของคุณ</div>}
           {report.scamVictim && <div className="mt-1 text-amber-200">คุณเคยตกเป็นเหยื่อมิจฉาชีพ จำไว้ว่า “การันตีผลตอบแทนสูง” + “ต้องตัดสินใจเดี๋ยวนี้” = โกงเสมอ</div>}
+          {report.cashOnlyChapters > 0 && <div className="mt-1 text-slate-200">มี {report.cashOnlyChapters} บทที่คุณถือเงินสดทั้งหมด — ยังไม่มีการกระจายการลงทุน เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ</div>}
         </div>
+
+        <section className="pixel-frame mt-3 bg-slate-900/80 p-3" aria-labelledby="readiness-title">
+          <h2 id="readiness-title" className="text-base font-black text-emerald-300 sm:text-xl">ความพร้อม 4 มิติในสถานการณ์จำลอง</h2>
+          <p className="mt-1 text-xs text-white/60">ไม่ใช่คำวินิจฉัยหรือคำแนะนำการลงทุนสำหรับชีวิตจริง</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">{readiness.map((item) => <div key={item.id} className="pixel-chip bg-slate-800 p-2 text-xs">
+            <div className="font-bold">{item.label}</div>
+            <div className="mt-1 text-lg text-amber-300">{item.score == null ? 'Not assessed' : `${item.score}/100`}</div>
+            <div className="text-white/55">{item.evidence}</div>
+          </div>)}</div>
+        </section>
+
+        <section className="pixel-frame mt-3 bg-slate-900/80 p-3 text-xs" aria-labelledby="learning-title">
+          <h2 id="learning-title" className="text-base font-black text-sky-300 sm:text-xl">สรุปการเรียนรู้ของฉัน</h2>
+          <p className="mt-2">โปรไฟล์ความเสี่ยงก่อนเล่น: <b>{learning.preRiskProfile ? RISK_PROFILE_LABEL[learning.preRiskProfile] : 'Not assessed'}</b></p>
+          <p>การเปลี่ยนแปลงคะแนนความรู้: <b>{learning.status === 'assessed' ? `${learning.knowledgeGain >= 0 ? '+' : ''}${learning.knowledgeGain}` : 'Not assessed'}</b></p>
+          <p>เวลาเล่นโดยประมาณ: <b>{durationMinutes == null ? 'เวลาไม่พร้อมใช้' : `${durationMinutes} นาที`}</b></p>
+          <p className="mt-1 text-white/55">คะแนนการเรียนรู้แยกจากผลพอร์ตและโชค ระบบจะส่งเฉพาะสถิติการเล่นเมื่อเชื่อมต่อฐานข้อมูล</p>
+          {saveStatus !== 'idle' && <p className="mt-1 text-emerald-300/80" aria-live="polite">
+            {saveStatus === 'saved' ? '✓ ส่งข้อมูลเข้าฐานข้อมูลแล้ว' : '… เก็บข้อมูลไว้ในเครื่อง จะส่งอัตโนมัติเมื่ออินเทอร์เน็ตกลับมา'}
+          </p>}
+        </section>
+
+        <details className="pixel-chip mt-3 bg-slate-900 p-3 text-xs">
+          <summary className="cursor-pointer font-bold text-violet-300">สมมติฐานและแหล่งอ้างอิง</summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-white/65">
+            <li>เงินเฟ้อ 2% ต่อปีเป็นค่ากลางของกรอบเป้าหมาย 1–3% และเป็นสมมติฐานเกม</li>
+            <li>HHI ใช้วัดการกระจุกตัวด้วยผลรวมสัดส่วนยกกำลังสอง</li>
+            <li>ผลตอบแทน เหตุการณ์ และ Black Swan เป็นพารามิเตอร์จำลอง ไม่ใช่การพยากรณ์</li>
+          </ul>
+        </details>
 
         <button type="button" onClick={onRestart} className="pixel-btn mt-3 mb-1 shrink-0 bg-emerald-500 py-2 text-sm font-bold text-emerald-950 sm:py-3 sm:text-lg">
           ↻ เล่นอีกครั้งด้วยสไตล์อื่น
@@ -107,3 +204,5 @@ export default function ReportScreen({ report, onRestart }) {
     </div>
   )
 }
+
+
