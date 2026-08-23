@@ -5,12 +5,41 @@ import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
 import { characterArtOf } from './art'
 import chooseCharacterBackground from '../assets/ui/choose-character-background-user.webp'
+import mediumFrameBackground from '../assets/ui/character-frame-bg-medium.svg'
+import viFrameBackground from '../assets/ui/character-frame-bg-vi.svg'
+import longtermFrameBackground from '../assets/ui/character-frame-bg-longterm.svg'
+import traderFrameBackground from '../assets/ui/character-frame-bg-trader.svg'
+import mediumPanelBackground from '../assets/ui/main-panel-bg-medium.svg'
+import viPanelBackground from '../assets/ui/main-panel-bg-vi.svg'
+import longtermPanelBackground from '../assets/ui/main-panel-bg-longterm.svg'
+import traderPanelBackground from '../assets/ui/main-panel-bg-trader.svg'
+import infoCoinAsset from '../assets/ui/info-coin-transparent.png'
+import portfolioDiamondAsset from '../assets/ui/portfolio-diamond-transparent.png'
+import navArrowPrevAsset from '../assets/ui/nav-arrow-prev-transparent.png'
+import navArrowNextAsset from '../assets/ui/nav-arrow-next-transparent.png'
+import styleSelectPlayAsset from '../assets/ui/style-select-play-transparent.png'
 
 const STYLE_GRAD = {
   medium: 'from-sky-900/60 to-sky-950 border-sky-500/50',
   longterm: 'from-emerald-900/60 to-emerald-950 border-emerald-500/50',
   trader: 'from-rose-900/60 to-rose-950 border-rose-500/50',
   vi: 'from-amber-900/60 to-amber-950 border-amber-500/50',
+}
+
+// กรอบพื้นหลังของการ์ดแต่ละสไตล์ — เป็น Visual Asset เท่านั้น ไม่ผูกกับกฎหรือค่าของเกม
+const STYLE_FRAME_BACKGROUND = {
+  medium: mediumFrameBackground,
+  vi: viFrameBackground,
+  longterm: longtermFrameBackground,
+  trader: traderFrameBackground,
+}
+
+// Background Layer ของ Main Details Panel — เป็น Visual Asset เท่านั้น
+const MAIN_PANEL_BACKGROUND = {
+  medium: mediumPanelBackground,
+  vi: viPanelBackground,
+  longterm: longtermPanelBackground,
+  trader: traderPanelBackground,
 }
 
 // ตำแหน่งครอปตอน object-fit: cover — วัดจาก bounding box จริงของแต่ละภาพแล้วพบว่า
@@ -54,14 +83,23 @@ const defenseCaption = (style, defensePct) => {
   return 'รับแรงกระแทกเท่าคนทั่วไป ไม่มีการป้องกันพิเศษ'
 }
 
-// ●●●○○ จากจำนวนจุดที่ปรับพอร์ตได้ (รวมจุดจัดพอร์ตต้นบท) — ยิ่งปรับได้บ่อย ยิ่งเต็มดวง
-// จุดติดสีทอง จุดว่างสีเทาจาง จึงต้องแยกสีเป็นสอง span แทนที่จะเป็น string เดียว
+// เพชรชัด/จางจากจำนวนจุดที่ปรับพอร์ตได้ — เป็น Visual Asset เท่านั้น
 function FreqDots({ n }) {
   const filled = Math.max(1, Math.min(5, n))
   return (
-    <span className="tracking-widest">
-      <span className="text-amber-400">{'●'.repeat(filled)}</span>
-      <span className="text-white/20">{'○'.repeat(5 - filled)}</span>
+    <span className="style-select-freq-diamonds" aria-label={`ปรับพอร์ตได้ ${n} ครั้ง`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <img key={i} className={`style-select-freq-diamond${i < filled ? ' is-filled' : ''}`} src={portfolioDiamondAsset} alt="" aria-hidden="true" />
+      ))}
+    </span>
+  )
+}
+
+function StyleAdvice({ style, className = '' }) {
+  return (
+    <span className={className}>
+      {style.tagline}{' '}
+      <strong className="style-select-favorite-assets">สินทรัพย์คู่ใจคือ {style.favoriteAssets}</strong>
     </span>
   )
 }
@@ -76,6 +114,12 @@ function CompareCard({ style, selected, onClick }) {
       type="button"
       onClick={onClick}
       aria-pressed={selected}
+      style={{
+        backgroundImage: `url(${STYLE_FRAME_BACKGROUND[style.id]})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '100% 100%',
+      }}
       className={`pixel-frame flex min-w-0 flex-col items-center gap-1 border bg-gradient-to-b p-1.5 text-center transition-opacity sm:p-2 ${STYLE_GRAD[style.id]} ${
         selected ? 'outline outline-2 outline-offset-2 outline-yellow-400 sm:outline-[3px]' : 'opacity-60 hover:opacity-90'
       }`}
@@ -154,7 +198,7 @@ function StyleDetailModal({ style, allGainPct, allDefensePct, selectedIndex, onC
     <Modal onClose={onClose} label={`รายละเอียด ${style.name}`} panelClassName={`pixel-frame max-w-lg border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}>
       <div>
         <div className="text-base font-bold sm:text-lg">{style.name}</div>
-        <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{style.tagline}</p>
+        <p className="mt-1 text-[11px] text-white/70 sm:text-sm"><StyleAdvice style={style} /></p>
 
         <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">กลไกปรับพอร์ต</div>
         <div className="pixel-chip mt-1.5 bg-black/40 p-1.5 text-[10px] leading-snug text-white/80 sm:text-[11px]">{adjustLabel(style)}</div>
@@ -237,7 +281,7 @@ export default function StyleSelect({ onSelect }) {
         />
       )}
       <div className="mx-auto flex w-full max-w-[108rem] flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4 sm:py-4">
-        <header className="mb-2 shrink-0 text-center">
+        <header className="style-select-header mb-2 shrink-0 text-center">
           <p className="game-subtitle text-xs sm:text-base">คุณเป็นนักลงทุนแบบไหน?</p>
           <p className="mt-0.5 text-[10px] text-white/50 sm:text-xs">
             ทุกแบบซื้อสินทรัพย์ได้เหมือนกันหมด — ต่างกันที่ว่าคุณ "แตะพอร์ตได้บ่อยแค่ไหน"
@@ -245,17 +289,31 @@ export default function StyleSelect({ onSelect }) {
         </header>
 
         {/* แถบเทียบ 4 สไตล์พร้อมกัน — คลิกใบไหนก็ตั้งเป็นสไตล์ที่เลือกอยู่ */}
-        <div className="mb-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2">
+        <div className="style-select-compare mb-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2">
           {styles.map((s, i) => (
             <CompareCard key={s.id} style={s} selected={i === index} onClick={() => setIndex(i)} />
           ))}
         </div>
 
         <div key={style.id} className="slide-in flex min-h-0 flex-1 flex-col gap-2">
-          <div className={`pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}>
-            {/* 1. หัวการ์ด: portrait + ชื่อ+badge แถวเดียว */}
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              <div className={`pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}>
+          <div
+            className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}
+            style={{
+              backgroundImage: `url(${MAIN_PANEL_BACKGROUND[style.id]})`,
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '100% 100%',
+            }}
+          >
+            <div className="style-select-panel-title">เลือกตัวละคร</div>
+
+            {/* 1. hero กลางแผง: ปุ่มเลื่อนอยู่ข้างตัวละคร */}
+            <div className="style-select-hero-nav">
+              <button type="button" onClick={prev} aria-label="ก่อนหน้า" className="style-select-hero-arrow pixel-btn">
+                <img src={navArrowPrevAsset} alt="" aria-hidden="true" />
+              </button>
+              <div className="style-select-hero flex shrink-0 items-center gap-2 sm:gap-3">
+              <div className={`style-select-hero-art pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}>
                 {art ? (
                   <Portrait src={art} alt={style.name} size="fill" fit="cover" objectPosition={PORTRAIT_POSITION[style.id]} />
                 ) : (
@@ -263,59 +321,66 @@ export default function StyleSelect({ onSelect }) {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-base font-bold sm:text-xl">{style.name}</div>
+                <div className="style-select-name text-base font-bold sm:text-xl">{style.name}</div>
                 {style.isDefault && <div className="text-[9px] text-white/50 sm:text-[11px]">แนะนำสำหรับเล่นครั้งแรก</div>}
               </div>
+              </div>
+              <button type="button" onClick={next} aria-label="ถัดไป" className="style-select-hero-arrow pixel-btn">
+                <img src={navArrowNextAsset} alt="" aria-hidden="true" />
+              </button>
             </div>
 
             {/* 2. persona ซ้าย / จำนวนครั้งปรับพอร์ต+FreqDots ขวา แถวเดียวกัน */}
             <div className="mt-2.5 flex items-start justify-between gap-2 sm:mt-3">
-              <p className="text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
+              <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
               <div className="shrink-0 text-right">
                 <div className="text-[8px] text-white/50 sm:text-[10px]">ปรับพอร์ตได้/ครั้ง</div>
                 <FreqDots n={style.canAdjustAt.length} />
               </div>
             </div>
 
-            {/* 3. จุดแข็ง/จุดอ่อน — เนื้อหาหลัก เด่นกว่าเดิม */}
-            <div className="mt-2.5 space-y-1.5 sm:mt-3">
-              <div className="flex gap-1.5 border-l-[3px] border-emerald-400 bg-emerald-500/10 px-2 py-1.5 text-[11px] sm:text-xs">
-                <span className="shrink-0 text-emerald-300">✓</span>
-                <span className="text-white/90">{style.pros}</span>
+            {/* 3. กรอบข้อมูลตัวละคร — ตัวเลขกำไร/ป้องกันอยู่ใน modal รายละเอียดเท่านั้น */}
+            <div className="style-select-profile pixel-frame mt-3">
+              <div className="style-select-profile__label">ข้อมูลตัวละคร</div>
+              <p className="style-select-profile__tagline"><StyleAdvice style={style} /></p>
+              <div className="style-select-pros-cons mt-2 space-y-1.5">
+                <div className="flex gap-1.5 border-l-[3px] border-emerald-400 bg-emerald-500/10 px-2 py-1.5">
+                  <span className="shrink-0 text-emerald-300">✓</span>
+                  <span className="text-white/90">{style.pros}</span>
+                </div>
+                <div className="flex gap-1.5 border-l-[3px] border-rose-400 bg-rose-500/10 px-2 py-1.5">
+                  <span className="shrink-0 text-rose-300">✗</span>
+                  <span className="text-white/90">{style.cons}</span>
+                </div>
               </div>
-              <div className="flex gap-1.5 border-l-[3px] border-rose-400 bg-rose-500/10 px-2 py-1.5 text-[11px] sm:text-xs">
-                <span className="shrink-0 text-rose-300">✗</span>
-                <span className="text-white/90">{style.cons}</span>
-              </div>
+              <div className="style-select-profile__adjust mt-2">{adjustLabel(style)}</div>
+              {(style.tradeFeePct || style.buyDipMult) && <div className="mt-2 flex flex-wrap gap-1">
+                {style.tradeFeePct && <span className="pixel-chip bg-rose-950/50 px-1.5 py-0.5 text-[9px] text-rose-100">ค่าธรรมเนียม {(style.tradeFeePct * 100).toFixed(0)}%/ครั้ง</span>}
+                {style.buyDipMult && <span className="pixel-chip bg-emerald-950/50 px-1.5 py-0.5 text-[9px] text-emerald-100">ซื้อตอนร่วง ×{style.buyDipMult}</span>}
+              </div>}
             </div>
 
             {/* 4. ลิงก์เปิด modal รายละเอียดเพิ่มเติม */}
             <button
               type="button"
               onClick={() => setShowDetail(true)}
-              className="mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
+              className="style-select-info mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
             >
-              ⓘ ดูรายละเอียดเพิ่มเติม
+              <span className="style-select-info__heading"><img className="style-select-info__icon" src={infoCoinAsset} alt="" aria-hidden="true" />ดูรายละเอียดเพิ่มเติม</span>
               <span className="block text-[9px] text-white/55 sm:text-[10px]">
                 (tagline · กำไรเฉลี่ย/ป้องกันความเสี่ยงเทียบ 4 สไตล์ · กลไกปรับพอร์ต · บทเรียน)
               </span>
             </button>
           </div>
 
-          {/* แถวปุ่ม: ◀▶ เป็นทางเลือกเสริมคู่กับแถบเทียบด้านบน */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" onClick={prev} aria-label="ก่อนหน้า" className="pixel-btn shrink-0 bg-slate-700 px-3 py-2 text-base font-bold sm:px-4 sm:py-2.5 sm:text-xl">
-              ◀
-            </button>
+          <div className="style-select-actions flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => onSelect(style.id)}
-              className="pixel-btn flex-1 bg-white py-2 text-xs font-semibold text-slate-900 sm:py-2.5 sm:text-base"
+              aria-label="เลือกตัวละครนี้"
+              className="style-select-play-button flex-1"
             >
-              เลือกตัวละครนี้
-            </button>
-            <button type="button" onClick={next} aria-label="ถัดไป" className="pixel-btn shrink-0 bg-slate-700 px-3 py-2 text-base font-bold sm:px-4 sm:py-2.5 sm:text-xl">
-              ▶
+              <img src={styleSelectPlayAsset} alt="" aria-hidden="true" />
             </button>
           </div>
         </div>
