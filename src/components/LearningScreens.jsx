@@ -45,7 +45,11 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
           return <label
             key={value}
             className={`assessment-answer-row ${optionIndex % 2 === 0 ? 'assessment-answer-row--left' : 'assessment-answer-row--right'} flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
-            style={{ borderImageSource: `url(${selected ? preAssessmentOptionSelected : preAssessmentOptionFrame})` }}
+            style={{
+              backgroundImage: `url(${selected ? preAssessmentOptionSelected : preAssessmentOptionFrame})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '100% 100%',
+            }}
           >
             <input className="sr-only" type="radio" name={q.id} value={value} checked={selected} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
             <span className="assessment-answer-row__text min-w-0 flex-1 break-words">{label}</span>

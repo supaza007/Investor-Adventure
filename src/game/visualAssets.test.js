@@ -106,9 +106,10 @@ test('answer text scales with the viewport and stays inside the artwork', async 
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?line-height:\s*1\.35/)
 })
 
-test('answer rows mount SVG artwork as a slice-safe border image', async () => {
+test('answer rows mount SVG artwork as a responsive background layer', async () => {
   const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
-  assert.match(jsx, /style=\{\{ borderImageSource: `url\(\$\{selected \? preAssessmentOptionSelected : preAssessmentOptionFrame\}\)` \}\}/)
+  assert.match(jsx, /backgroundImage: `url\(\$\{selected \? preAssessmentOptionSelected : preAssessmentOptionFrame\}\)`/)
+  assert.match(jsx, /backgroundSize: '100% 100%'/)
   assert.doesNotMatch(jsx, /className="assessment-answer-row__art"/)
 })
 test('pre-assessment visual chrome remains mounted', async () => {
