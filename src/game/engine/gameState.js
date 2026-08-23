@@ -10,15 +10,29 @@ import { getStyle } from './data/styles.js'
 import { getEvent, getEventsByPrimaryTag } from './data/events.js'
 import { TAGS, getTool } from './data/tools.js'
 import { rngFrom, shuffle } from './rng.js'
-import { totalValue, rebalance, applyGrowth } from './portfolio.js'
-import { outcomeBand, rollShock, applyShock, isBlackSwan } from './encounter.js'
+import { totalValue, rebalance, applyGrowthWithDetails, concentration } from './portfolio.js'
+import { applyEventReturns } from './encounter.js'
 import { makeScamOffer, applyScamLoss } from './scam.js'
 import { buildReport } from './report.js'
 
 export const STAGES = BALANCE.stages
 const LAST_CHAPTER = BALANCE.chapters.length - 1
-export const RULES_VERSION = '2026-08-formula-evidence-v1'
+export const RULES_VERSION = '2026-08-character-abilities-v3'
 export const RNG_VERSION = 'mulberry32-v1'
+
+function createChapterAbility(styleId = null) {
+  const style = styleId ? getStyle(styleId) : null
+  return {
+    abilityId: style?.abilityId ?? null,
+    triggered: false,
+    bonus: 0,
+    cost: 0,
+    recoveryBonus: 0,
+    growthBonus: 0,
+    adjustmentCount: 0,
+    promptChoices: {},
+  }
+}
 
 export function createInitialState(seed = Date.now()) {
   return {
@@ -31,10 +45,9 @@ export function createInitialState(seed = Date.now()) {
     positionsBeforeShock: {}, // สำเนา positions ก่อนแรงกระแทกลง — สเตจ 5 ใช้บอกผลกระทบรายตัว
     cash: 0,
     eventOrder: [], // เหตุการณ์ของทั้ง 4 บท เลือกตอนเริ่มรอบ
+    incomeSchedule: [], // เงินที่ได้รับจริงในแต่ละบท สุ่มครั้งเดียวจาก seed แล้ว replay ได้
     scamChapter: null, // บทที่มิจฉาชีพจะทัก — อีเวนต์เสริม สุ่มบทเดียวต่อรอบ
-    isBlackSwan: false,
-    band: null,
-    shock: null, // { shockPct, percentile }
+    shock: null, // { portfolioReturn, shockPct, assetReturns, impacts }
     valueBeforeShock: 0,
     scam: null, // { offerAmount, accepted }
     behavior: null, // 'hold' | 'cut' | 'buy'
@@ -42,10 +55,11 @@ export function createInitialState(seed = Date.now()) {
     immuneToAftershock: false,
     lastAftershock: null,
     lastFee: 0,
+    chapterAbility: createChapterAbility(),
     history: [],
     report: null,
     validationError: null,
-    versions: { rulesVersion: RULES_VERSION, rngVersion: RNG_VERSION, contentVersion: 'content-v1' },
+    versions: { rulesVersion: RULES_VERSION, rngVersion: RNG_VERSION, contentVersion: 'content-v2-event-explanations' },
     timing: { runStartedAt: null, runEndedAt: null, runDurationSeconds: null, chapters: {}, stages: {} },
     research: { consent: null, consentVersion: 'research-consent-v1', anonymousPlayerId: null, runId: null },
     assessment: { pre: null, post: null, knowledgeGain: null },
@@ -83,7 +97,10 @@ export function canAdjustNow(s) {
   if (!style) return false
   if (s.phase === 'allocation') return true
   if (s.phase !== 'stage') return false
-  return style.canAdjustAt.includes(currentStage(s).n)
+  if (!style.canAdjustAt.includes(currentStage(s).n)) return false
+  if (Number.isFinite(style.maxMidStageAdjustmentsPerChapter)
+      && s.chapterAbility.adjustmentCount >= style.maxMidStageAdjustmentsPerChapter) return false
+  return true
 }
 
 // ---------- เริ่มรอบ ----------
@@ -98,7 +115,7 @@ function pickEvents(rng) {
   const crisisIndex = BALANCE.chapters.findIndex((c) => c.bigCrisis)
   let worst = 0
   for (let i = 1; i < chosen.length; i++) {
-    if (chosen[i].severity > chosen[worst].severity) worst = i
+    if (chosen[i].crisisRank > chosen[worst].crisisRank) worst = i
   }
   ;[chosen[crisisIndex], chosen[worst]] = [chosen[worst], chosen[crisisIndex]]
   return chosen.map((e) => e.id)
@@ -111,6 +128,7 @@ function startRun(state, styleId, startedAt = null) {
   const eventOrder = pickEvents(rng)
   // มิจฉาชีพทักครั้งเดียวต่อรอบ สุ่มว่าบทไหน — ผู้เล่นได้เจอบทเรียนนี้เสมอ แต่เดาล่วงหน้าไม่ได้
   const scamChapter = Math.floor(rng() * BALANCE.chapters.length)
+  const incomeSchedule = BALANCE.chapters.map(({ incomeOptions }) => incomeOptions[Math.floor(rng() * incomeOptions.length)])
   const next = createInitialState(rng.getSeed())
 
   return {
@@ -118,8 +136,10 @@ function startRun(state, styleId, startedAt = null) {
     phase: 'allocation',
     styleId,
     eventOrder,
+    incomeSchedule,
     scamChapter,
-    cash: BALANCE.chapters[0].income, // ทุนตั้งต้นของบท 1
+    chapterAbility: createChapterAbility(styleId),
+    cash: incomeSchedule[0], // ทุนตั้งต้นของบท 1
     timing: startedAt ? { ...next.timing, runStartedAt: startedAt } : next.timing,
   }
 }
@@ -163,6 +183,18 @@ export function applyAllocation(state, weights) {
   return { ...state, positions, cash, lastFee: fee, validationError: null }
 }
 
+function recordAllocationEffect(state, allocated, { countAdjustment = false } = {}) {
+  const style = currentStyle(state)
+  const fee = allocated.lastFee ?? 0
+  const chapterAbility = {
+    ...state.chapterAbility,
+    triggered: state.chapterAbility.triggered || countAdjustment || (style?.id === 'trader' && fee > 0),
+    cost: state.chapterAbility.cost + (style?.id === 'trader' ? fee : 0),
+    adjustmentCount: state.chapterAbility.adjustmentCount + (countAdjustment ? 1 : 0),
+  }
+  return { ...allocated, chapterAbility }
+}
+
 function confirmAllocation(state) {
   return { ...state, phase: 'stage', stageIndex: 0 }
 }
@@ -185,7 +217,6 @@ function enterStage(state, index) {
 function resolveShock(state) {
   const rng = rngFrom(state.seed)
   const event = currentEvent(state)
-  const style = currentStyle(state)
 
   let positions = state.positions
   let cash = state.cash
@@ -200,18 +231,27 @@ function resolveShock(state) {
   }
 
   const valueBeforeShock = totalValue(positions) + cash
-  const bs = isBlackSwan(rng)
-  const band = outcomeBand(positions, event, { styleShockMult: style.shockMult, isBlackSwan: bs })
-  const shock = rollShock(band, rng)
-
-  // เก็บสำเนาไว้ก่อน applyShock เขียนทับ — สเตจ 5 ต้องเทียบก่อน/หลังรายสินทรัพย์
-  // ย้อนคำนวณเอาทีหลังไม่ได้ทุกเคส: ตัวที่โดน margin call เหลือ 0 (หารกลับไม่ได้)
-  // และตัวที่ชนพื้น 10% ก็ไม่ได้สะท้อน shock จริงที่โดน
-  //
+  // เก็บสำเนาไว้ก่อนลงผลตอบแทน — สเตจ 5 ใช้เทียบผลรายสินทรัพย์
   // จุดนี้คือ "หลังมิจฉาชีพเชิดเงินแล้ว" โดยตั้งใจ — ตารางสเตจ 5 รายงานผลของเหตุการณ์อย่างเดียว
   // ส่วนเงินที่โดนโกงมีบรรทัดของตัวเองอยู่แล้วในสเตจ 3
   const positionsBeforeShock = { ...positions }
-  positions = applyShock(positions, event, shock.shockPct, { isBlackSwan: bs })
+  const result = applyEventReturns(positions, event, {
+    chapterIndex: state.chapterIndex,
+    ageModifiers: BALANCE.ageModifiers,
+  })
+  positions = result.positions
+  const valueAfterShock = totalValue(positions) + cash
+  const portfolioReturn = valueBeforeShock > 0
+    ? (valueAfterShock - valueBeforeShock) / valueBeforeShock
+    : 0
+  const shock = {
+    portfolioReturn,
+    shockPct: portfolioReturn,
+    baseReturns: result.baseReturns,
+    ageModifiers: result.ageModifiers,
+    assetReturns: result.assetReturns,
+    impacts: result.impacts,
+  }
 
   return {
     ...state,
@@ -220,8 +260,6 @@ function resolveShock(state) {
     positionsBeforeShock,
     cash,
     scam,
-    isBlackSwan: bs,
-    band,
     shock,
     valueBeforeShock,
     behavior: null,
@@ -235,8 +273,17 @@ function chooseBehavior(state, choice) {
   let next = { ...state, behavior: choice, validationError: null }
 
   if (choice === 'hold') {
-    next.reboundOwed = lost * BALANCE.reboundPct
+    const baseRecovery = lost * BALANCE.reboundPct
+    const actualRecovery = baseRecovery * (style.holdRecoveryMult ?? 1)
+    const recoveryBonus = actualRecovery - baseRecovery
+    next.reboundOwed = actualRecovery
     next.immuneToAftershock = false
+    if (recoveryBonus > 0) next.chapterAbility = {
+      ...state.chapterAbility,
+      triggered: true,
+      bonus: state.chapterAbility.bonus + recoveryBonus,
+      recoveryBonus: state.chapterAbility.recoveryBonus + recoveryBonus,
+    }
   }
 
   if (choice === 'cut') {
@@ -244,11 +291,19 @@ function chooseBehavior(state, choice) {
     const { positions, fee } = rebalance(state.positions, { bond: 1 }, style.tradeFeePct ?? 0)
     next.positions = positions
     next.lastFee = fee
+    if (style.id === 'trader' && fee > 0) next.chapterAbility = {
+      ...state.chapterAbility,
+      triggered: true,
+      cost: state.chapterAbility.cost + fee,
+    }
     next.reboundOwed = 0
     next.immuneToAftershock = true
   }
 
   if (choice === 'buy') {
+    if (state.cash <= 0.5) {
+      return { ...state, validationError: 'ต้องมีเงินสดเหลือจึงจะซื้อเพิ่มได้' }
+    }
     // ซื้อเพิ่มตอนราคาถูก: เทเงินสดที่เหลือลงพอร์ตตามสัดส่วนเดิม
     const invested = state.cash
     const total = totalValue(state.positions)
@@ -262,9 +317,18 @@ function chooseBehavior(state, choice) {
     }
     next.positions = positions
     next.cash = 0
-    next.reboundOwed = lost * BALANCE.reboundPct * BALANCE.buyDipReboundMult * (style.buyDipMult ?? 1)
+    const baseRecovery = lost * BALANCE.reboundPct * BALANCE.buyDipReboundMult
+    const actualRecovery = baseRecovery * (style.buyDipMult ?? 1)
+    const recoveryBonus = actualRecovery - baseRecovery
+    next.reboundOwed = actualRecovery
     next.immuneToAftershock = false
     next.investedOnDip = invested
+    if (recoveryBonus > 0) next.chapterAbility = {
+      ...state.chapterAbility,
+      triggered: true,
+      bonus: state.chapterAbility.bonus + recoveryBonus,
+      recoveryBonus: state.chapterAbility.recoveryBonus + recoveryBonus,
+    }
   }
   return next
 }
@@ -300,14 +364,29 @@ function finishChapter(state, endedAt = null) {
     if (state.immuneToAftershock) {
       lastAftershock = { hit: false, avoided: true }
     } else {
-      const aftershockPct = (state.shock?.shockPct ?? 0) * BALANCE.aftershockSeverityMult
-      positions = applyShock(positions, event, aftershockPct, { isBlackSwan: false })
-      lastAftershock = { hit: true, avoided: false, pct: aftershockPct }
+      // คลื่นตามย้ำเฉพาะด้านลบของ Matrix ด้วยความแรงครึ่งหนึ่ง
+      // จึงไม่แจกกำไรซ้ำให้สินทรัพย์ที่ชนะเหตุการณ์
+      const result = applyEventReturns(positions, event, {
+        scale: BALANCE.aftershockSeverityMult,
+        negativeOnly: true,
+        chapterIndex: state.chapterIndex,
+        ageModifiers: BALANCE.ageModifiers,
+      })
+      positions = result.positions
+      lastAftershock = { hit: true, avoided: false, pct: result.portfolioReturn }
     }
   }
 
   // 3) ทบต้นเงียบๆ ตลอดทศวรรษ — รางวัลของการถือ (ดีไซน์ข้อ 3)
-  positions = applyGrowth(positions, style.returnMult, rng)
+  const growth = applyGrowthWithDetails(positions, style.returnMult, rng)
+  positions = growth.positions
+  const growthBonus = Math.max(0, growth.abilityBonus)
+  const finalizedAbility = {
+    ...state.chapterAbility,
+    triggered: state.chapterAbility.triggered || growthBonus > 0,
+    bonus: state.chapterAbility.bonus + growthBonus,
+    growthBonus: state.chapterAbility.growthBonus + growthBonus,
+  }
 
   const entry = {
     chapter: chapter.n,
@@ -315,11 +394,26 @@ function finishChapter(state, endedAt = null) {
     ageTo: chapter.ageTo,
     eventId: event.id,
     eventName: event.name,
-    isBlackSwan: state.isBlackSwan,
-    shockPct: state.shock?.shockPct ?? 0,
-    percentile: state.shock?.percentile ?? 0,
-    exposure: state.band?.exposure ?? 0,
-    concentration: state.band?.concentration ?? 0,
+    characterAbilityId: finalizedAbility.abilityId,
+    abilityTriggered: finalizedAbility.triggered,
+    abilityBonus: finalizedAbility.bonus,
+    abilityCost: finalizedAbility.cost,
+    abilityNetEffect: finalizedAbility.bonus - finalizedAbility.cost,
+    abilityRecoveryBonus: finalizedAbility.recoveryBonus,
+    abilityGrowthBonus: finalizedAbility.growthBonus,
+    adjustmentCount: finalizedAbility.adjustmentCount,
+    adjustmentPromptChoices: finalizedAbility.promptChoices,
+    incomeAdded: state.incomeSchedule[state.chapterIndex] ?? 0,
+    allocationBeforeEvent: {
+      ...state.positionsBeforeShock,
+      cash: state.cash,
+    },
+    shockPct: state.shock?.portfolioReturn ?? 0,
+    baseReturns: state.shock?.baseReturns ?? {},
+    ageModifiers: state.shock?.ageModifiers ?? {},
+    assetReturns: state.shock?.assetReturns ?? {},
+    assetImpacts: state.shock?.impacts ?? [],
+    concentration: concentration(state.positionsBeforeShock),
     cashOnly: totalValue(state.positions) <= 0 && state.cash > 0,
     behavior: state.behavior,
     scamAccepted: state.scam?.accepted ?? false,
@@ -337,7 +431,7 @@ function finishChapter(state, endedAt = null) {
   }
 
   // 4) เงินสดถูกเงินเฟ้อกิน แล้วรายได้ก้อนใหม่เข้ามา
-  cash = cash * BALANCE.cashDecayPerChapter + BALANCE.chapters[state.chapterIndex + 1].income
+  cash = cash * BALANCE.cashDecayPerChapter + (state.incomeSchedule[state.chapterIndex + 1] ?? 0)
 
   return {
     ...state,
@@ -348,15 +442,14 @@ function finishChapter(state, endedAt = null) {
     chapterIndex: state.chapterIndex + 1,
     stageIndex: 0,
     phase: 'allocation',
-    isBlackSwan: false,
-    band: null,
     shock: null,
-    positionsBeforeShock: {}, // ล้างพร้อม band/shock — ข้อมูลของบทที่จบไปแล้วต้องไม่ค้างมาบทใหม่
+    positionsBeforeShock: {}, // ล้างพร้อม shock — ข้อมูลของบทที่จบไปแล้วต้องไม่ค้างมาบทใหม่
     scam: null,
     behavior: null,
     reboundOwed: 0,
     immuneToAftershock: false,
     lastAftershock,
+    chapterAbility: createChapterAbility(state.styleId),
     investedOnDip: 0,
   }
 }
@@ -384,15 +477,31 @@ export function gameReducer(state, action) {
 
     case 'SET_ALLOCATION':
       if (!canAdjustNow(state)) return state
-      return applyAllocation(state, action.weights)
+      return recordAllocationEffect(state, applyAllocation(state, action.weights), { countAdjustment: state.phase === 'stage' })
 
     case 'CONFIRM_ALLOCATION':
       if (state.phase !== 'allocation') return state
       if (Object.hasOwn(action, 'weights')) {
         const allocated = applyAllocation(state, action.weights)
-        return allocated.validationError ? allocated : confirmAllocation(allocated)
+        if (allocated.validationError) return allocated
+        return confirmAllocation(recordAllocationEffect(state, allocated))
       }
       return state.validationError ? state : confirmAllocation(state)
+
+    case 'RECORD_ADJUSTMENT_PROMPT': {
+      if (state.phase !== 'stage' || !['adjust', 'skip'].includes(action.choice)) return state
+      const style = currentStyle(state)
+      const stage = currentStage(state)
+      if (!style.adjustmentPromptStages?.includes(stage.n)) return state
+      if (state.chapterAbility.promptChoices[stage.key]) return state
+      return {
+        ...state,
+        chapterAbility: {
+          ...state.chapterAbility,
+          promptChoices: { ...state.chapterAbility.promptChoices, [stage.key]: action.choice },
+        },
+      }
+    }
 
     case 'ANSWER_SCAM':
       if (!state.scam || state.scam.accepted !== null) return state

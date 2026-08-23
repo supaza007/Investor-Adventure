@@ -5,10 +5,10 @@ export const BALANCE = {
   // ── โครงเกม ────────────────────────────────────────────────
   // 4 บทเล่นจริง + 1 หน้ารายงาน (ดีไซน์ข้อ 3 — พาดหัว "6 บท" ในเอกสารเขียนผิด)
   chapters: [
-    { n: 1, ageFrom: 20, ageTo: 29, theme: 'เริ่มทำงาน ทุนน้อย เสี่ยงได้มาก', income: 100 },
-    { n: 2, ageFrom: 30, ageTo: 39, theme: 'ภาระเพิ่ม (ครอบครัว/บ้าน)', income: 60 },
-    { n: 3, ageFrom: 40, ageTo: 49, theme: 'รายได้พีค แต่เจอวิกฤตใหญ่ที่สุด', income: 100, bigCrisis: true },
-    { n: 4, ageFrom: 50, ageTo: 59, theme: 'ต้องเริ่มลดความเสี่ยงก่อนเกษียณ', income: 80 },
+    { n: 1, ageFrom: 20, ageTo: 29, theme: 'เริ่มทำงาน ทุนน้อย เสี่ยงได้มาก', incomeOptions: [10000] },
+    { n: 2, ageFrom: 30, ageTo: 39, theme: 'ภาระเพิ่ม (ครอบครัว/บ้าน)', incomeOptions: [6000, 8000, 10000] },
+    { n: 3, ageFrom: 40, ageTo: 49, theme: 'รายได้พีค แต่เจอวิกฤตใหญ่ที่สุด', incomeOptions: [9000, 10000, 12000], bigCrisis: true },
+    { n: 4, ageFrom: 50, ageTo: 59, theme: 'ต้องเริ่มลดความเสี่ยงก่อนเกษียณ', incomeOptions: [9000, 10000, 12000] },
   ],
   retireAge: 60,
 
@@ -31,21 +31,13 @@ export const BALANCE = {
   yearsPerChapter: 10,
   cashDecayPerChapter: (1 + 0.02) ** -10,
 
-  // ── สูตร outcome band (ดีไซน์ข้อ 7) ────────────────────────
-  // center    = −S × E × (1 + concentrationCenterMult × D)
-  // halfWidth = S × (bandWidthBase + bandWidthPerConcentration × D)
-  // กระจุกตัวโดนลงโทษ 2 ชั้น: เลื่อนลบแรงขึ้น และช่วงกว้างขึ้น (เดาผลไม่ได้)
-  concentrationCenterMult: 0.5,
-  bandWidthBase: 0.15, // กระจายสมบูรณ์ = ช่วงแคบ ±15% ของ severity
-  bandWidthPerConcentration: 0.45, // ทุ่มตัวเดียว = ช่วงกว้าง ±60%
-
-  // ── Black Swan (ดีไซน์ข้อ 7) ───────────────────────────────
-  // ต้องหายากพอไม่ให้เป็นข้ออ้างละเลยการกระจายความเสี่ยง
-  blackSwanChance: 0.12,
-  blackSwanExposure: 0.8, // บังคับ E คงที่ ไม่สนใจว่าพอร์ตกระจายดีแค่ไหน
-  // Proposed systemic-shock profile: ทุกสินทรัพย์โดน แต่ระดับต่างกัน
-  // เป็น simulation parameter จนกว่าจะผ่าน finance/content review
-  blackSwanShockProfile: { bond: 0.35, fund: 0.55, stock: 0.8, crypto: 1.2 },
+  // ── ผลของช่วงวัยต่อ Event Matrix ───────────────────────────
+  ageModifiers: [
+    { negativeRelief: 0.05 },
+    {},
+    { riskyLossPenalty: 0.05, bondPositiveBonus: 0.05 },
+    { riskyLossPenalty: 0.10, bondPositiveBonus: 0.05 },
+  ],
 
   // ── จุดตัดสินใจพฤติกรรม สเตจ 4 ─────────────────────────────
   reboundPct: 0.4, // "ถือต่อ" ฟื้น 40% ของที่เสียไป ในบทถัดไป
@@ -61,26 +53,18 @@ export const BALANCE = {
     lossPct: 1.0, // รับข้อเสนอ = เสียเงินก้อนนั้น 100%
   },
 
-  // ── ล้มละลาย (ดีไซน์ข้อ 7) ─────────────────────────────────
-  // ไม่มี Game Over จากบทเดียว ยกเว้นล้มละลายจริงจากเลเวอเรจเกินตัว
-  ruinThreshold: 0.02, // มูลค่าเหลือ < 2% ของทุนที่ใส่ไปทั้งหมด = ล้มละลาย
-
-  // Margin call: ในโลกจริงเลเวอเรจไม่ได้ฆ่าคนด้วยการค่อยๆ ขาดทุน แต่ด้วยการโดนบังคับขายทีเดียวหมด
-  // ถ้าแรงกระแทกที่ลงกับอนุพันธ์/คริปโตแรงเกินเกณฑ์นี้ ตำแหน่งนั้นเป็นศูนย์ทันที ไม่ใช่แค่ลดลง
-  // ทุ่มสุดตัว = หมดตัวจริง · แบ่งมานิดเดียว = ตายเฉพาะก้อนนั้น พอร์ตที่เหลือรอด (รางวัลของการกระจาย)
-  marginCallThreshold: -0.5,
-
   // ── เกณฑ์อ้างอิงตอนจบ ─────────────────────────────────────
   // "ถ้าถือกองทุนดัชนีเฉยๆ ตลอด 40 ปีจะได้เท่าไหร่" (ดีไซน์ข้อ 7)
   //
-  // ⚠️ เลขนี้วัดมาจาก `npm run sim` (ค่ากลางของกองทุนรวมล้วน 3,000 รอบ) ไม่ใช่คำนวณสูตรตรงๆ
+  // ⚠️ เลขนี้วัดมาจาก `node scripts/sim.mjs 5000` (ค่ากลางของกองทุนรวมล้วน) ไม่ใช่คำนวณสูตรตรงๆ
   // เพราะต้องรวมผลของแรงกระแทกและความผันผวนจริงด้วย ถ้าจูนตัวเลขในไฟล์นี้ ต้องรัน sim ใหม่แล้วอัปเดตที่นี่
   benchmarkToolId: 'fund',
-  benchmarkValue: 1421,
+  benchmarkValue: 204172,
   outcomeBands: [
-    { id: 'fire', minRatio: 1.5, label: 'FIRE ก่อนกำหนด' }, // เทียบกับเกณฑ์อ้างอิง
-    { id: 'comfortable', minRatio: 0.9, label: 'เกษียณสบาย' },
-    { id: 'adequate', minRatio: 0.5, label: 'พอใช้' },
-    { id: 'tight', minRatio: 0.0, label: 'ฝืดเคือง' },
+    { id: 'fire', minMultiple: 8, label: 'รวย!!' },
+    { id: 'comfortable', minMultiple: 4, label: 'ฐานะมั่นคง' },
+    { id: 'adequate', minMultiple: 1.5, label: 'พออยู่ได้' },
+    { id: 'tight', minMultiple: 0.2, label: 'เงินขาดมือ' },
+    { id: 'ruined', minMultiple: 0, label: 'เจ๊งกะโบ๊ง!' },
   ],
 }

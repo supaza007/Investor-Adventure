@@ -76,10 +76,33 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: viewportWidth, height: viewportHeight, deviceScaleFactor: 1, mobile: viewportWidth < 768 })
   await send('Page.navigate', { url })
   await sleep(700)
-  await clickText('PLAY')
-  await clickText('ข้าม · ไม่ประเมิน')
-  await clickText('ไม่ยินยอม แต่เล่นต่อ')
+  const coverReady = await evaluate(`(() => {
+    const name = document.querySelector('#student-name')
+    const room = document.querySelector('#class-room')
+    if (!name || !room) return false
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
+    setValue.call(name, 'QA Player')
+    name.dispatchEvent(new Event('input', { bubbles: true }))
+    setValue.call(room, 'QA Room')
+    room.dispatchEvent(new Event('input', { bubbles: true }))
+    return true
+  })()`)
+  if (!coverReady) throw new Error('Cover identity fields were not found')
+  await clickText('START')
+
+  const assessmentReady = await evaluate(`(() => {
+    const radios = [...document.querySelectorAll('input[type="radio"]')]
+    const firstByQuestion = new Map()
+    for (const radio of radios) if (!firstByQuestion.has(radio.name)) firstByQuestion.set(radio.name, radio)
+    for (const radio of firstByQuestion.values()) radio.click()
+    return firstByQuestion.size === 10
+  })()`)
+  if (!assessmentReady) throw new Error('Pre-assessment questions were not ready')
+  await clickText('บันทึกและไปต่อ')
+  await clickText('เข้าใจแล้ว ไปต่อ')
+  await clickText('ไม่ยินยอม แต่เล่นเกมต่อ')
   await clickText('เลือกตัวละครนี้')
+  await clickText('ดูเงินที่ได้รับในบทนี้')
   await clickText('เริ่มจัดพอร์ตบทนี้')
 
   const allocated = await evaluate(`(() => { const buttons = [...document.querySelectorAll('[data-allocation-field="bond"]')]; const add = buttons.at(-1); if (!add) return false; for (let i = 0; i < 20; i += 1) add.click(); return true })()`)
@@ -112,7 +135,9 @@ try {
   const evidence = await evaluate(`(() => {
     const dialog = document.querySelector('[role="dialog"]')
     const image = dialog?.querySelector('img')
-    const action = [...(dialog?.querySelectorAll('button') ?? [])].find((button) => button.textContent.includes('เริ่มจัดพอร์ตบทนี้'))
+    const action = [...(dialog?.querySelectorAll('button') ?? [])].find((button) =>
+      button.textContent.includes('ดูเงินที่ได้รับในบทนี้') || button.textContent.includes('เริ่มจัดพอร์ตบทนี้')
+    )
     const rect = action?.getBoundingClientRect()
     return {
       dialogVisible: Boolean(dialog),

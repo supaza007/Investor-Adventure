@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="135" viewBox="0 0 240 135" shape-rendering="crispEdges">
+  <defs><linearGradient id="bronze" x2="0" y2="1"><stop stop-color="#ffe28a"/><stop offset=".25" stop-color="#b87542"/><stop offset=".82" stop-color="#6d3826"/><stop offset="1" stop-color="#2b1a1b"/></linearGradient></defs>
+  <path fill="url(#bronze)" d="M10 6h42v4h136V6h42v34h-4v55h4v34h-42v-4H52v4H10V95h4V40h-4z"/>
+  <path fill="#1b1720" d="M42 16h156v4h22v95h-22v4H42v-4H20V20h22z"/>
+  <path fill="#f4c86d" d="M52 6h136v5H52zM52 124h136v5H52zM10 48h5v39h-5zm215 0h5v39h-5z"/>
+  <path fill="#9b5c35" d="M14 40h18v-8h14v8h-8v8H20v8h-6zm212 0h-18v-8h-14v8h8v8h18v8h6zM14 95h18v8h14v-8h-8v-8H20v-8h-6zm212 0h-18v8h-14v-8h8v-8h18v-8h6z"/>
+  <path fill="#c88a4c" d="M98 6h44v5H98zM98 124h44v5H98z"/>
+</svg>

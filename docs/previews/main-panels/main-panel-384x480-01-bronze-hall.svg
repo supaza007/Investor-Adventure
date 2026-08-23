@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="480" viewBox="0 0 384 480" shape-rendering="crispEdges">
+  <defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#132b3e"/><stop offset=".5" stop-color="#0b1b2c"/><stop offset="1" stop-color="#06111e"/></linearGradient><linearGradient id="wood" x2="0" y2="1"><stop stop-color="#f0b76b"/><stop offset=".2" stop-color="#ad613b"/><stop offset=".8" stop-color="#633222"/><stop offset="1" stop-color="#2b1820"/></linearGradient></defs>
+  <rect x="8" y="8" width="368" height="464" fill="#15141b"/><rect x="16" y="16" width="352" height="448" fill="url(#bg)"/>
+  <path fill="url(#wood)" d="M24 8h64v8h208V8h64v64h8v264h-8v64h-64v-8H88v8H24v-64h-8V72h8z"/>
+  <path fill="#241b22" d="M40 32h72v8h160v-8h72v56h8v248h-8v56h-72v-8H112v8H40v-56h-8V88h8z"/>
+  <path fill="#8b4d31" d="M24 24h64v16H40v40H24zm336 0h-64v16h48v40h16zM24 456h64v-16H40v-40H24zm336 0h-64v-16h48v-40h16z"/>
+  <path fill="#d49a54" d="M96 8h192v8H96zM96 464h192v8H96zM16 144h8v192h-8zm344 0h8v192h-8z"/>
+  <path fill="#c17b42" d="M48 80h64v8H48zm224 0h64v8h-64zM48 392h64v8H48zm224 0h64v8h-64z"/>
+  <path fill="#1b3443" d="M56 104h272v8h8v264h-8v8H56v-8h-8V112h8z"/>
+  <path fill="#25485a" d="M64 120h256v4h8v240h-8v4H64v-4h-8V124h8z"/>
+  <path fill="#e7b76a" d="M24 72h16v16H24zm320 0h16v16h-16zM24 392h16v16H24zm320 0h16v16h-16z"/>
+  <path fill="#a75f39" d="M80 8h24v8H80zm200 0h24v8h-24zM80 464h24v8H80zm200 0h24v8h-24z"/>
+</svg>

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { characterArtOf } from './art.js'
 import coverBackground from '../assets/ui/cover-background-user.svg'
-import gameSubtitle from '../assets/ui/game-subtitle-user.svg'
-import playButton from '../assets/ui/play-button-user.svg'
+import gameSubtitle from '../assets/ui/cover-adventure-subtitle-user.png'
+import playButton from '../assets/ui/cover-start-button-user.png'
 
 // ⚠️ ไม่ import รูปหน้าปกตรงๆ ด้วยเหตุผลเดียวกับ art.js — ไฟล์รูปไม่ถูก commit ขึ้น git
 // เครื่องที่มีไฟล์ → ใช้โลโก้/พื้นหลังจริง · เครื่องที่ไม่มี (GitHub Actions) → ใช้ชื่อเกมแบบตัวอักษร
@@ -53,7 +53,7 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
           <img
             src={titleLogo}
             alt={GAME_TITLE}
-            className="w-[min(80vw,620px)] max-h-[30vh] max-w-full object-contain drop-shadow-[0_6px_0_rgba(0,0,0,0.5)]"
+            className="w-[min(80vw,620px)] max-h-[26vh] max-w-full object-contain drop-shadow-[0_6px_0_rgba(0,0,0,0.5)]"
             style={{ imageRendering: 'pixelated' }}
           />
         ) : (
@@ -62,9 +62,9 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
           </h1>
         )}
 
-        <img src={gameSubtitle} alt="เส้นทางชีวิตนักลงทุน · อายุ 20 ถึงเกษียณ" className="mt-2 w-[min(80vw,30rem)] object-contain" />
+        <img src={gameSubtitle} alt="ผจญภัยในโลกแห่งการลงทุน" className="cover-adventure-subtitle mt-1 object-contain" draggable="false" />
 
-        {heroes.length > 0 && <div className="cozy-hero-lineup mt-3 flex h-[min(30vh,15rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
+        {heroes.length > 0 && <div className="cozy-hero-lineup mt-2 flex h-[min(25vh,12rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
           {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
         </div>}
 
@@ -90,9 +90,9 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
             autoComplete="off"
           />
           {inputError && <p role="alert" className="text-xs text-rose-200">{inputError}</p>}
-          <button type="submit" className="cover-play-art pixel-btn play-pulse mt-1 self-center">
-            <img src={playButton} alt="" className="block w-[clamp(11rem,38vw,17rem)]" />
-            <span className="sr-only">PLAY</span>
+          <button type="submit" aria-label="เริ่มเกม" className="cover-play-art pixel-btn play-pulse mt-1 self-center">
+            <img src={playButton} alt="" className="cover-start-image block" draggable="false" />
+            <span className="sr-only">START</span>
           </button>
         </form>
 
@@ -100,7 +100,7 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
 
         {saveError && <p role="alert" className="mt-3 max-w-lg bg-rose-950/90 p-2 text-xs text-rose-100">เปิดข้อมูลที่บันทึกไว้ไม่ได้ ({saveError}) เกมใหม่ยังเล่นได้ตามปกติ</p>}
 
-        <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม PLAY เพื่อเริ่มการผจญภัย</p>
+        <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม START เพื่อเริ่มการผจญภัย</p>
       </div>
     </div>
   )

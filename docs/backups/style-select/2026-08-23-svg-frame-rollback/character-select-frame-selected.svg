@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" shape-rendering="crispEdges" role="img" aria-label="กรอบตัวละครที่เลือก">
+  <defs>
+    <linearGradient id="bronze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe58a"/>
+      <stop offset="0.2" stop-color="#b9783e"/>
+      <stop offset="0.78" stop-color="#7f452a"/>
+      <stop offset="1" stop-color="#3b211b"/>
+    </linearGradient>
+    <linearGradient id="highlight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff3ad"/>
+      <stop offset="1" stop-color="#d39a4f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- transparent centre: border-image can preserve the card content -->
+  <path d="M 24 4 H 72 V 8 H 84 V 12 H 88 V 24 H 92 V 72 H 88 V 84 H 84 V 88 H 72 V 92 H 24 V 88 H 12 V 84 H 8 V 72 H 4 V 24 H 8 V 12 H 12 V 8 H 24 Z" fill="url(#bronze)"/>
+  <path d="M 24 8 H 72 V 12 H 80 V 16 H 84 V 24 H 88 V 72 H 84 V 80 H 80 V 84 H 72 V 88 H 24 V 84 H 16 V 80 H 12 V 72 H 8 V 24 H 12 V 16 H 16 V 12 H 24 Z" fill="#1d1720"/>
+  <path d="M 24 12 H 72 M 12 24 V 72 M 24 84 H 72 M 84 24 V 72" stroke="url(#highlight)" stroke-width="3"/>
+
+  <!-- pixel-scroll corner ornaments -->
+  <path d="M 8 24 V 12 H 20 V 8 H 32 V 12 H 24 V 16 H 16 V 24 Z M 12 20 H 20 V 16 H 28 V 20 H 24 V 24 H 16 V 28 H 12 Z" fill="#9b5c35"/>
+  <path d="M 88 24 V 12 H 76 V 8 H 64 V 12 H 72 V 16 H 80 V 24 Z M 84 20 H 76 V 16 H 68 V 20 H 72 V 24 H 80 V 28 H 84 Z" fill="#9b5c35"/>
+  <path d="M 8 72 V 84 H 20 V 88 H 32 V 84 H 24 V 80 H 16 V 72 Z M 12 76 H 20 V 80 H 28 V 76 H 24 V 72 H 16 V 68 H 12 Z" fill="#9b5c35"/>
+  <path d="M 88 72 V 84 H 76 V 88 H 64 V 84 H 72 V 80 H 80 V 72 Z M 84 76 H 76 V 80 H 68 V 76 H 72 V 72 H 80 V 68 H 84 Z" fill="#9b5c35"/>
+
+  <!-- centre clasps -->
+  <path d="M 36 4 H 60 V 8 H 64 V 20 H 60 V 24 H 36 V 20 H 32 V 8 H 36 Z" fill="#7d4329"/>
+  <path d="M 40 8 H 56 V 12 H 60 V 16 H 56 V 20 H 40 V 16 H 36 V 12 H 40 Z" fill="#c88a4c"/>
+  <path d="M 40 12 H 56 V 16 H 40 Z" fill="#4c2920"/>
+  <path d="M 36 72 H 60 V 76 H 64 V 88 H 60 V 92 H 36 V 88 H 32 V 76 H 36 Z" fill="#7d4329"/>
+  <path d="M 40 76 H 56 V 80 H 60 V 84 H 56 V 88 H 40 V 84 H 36 V 80 H 40 Z" fill="#c88a4c"/>
+  <path d="M 40 80 H 56 V 84 H 40 Z" fill="#4c2920"/>
+  <path d="M 4 36 V 60 H 8 V 64 H 20 V 60 H 24 V 36 H 20 V 32 H 8 V 36 Z" fill="#7d4329"/>
+  <path d="M 8 40 H 12 V 36 H 16 V 40 H 20 V 56 H 16 V 60 H 12 V 56 H 8 Z" fill="#c88a4c"/>
+  <path d="M 12 40 H 16 V 56 H 12 Z" fill="#4c2920"/>
+  <path d="M 72 36 V 60 H 76 V 64 H 88 V 60 H 92 V 36 H 88 V 32 H 76 V 36 Z" fill="#7d4329"/>
+  <path d="M 76 40 H 80 V 36 H 84 V 40 H 88 V 56 H 84 V 60 H 80 V 56 H 76 Z" fill="#c88a4c"/>
+  <path d="M 80 40 H 84 V 56 H 80 Z" fill="#4c2920"/>
+</svg>

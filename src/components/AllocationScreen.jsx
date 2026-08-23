@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { getTools, TAG_LABELS } from '../game/engine/data/tools.js'
+import { getTools } from '../game/engine/data/tools.js'
 import { netWorth, applyAllocation, currentStyle } from '../game/engine/gameState.js'
 import { colorOf, money, pct } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
@@ -71,9 +71,6 @@ function useHoldRepeat(action) {
   }
 }
 
-// แปลง exposure 0..1 เป็นดาว 1-5 เม็ด — นักเรียน ม.ปลาย ไม่ต้องอ่านทศนิยม
-const riskDots = (v) => '●'.repeat(Math.max(1, Math.round(v * 5))) + '○'.repeat(5 - Math.max(1, Math.round(v * 5)))
-
 // growthVol จริงอยู่ระหว่าง 0.08-1.2 ไม่ใช่ 0..1 จึงแปลเป็นระดับคำแทนโชว์ % ตรงๆ
 const VOL_LEVELS = [
   { max: 0.15, label: 'แทบไม่ผันผวน' },
@@ -96,7 +93,7 @@ const volDots = (v) => {
 }
 
 // การ์ดหน้าเริ่มต้น — ย่อเหลือ 4 บรรทัด (ชื่อ / %+เงิน / ปุ่ม −+ / เสี่ยง) กดที่การ์ดเปิด modal
-// รายละเอียดเต็ม (tagline, โต X×, exposure ครบ 4 tag, ความผันผวนเป็นคำ, lesson) — ไอคอน ⓘ
+// รายละเอียดเต็ม (tagline, การเติบโต, ความผันผวน, lesson) — ไอคอน ⓘ
 // มุมขวาบนเป็นตัวใบ้ว่ากดดูเพิ่มได้ ไม่กดก็เล่นต่อได้ปกติ
 function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
   const c = colorOf(tool.id)
@@ -143,7 +140,7 @@ function ToolRow({ tool, percent, value, onAdd, onSub, canAdd, onOpenDetail }) {
   )
 }
 
-// กดที่การ์ดเครื่องมือเปิด modal นี้ — โชว์ความอ่อนไหวครบทั้ง 4 tag (ไม่ใช่แค่จุดอ่อนสุด) + ความผันผวน + บทเรียน
+// กดที่การ์ดเครื่องมือเปิด modal นี้ — โชว์การเติบโต ความผันผวน และบทเรียน
 function ToolDetailModal({ tool, onClose }) {
   const c = colorOf(tool.id)
   const vol = volInfo(tool.growthVol)
@@ -153,16 +150,6 @@ function ToolDetailModal({ tool, onClose }) {
         <div className="text-base font-bold sm:text-lg">{tool.name}</div>
         <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{tool.tagline}</p>
         <div className="mt-1 text-[10px] text-white/45 sm:text-xs">โต {tool.growthMult.toFixed(2)}× / 10 ปี</div>
-
-        <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">ความอ่อนไหวต่อความเสี่ยงแต่ละด้าน</div>
-        <div className="mt-1.5 space-y-1">
-          {Object.entries(tool.exposure).map(([tag, v]) => (
-            <div key={tag} className="pixel-chip flex items-center justify-between bg-black/30 px-2 py-1 text-[10px] sm:text-xs">
-              <span className="text-white/70">{TAG_LABELS[tag]}</span>
-              <span className="text-rose-300">{riskDots(v)}</span>
-            </div>
-          ))}
-        </div>
 
         <div className="pixel-chip mt-3 bg-black/30 px-2 py-1 text-[10px] sm:text-xs">
           <span className="text-white/70">ความผันผวน — </span>
@@ -186,9 +173,9 @@ function signedMoney(value) {
   return `${rounded > 0 ? '+' : ''}${money(rounded)}`
 }
 
-function ChapterIntroModal({ chapter, prevSummary, startValue, onContinue }) {
+function ChapterIntroModal({ chapter, prevSummary, startValue, incomeAdded, onContinue }) {
   const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
-  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue })
+  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue, incomeAdded })
 
   return (
     // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
@@ -224,11 +211,21 @@ function ChapterIntroModal({ chapter, prevSummary, startValue, onContinue }) {
         </p>
 
         <button type="button" onClick={onContinue} className="pixel-btn mt-4 w-full bg-emerald-500 py-2.5 text-sm font-bold text-emerald-950 sm:text-base">
-          เริ่มจัดพอร์ตบทนี้
+          ดูเงินที่ได้รับในบทนี้
         </button>
       </div>
     </Modal>
   )
+}
+
+function IncomePopup({ chapter, incomeAdded, cumulativeIncome, onContinue }) {
+  return <Modal label={`เงินที่ได้รับในบทที่ ${chapter.n}`} panelClassName="pixel-frame max-w-md border border-emerald-400/60 bg-slate-950 p-5 text-center text-white">
+    <div className="text-xs uppercase tracking-widest text-emerald-300">{chapter.n === 1 ? 'ทุนเริ่มต้น' : 'รายได้และเงินออมใหม่'}</div>
+    <div className="mt-2 text-3xl font-black text-amber-300">+{money(incomeAdded)}</div>
+    <p className="mt-2 text-sm text-white/70">เงินที่ได้รับสะสมตั้งแต่เริ่มเกม <b className="text-white">{money(cumulativeIncome)}</b></p>
+    <p className="mt-3 text-xs text-white/50">เงินก้อนนี้ถูกเพิ่มเข้ามาแล้ว และแยกจากกำไรหรือขาดทุนของตลาด</p>
+    <button type="button" onClick={onContinue} className="pixel-btn mt-4 w-full bg-emerald-500 py-3 font-bold text-emerald-950">เริ่มจัดพอร์ตบทนี้</button>
+  </Modal>
 }
 
 // หน้าจัดพอร์ต — ผู้เล่นบอกสัดส่วนที่อยากได้ เอนจินย้ายเงินให้เอง
@@ -266,9 +263,13 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   }, [commandError])
 
   // แสดง popup แนะนำบทแค่ครั้งเดียวต่อบท แม้ผู้เล่นจะลาก slider จน component re-render ก็ไม่โผล่ซ้ำ
-  const [introSeenFor, setIntroSeenFor] = useState(null)
-  const showIntro = isChapterStart && introSeenFor !== chapter.n
+  const [chapterIntroSeenFor, setChapterIntroSeenFor] = useState(null)
+  const [incomeSeenFor, setIncomeSeenFor] = useState(null)
+  const showChapterIntro = isChapterStart && chapterIntroSeenFor !== chapter.n
+  const showIncome = isChapterStart && chapterIntroSeenFor === chapter.n && incomeSeenFor !== chapter.n
   const prevSummary = state.history[state.history.length - 1] ?? null
+  const incomeAdded = state.incomeSchedule[state.chapterIndex] ?? 0
+  const cumulativeIncome = state.incomeSchedule.slice(0, state.chapterIndex + 1).reduce((sum, amount) => sum + amount, 0)
 
   const change = (id, delta) => {
     setAlloc((a) => {
@@ -294,9 +295,10 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
         backgroundSize: 'cover',
       }}
     >
-      {showIntro && (prevSummary
-        ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />
-        : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />)}
+      {showChapterIntro && (prevSummary
+        ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} incomeAdded={incomeAdded} onContinue={() => setChapterIntroSeenFor(chapter.n)} />
+        : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} incomeAdded={incomeAdded} onContinue={() => setChapterIntroSeenFor(chapter.n)} />)}
+      {showIncome && <IncomePopup chapter={chapter} incomeAdded={incomeAdded} cumulativeIncome={cumulativeIncome} onContinue={() => setIncomeSeenFor(chapter.n)} />}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
       {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>
         <h1 className="text-xl font-black text-emerald-300">ทบทวนก่อนลงทุน</h1>

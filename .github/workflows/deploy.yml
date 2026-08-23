@@ -44,8 +44,23 @@ jobs:
       - name: ตรวจบาลานซ์เกม
         run: npm run sim -- 1500
 
+      # Vite ฝังค่าสองตัวนี้ลง bundle ตอน build; .env.local จากเครื่องพัฒนาไม่ถูกส่งขึ้น GitHub
+      # ใช้เฉพาะ Supabase Publishable/Legacy anon key เท่านั้น ห้ามใช้ secret/service_role key
+      - name: ตรวจการเชื่อมต่อ Supabase สำหรับเว็บจริง
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "Missing GitHub Repository Variables: VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY"
+            exit 1
+          fi
+
       - name: Build เวอร์ชันเว็บ (แยกไฟล์ โหลดเร็ว)
         run: npm run build:web
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
 

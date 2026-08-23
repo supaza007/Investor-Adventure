@@ -1,11 +1,16 @@
-export const SESSION_SCHEMA_VERSION = 1
-export const SESSION_STORAGE_KEY = 'investor-adventure:session:v1'
+export const SESSION_SCHEMA_VERSION = 4
+export const SESSION_STORAGE_KEY = 'investor-adventure:session:v4'
+
+function createAnonymousPlayerId() {
+  return globalThis.crypto?.randomUUID?.() ?? null
+}
 
 export function createSession() {
   return {
     schemaVersion: SESSION_SCHEMA_VERSION,
     player: { studentName: '', classRoom: '' },
     consent: null,
+    anonymousPlayerId: createAnonymousPlayerId(),
     assessment: { pre: null, post: null },
     timing: { startedAt: null, endedAt: null },
     updatedAt: null,

@@ -9,13 +9,15 @@ select
   gs.style_id,
   gs.outcome_band,
   gs.final_value,
+  gs.contributed,
+  gs.net_gain,
+  gs.net_gain_pct,
   gs.multiple,
   gs.post_total,
   gs.knowledge_gain,
   round(gs.play_duration_seconds / 60.0, 1) as play_minutes,
   count(ce.id) as chapters_recorded,
-  gs.scam_victim,
-  gs.black_swan_count
+  gs.scam_victim
 from public.game_sessions gs
 left join public.chapter_events ce on ce.session_id = gs.id
 group by gs.id
@@ -28,6 +30,19 @@ select
   gs.class_room,
   ce.chapter_n,
   ce.event_name,
+  ce.income_added,
+  ce.allocation_before_event,
+  ce.base_asset_returns,
+  ce.age_modifiers,
+  ce.final_asset_returns,
+  ce.character_ability_id,
+  ce.ability_triggered,
+  ce.ability_bonus,
+  ce.ability_cost,
+  ce.ability_net_effect,
+  ce.adjustment_count,
+  ce.adjustment_prompt_choices,
+  ce.portfolio_adjusted,
   ce.behavior,
   ce.shock_pct,
   ce.exposure,

@@ -41,27 +41,13 @@ const adjustLabel = (style) => {
   return `ปรับกลางบทได้ที่: ${names.join(' · ')}`
 }
 
-// เลขบวก = ดีเสมอ (กฎขั้วเดียวกันทั้ง "กำไรเฉลี่ย" และ "ป้องกันความเสี่ยง")
-// ไม่บังคับให้เป็นบวก — สไตล์ที่ค่าติดลบจริง (เช่น เทรดเดอร์ overtrading) ต้องเห็นค่าติดลบสีแดง
+// โบนัสส่วนการเติบโตจากเอนจิน ไม่ใช่กำไรปลายเกมที่รับประกัน
 const signedPct = (n) => `${n >= 0 ? '+' : ''}${n}%`
 
-// คำอธิบายใต้ตัวเลข "กำไรเฉลี่ย" — เทียบกับนักลงทุนระยะกลางซึ่งเป็นค่ามาตรฐาน (returnMult 1.0)
-// ห้ามปัดเป็นคำกลางๆ ให้เทรดเดอร์: สไตล์นี้ถูกออกแบบให้เป็นกับดักที่ตั้งใจให้แพ้ค่ามาตรฐานจริงๆ
-// (returnMult 0.85 + ค่าธรรมเนียมสะสม) ต้องบอกตรงๆ ว่า "จนกว่า" ไม่ใช่ปัดเป็น "จุดอ่อน" ลอยๆ
 const gainCaption = (style, gainPct) => {
-  if (style.id === 'medium') return 'ค่ามาตรฐานที่สไตล์อื่นเทียบด้วย'
-  const n = Math.abs(gainPct)
-  if (gainPct > 0) return `รวยกว่าสายกลาง ${n}% ตอนจบเกม`
-  if (gainPct < 0) return `จนกว่าสายกลาง ${n}% ตอนจบเกม${style.tradeFeePct ? ' (ยังไม่รวมค่าธรรมเนียมที่กัดเพิ่ม)' : ''}`
-  return 'เท่ากับสายกลาง'
-}
-
-// คำอธิบายใต้ตัวเลข "ป้องกันความเสี่ยง" — เทียบกับฐาน shockMult 1.0 (รับแรงกระแทกเต็มๆ)
-const defenseCaption = (style, defensePct) => {
-  if (style.id === 'medium') return 'ค่ามาตรฐานที่สไตล์อื่นเทียบด้วย'
-  if (defensePct > 0) return `เสียหายน้อยกว่าปกติ ${defensePct}% เวลาเจอวิกฤต`
-  if (defensePct < 0) return `รับแรงกระแทกหนักกว่าปกติ ${Math.abs(defensePct)}% เวลาเจอวิกฤต`
-  return 'รับแรงกระแทกเท่าคนทั่วไป ไม่มีการป้องกันพิเศษ'
+  if (gainPct > 0) return `เพิ่มเฉพาะส่วนการเติบโต ${gainPct}% ต่อบท`
+  if (style.id === 'trader') return 'ไม่มีโทษผลตอบแทนซ่อนอยู่ แต่เสียค่าธรรมเนียมเมื่อย้ายเงินจริง'
+  return 'ไม่มีโบนัสการเติบโตเพิ่มเติม'
 }
 
 // ●●●○○ จากจำนวนจุดที่ปรับพอร์ตได้ (รวมจุดจัดพอร์ตต้นบท) — ยิ่งปรับได้บ่อย ยิ่งเต็มดวง
@@ -69,7 +55,7 @@ const defenseCaption = (style, defensePct) => {
 function FreqDots({ n }) {
   const filled = Math.max(0, Math.min(5, n))
   return (
-    <span className="flex items-center justify-end gap-0.5" aria-label={`ปรับพอร์ตได้ ${filled} ครั้ง`}>
+    <span className="flex items-center justify-end gap-0.5" aria-label={`มีจังหวะปรับพอร์ตกลางบท ${filled} ครั้ง`}>
       {Array.from({ length: 5 }, (_, i) => (
         <img
           key={i}
@@ -134,7 +120,7 @@ function CompareCard({ style, selected, onClick }) {
   )
 }
 
-// กล่องสถิติหลัก — ใหญ่ เด่น ใช้ในการ์ดหลัก (FreqDots) และใน modal (กำไรเฉลี่ย/ป้องกันความเสี่ยง)
+// กล่องสถิติหลัก — ใหญ่ เด่น ใช้ในการ์ดหลัก (FreqDots) และใน modal (กำไรเฉลี่ย/จังหวะปรับพอร์ต)
 // caption = ประโยคแปลตัวเลขเทียบกับสายกลาง อยู่ใต้ตัวเลขตัวเล็กจาง — ใช้เฉพาะกล่องที่มีค่าตัวเลข
 // chart = เนื้อหาเสริมต่อท้าย caption (เช่น mini bar chart เทียบ 4 สไตล์ใน modal) — ไม่ใส่ก็ได้
 function StatBox({ label, value, tone, caption, chart, children }) {
@@ -180,9 +166,8 @@ function StyleCompareBars({ values, selectedIndex }) {
 
 // modal รายละเอียดเพิ่มเติม — เนื้อหาที่ย้ายออกจากการ์ดหลัก (tagline, กลไกปรับพอร์ต, ตัวเลขเทียบ
 // 4 สไตล์ + กราฟแท่ง, ค่าธรรมเนียม/โบนัส, บทเรียน) ใช้ pattern เดียวกับ ToolDetailModal ใน AllocationScreen.jsx
-function StyleDetailModal({ style, allGainPct, allDefensePct, selectedIndex, onClose }) {
+function StyleDetailModal({ style, allGainPct, selectedIndex, onClose }) {
   const gainPct = allGainPct[selectedIndex]
-  const defensePct = allDefensePct[selectedIndex]
   return (
     <Modal onClose={onClose} label={`รายละเอียด ${style.name}`} panelClassName={`pixel-frame max-w-lg border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}>
       <div>
@@ -195,19 +180,18 @@ function StyleDetailModal({ style, allGainPct, allDefensePct, selectedIndex, onC
         <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">ตัวเลขเทียบ 4 สไตล์</div>
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           <StatBox
-            label="กำไรเฉลี่ย"
+            label="โบนัสส่วนการเติบโต"
             value={signedPct(gainPct)}
             tone={gainPct >= 0 ? 'good' : 'bad'}
             caption={gainCaption(style, gainPct)}
             chart={<StyleCompareBars values={allGainPct} selectedIndex={selectedIndex} />}
           />
           <StatBox
-            label="ป้องกันความเสี่ยง"
-            value={signedPct(defensePct)}
-            tone={defensePct >= 0 ? 'good' : 'bad'}
-            caption={defenseCaption(style, defensePct)}
-            chart={<StyleCompareBars values={allDefensePct} selectedIndex={selectedIndex} />}
-          />
+            label="จังหวะปรับพอร์ต"
+            caption={adjustLabel(style)}
+          >
+            <FreqDots n={style.canAdjustAt.filter((point) => point !== 'allocation').length} />
+          </StatBox>
         </div>
 
         {(style.tradeFeePct || style.buyDipMult) && (
@@ -248,7 +232,6 @@ export default function StyleSelect({ onSelect }) {
 
   const art = characterArtOf(style.id)
   const allGainPct = styles.map((s) => Math.round((s.returnMult - 1) * 100))
-  const allDefensePct = styles.map((s) => Math.round((1 - s.shockMult) * 100))
 
   return (
     <div
@@ -264,7 +247,6 @@ export default function StyleSelect({ onSelect }) {
         <StyleDetailModal
           style={style}
           allGainPct={allGainPct}
-          allDefensePct={allDefensePct}
           selectedIndex={index}
           onClose={() => setShowDetail(false)}
         />
@@ -328,8 +310,8 @@ export default function StyleSelect({ onSelect }) {
             <div className="mt-2.5 flex items-start justify-between gap-2 sm:mt-3">
               <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
               <div className="style-select-frequency shrink-0 text-right">
-                <div className="style-select-frequency__label text-[8px] sm:text-[10px]">ปรับพอร์ตได้/ครั้ง</div>
-                <FreqDots n={style.canAdjustAt.length} />
+                <div className="style-select-frequency__label text-[8px] sm:text-[10px]">จังหวะปรับกลางบท</div>
+                <FreqDots n={style.canAdjustAt.filter((point) => point !== 'allocation').length} />
               </div>
             </div>
 
@@ -362,7 +344,7 @@ export default function StyleSelect({ onSelect }) {
             >
               ⓘ ดูรายละเอียดเพิ่มเติม
               <span className="block text-[9px] text-white/55 sm:text-[10px]">
-                (tagline · กำไรเฉลี่ย/ป้องกันความเสี่ยงเทียบ 4 สไตล์ · กลไกปรับพอร์ต · บทเรียน)
+                (tagline · โบนัสเติบโต/จังหวะปรับพอร์ต · กลไกปรับพอร์ต · บทเรียน)
               </span>
             </button>
           </div>

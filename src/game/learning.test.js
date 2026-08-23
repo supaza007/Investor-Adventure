@@ -32,9 +32,11 @@ test('risk profile bands are deterministic', () => {
   assert.equal(classifyRiskProfile(20, 20), 'aggressive')
 })
 
-test('readiness never invents life/health score', () => {
-  const report = { ratio: 1, chapters: [{ prep: { score: 0.5 } }] }
+test('readiness has exactly three financial dimensions and no life/health placeholder', () => {
+  const report = { multiple: 4, chapters: [{ prep: { score: 0.5 } }] }
   const dimensions = buildReadiness(report, { post: null })
-  assert.equal(dimensions.find((d) => d.id === 'life').score, null)
+  assert.equal(dimensions.length, 3)
+  assert.equal(dimensions.find((d) => d.id === 'life'), undefined)
+  assert.equal(dimensions.find((d) => d.id === 'financial').score, 50)
   assert.equal(dimensions.find((d) => d.id === 'capability').score, null)
 })

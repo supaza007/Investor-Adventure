@@ -6,7 +6,7 @@ import AllocationScreen from './components/AllocationScreen'
 import StageScreen from './components/StageScreen'
 import ReportScreen from './components/ReportScreen'
 import { useGameCommand } from './ui/useGameCommand.js'
-import { PreAssessmentScreen, ConsentScreen, PostAssessmentScreen } from './components/LearningScreens.jsx'
+import { PreAssessmentScreen, RiskResultScreen, ConsentScreen, PostAssessmentScreen } from './components/LearningScreens.jsx'
 import { buildLearningSummary } from './game/learning.js'
 import { createSession, parseSession, serializeSession, SESSION_STORAGE_KEY } from './game/sessionStore.js'
 
@@ -117,7 +117,8 @@ export default function App() {
   }
 
   if (journey === 'cover') return <CoverScreen onPlay={(player) => { setSession((s) => ({ ...s, player })); setJourney('pre') }} onContinue={savedRun ? continueSaved : null} saveError={saveError} />
-  if (journey === 'pre') return <PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('consent') }} onSkip={() => setJourney('consent')} />
+  if (journey === 'pre') return <PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('risk-result') }} onSkip={() => setJourney('consent')} />
+  if (journey === 'risk-result') return <RiskResultScreen assessment={session.assessment.pre} onContinue={() => setJourney('consent')} />
   if (journey === 'consent') return <ConsentScreen onChoice={beginCore} />
   if (state.phase === 'report' && journey === 'game') return <PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />
 
@@ -162,7 +163,7 @@ export default function App() {
   }
 
   if (state.phase === 'report') {
-    return <ReportScreen report={state.report} session={session} styleId={state.styleId} gameTiming={state.timing} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
+    return <ReportScreen report={state.report} session={session} styleId={state.styleId} gameTiming={state.timing} versions={state.versions} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
   }
 
   return null

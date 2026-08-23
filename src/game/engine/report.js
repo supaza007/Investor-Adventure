@@ -1,35 +1,22 @@
-// รายงานผลเกษียณ (อายุ 60) — ไม่ใช่ win/lose แต่เป็นสเปกตรัม (ดีไซน์ข้อ 7)
+// สถานะทางการเงินเมื่ออายุ 60 — ไม่ใช่ win/lose แต่เป็นสเปกตรัม (ดีไซน์ข้อ 7)
 //
-// หัวใจคือทำให้ผู้เล่นเห็นว่า "ตัดสินใจถูกแล้วยังแพ้ได้" โดยไม่รู้สึกว่าเกมโกง
-// จึงต้องโชว์ทั้งคุณภาพการเตรียมพอร์ต และผลที่จับสลากได้ เทียบกันตรงๆ ทุกบท
+// หัวใจคือทำให้ผู้เล่นเห็นว่าการจัดพอร์ตแพ้หรือชนะเหตุการณ์ตรงไหน
+// ด้วยผลตอบแทนตายตัวที่ตรวจสอบย้อนกลับได้ทุกบท
 
 import { BALANCE } from './balance.js'
 import { getEvent } from './data/events.js'
 
-const totalContributed = () => BALANCE.chapters.reduce((s, c) => s + c.income, 0)
-
-function bandFor(ratio) {
-  return BALANCE.outcomeBands.find((b) => ratio >= b.minRatio) ?? BALANCE.outcomeBands[BALANCE.outcomeBands.length - 1]
+function bandFor(multiple) {
+  return BALANCE.outcomeBands.find((b) => multiple >= b.minMultiple) ?? BALANCE.outcomeBands[BALANCE.outcomeBands.length - 1]
 }
 
-// แปล percentile ที่จับสลากได้เป็นภาษาคน — นี่คือส่วนที่ทำให้ผู้เล่นไม่รู้สึกโดนโกง
-// export ไว้ให้ LifeTimeline.jsx ใช้ซ้ำตอนเปิดดูเหตุการณ์ที่ผ่านมาแล้ว (ต้องได้คำอธิบายแบบเดียวกับหน้ารายงานจบเกม)
-export function luckLabel(percentile) {
-  if (percentile >= 0.8) return { text: 'โชคดีกว่าที่ควรจะเป็น', tone: 'good' }
-  if (percentile >= 0.55) return { text: 'ผลออกมาดีกว่าค่ากลางเล็กน้อย', tone: 'good' }
-  if (percentile >= 0.45) return { text: 'ผลออกมาตามค่ากลาง', tone: 'neutral' }
-  if (percentile >= 0.2) return { text: 'ผลออกมาแย่กว่าค่ากลางเล็กน้อย', tone: 'bad' }
-  return { text: 'จับสลากได้กรณีโชคร้ายที่สุด', tone: 'bad' }
-}
-
-// แปลคุณภาพการเตรียมพอร์ตเป็นภาษาคน (ยิ่งกระจุก+ยิ่งอ่อนไหว = เตรียมแย่)
-// export ไว้ให้ LifeTimeline.jsx ใช้ซ้ำ (เหตุผลเดียวกับ luckLabel ด้านบน)
-export function prepLabel(exposure, concentration) {
-  const score = 1 - (exposure * 0.7 + concentration * 0.3)
-  if (score >= 0.7) return { text: 'เตรียมพอร์ตมาดีมาก', tone: 'good', score }
-  if (score >= 0.5) return { text: 'เตรียมพอร์ตมาพอใช้', tone: 'neutral', score }
-  if (score >= 0.3) return { text: 'พอร์ตอ่อนไหวต่อเหตุการณ์นี้', tone: 'bad', score }
-  return { text: 'พอร์ตกระจุกตรงจุดอ่อนพอดี', tone: 'bad', score }
+// สรุปผลจาก Matrix เป็นภาษาคน ใช้ซ้ำทั้ง timeline และรายงานจบเกม
+export function prepLabel(eventReturn) {
+  const score = Math.max(0, Math.min(1, (eventReturn + 0.2) / 0.35))
+  if (eventReturn >= 0.1) return { text: 'พอร์ตได้เปรียบเหตุการณ์นี้', tone: 'good', score }
+  if (eventReturn >= 0) return { text: 'พอร์ตรับมือเหตุการณ์นี้ได้', tone: 'good', score }
+  if (eventReturn > -0.1) return { text: 'พอร์ตเสียหายจำกัด', tone: 'neutral', score }
+  return { text: 'พอร์ตแพ้ทางเหตุการณ์นี้', tone: 'bad', score }
 }
 
 export function cashOnlyPrepLabel() {
@@ -44,10 +31,11 @@ const BEHAVIOR_LABEL = {
 
 export function buildReport(state) {
   const finalValue = Object.values(state.positions).reduce((a, b) => a + b, 0) + state.cash
-  const contributed = totalContributed()
+  const contributed = state.incomeSchedule.reduce((sum, amount) => sum + amount, 0)
   const benchmark = BALANCE.benchmarkValue
-  const ratio = finalValue / benchmark
-  const isRuined = finalValue < contributed * BALANCE.ruinThreshold
+  const multiple = contributed > 0 ? finalValue / contributed : 0
+  const ratio = multiple
+  const isRuined = multiple < 0.2
 
   const chapters = state.history.map((h) => {
     const event = getEvent(h.eventId)
@@ -58,8 +46,7 @@ export function buildReport(state) {
       emoji: event?.emoji ?? '❓',
       changePct: h.valueBefore > 0 ? change / h.valueBefore : 0,
       change,
-      luck: luckLabel(h.percentile),
-      prep: h.cashOnly ? cashOnlyPrepLabel() : prepLabel(h.exposure, h.concentration),
+      prep: h.cashOnly ? cashOnlyPrepLabel() : prepLabel(h.shockPct),
       behaviorLabel: BEHAVIOR_LABEL[h.behavior] ?? '—',
     }
   })
@@ -75,13 +62,14 @@ export function buildReport(state) {
     benchmark,
     ratio,
     isRuined,
-    band: isRuined ? { id: 'ruined', label: 'ล้มละลาย' } : bandFor(ratio),
-    multiple: finalValue / contributed,
+    band: bandFor(multiple),
+    multiple,
+    netGain: finalValue - contributed,
+    netGainPct: multiple - 1,
     chapters,
     cashOnlyChapters: chapters.filter((c) => c.cashOnly).length,
     worst,
     best,
     scamVictim: chapters.some((c) => c.scamAccepted),
-    blackSwanCount: chapters.filter((c) => c.isBlackSwan).length,
   }
 }

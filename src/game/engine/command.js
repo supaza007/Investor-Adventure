@@ -24,6 +24,7 @@ const CORE_COMMANDS = new Set([
   'SELECT_STYLE',
   'SET_ALLOCATION',
   'CONFIRM_ALLOCATION',
+  'RECORD_ADJUSTMENT_PROMPT',
   'ANSWER_SCAM',
   'CHOOSE_BEHAVIOR',
   'NEXT_STAGE',
@@ -103,6 +104,17 @@ function validateCommand(state, command) {
     case 'SET_ALLOCATION':
       if (!canAdjustNow(state)) return error(COMMAND_ERROR.WRONG_PHASE, 'สไตล์นี้ยังปรับพอร์ตในขั้นตอนปัจจุบันไม่ได้')
       return validateWeights(command.weights)
+    case 'RECORD_ADJUSTMENT_PROMPT': {
+      if (state.phase !== 'stage' || !['adjust', 'skip'].includes(command.choice)) {
+        return error(COMMAND_ERROR.INVALID_DECISION, 'กรุณาเลือกว่าจะปรับพอร์ตหรือใช้พอร์ตเดิม', 'choice')
+      }
+      const style = getStyle(state.styleId)
+      const stage = currentStage(state)
+      if (!style?.adjustmentPromptStages?.includes(stage.n) || state.chapterAbility.promptChoices[stage.key]) {
+        return error(COMMAND_ERROR.WRONG_PHASE, 'ขณะนี้ไม่มีคำถามปรับพอร์ตที่รอคำตอบ')
+      }
+      return null
+    }
     case 'ANSWER_SCAM':
       if (state.phase !== 'stage' || !state.scam || state.scam.accepted !== null) {
         return error(COMMAND_ERROR.WRONG_PHASE, 'ขณะนี้ไม่มีข้อเสนอที่รอคำตอบ')
@@ -114,9 +126,13 @@ function validateCommand(state, command) {
       if (state.phase !== 'stage' || currentStage(state)?.key !== 'behavior' || state.behavior) {
         return error(COMMAND_ERROR.WRONG_PHASE, 'ยังเลือกวิธีรับมือในขั้นตอนนี้ไม่ได้')
       }
-      return ['hold', 'cut', 'buy'].includes(command.choice)
-        ? null
-        : error(COMMAND_ERROR.INVALID_DECISION, 'กรุณาเลือกวิธีรับมือที่แสดงอยู่', 'choice')
+      if (!['hold', 'cut', 'buy'].includes(command.choice)) {
+        return error(COMMAND_ERROR.INVALID_DECISION, 'กรุณาเลือกวิธีรับมือที่แสดงอยู่', 'choice')
+      }
+      if (command.choice === 'buy' && state.cash <= 0.5) {
+        return error(COMMAND_ERROR.INVALID_DECISION, 'ต้องมีเงินสดเหลือจึงจะซื้อเพิ่มได้', 'choice')
+      }
+      return null
     case 'NEXT_STAGE':
       if (state.phase !== 'stage') return error(COMMAND_ERROR.WRONG_PHASE, 'ยังดำเนินเรื่องต่อจากหน้าปัจจุบันไม่ได้')
       if (!Number.isInteger(command.expectedStageIndex) || command.expectedStageIndex !== state.stageIndex) {

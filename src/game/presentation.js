@@ -1,10 +1,10 @@
 const nearZero = (value) => Math.abs(value) < 1e-9
 
-export function buildChapterTransitionBreakdown({ prevSummary, chapter, startValue }) {
+export function buildChapterTransitionBreakdown({ prevSummary, chapter, startValue, incomeAdded }) {
   if (!prevSummary || !chapter || !Number.isFinite(startValue)) return null
 
   const previousValue = prevSummary.valueEnd
-  const income = chapter.income
+  const income = incomeAdded
   if (!Number.isFinite(previousValue) || !Number.isFinite(income)) return null
 
   const netChange = startValue - previousValue

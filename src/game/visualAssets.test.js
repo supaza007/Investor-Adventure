@@ -26,6 +26,8 @@ test('user-supplied Cover assets stay within the web delivery budget', async () 
     'cover-background-user.webp': 350,
     'game-subtitle-user.webp': 30,
     'play-button-user.webp': 30,
+    'cover-adventure-subtitle-user.png': 500,
+    'cover-start-button-user.png': 500,
   }
   for (const [name, maxKb] of Object.entries(budgets)) {
     const path = fileURLToPath(new URL(`../assets/ui/${name}`, import.meta.url))
@@ -96,14 +98,15 @@ test('scroll backgrounds use a text-safe sizing mode', async () => {
 test('answer rows reserve space for the end ornaments with a responsive background', async () => {
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
-  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(3\.75rem,\s*8vw,\s*5\.5rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.7rem 3\.25rem/)
+  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*12\.5%,\s*6rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*1rem clamp\(2\.6rem,\s*12\.5%,\s*3\.25rem\)/)
 })
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?font-size:\s*clamp\(/)
-  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?line-height:\s*1\.35/)
+  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?line-height:\s*1\.4/)
+  assert.match(css, /\.assessment-answer-row__text\s*\{[\s\S]*?text-wrap:\s*pretty/)
 })
 
 test('answer rows mount SVG artwork as a responsive background layer', async () => {

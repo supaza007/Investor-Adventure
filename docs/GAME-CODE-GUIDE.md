@@ -28,7 +28,7 @@
 | สไตล์นักลงทุน | `src/game/engine/data/styles.js` | `STYLES` |
 | เครื่องมือการเงิน | `src/game/engine/data/tools.js` | `TOOLS` |
 | สูตรพอร์ต | `src/game/engine/portfolio.js` | `applyGrowth`, `rebalance` |
-| สูตรแรงกระแทก | `src/game/engine/encounter.js` | `rollShock`, `applyShock` |
+| สูตรผลเหตุการณ์ | `src/game/engine/encounter.js` | `returnsForEvent`, `applyEventReturns` |
 | state machine | `src/game/engine/gameState.js` | `createInitialState`, `dispatch` |
 | แสดงผลลัพธ์ | `src/components/ReportScreen.jsx` | `report`, `readiness` |
 | สี/ฟอนต์/ขนาด | `src/index.css` | class ที่ขึ้นต้นด้วย `assessment-`, `cozy-`, `pixel-` |
@@ -123,13 +123,15 @@ npm run sim
 
 เปิด `src/game/engine/data/events.js`.
 
-แต่ละเหตุการณ์มี `id`, `name`, `description`, `hint`, `tagWeights` และ `severity`.
+แต่ละเหตุการณ์มี `id`, `name`, `description`, `hint`, `primaryTag`, `crisisRank`, `returns` และ `impactReasons`.
 
 - `name` = ชื่อที่แสดงบนหน้าจอ
 - `description` = คำอธิบายเหตุการณ์
 - `hint` = สัญญาณก่อนเกิดเหตุการณ์
-- `tagWeights` = เหตุการณ์กระทบความเสี่ยงด้านใดบ้าง โดยค่ารวมควรเป็น 1
-- `severity` = ความรุนแรงฐาน 0 ถึง 1
+- `primaryTag` = หมวดเหตุการณ์ที่ใช้จัด pool
+- `crisisRank` = ลำดับสำหรับเลือกวิกฤตใหญ่ของบท 3 ไม่ได้คูณผลตอบแทน
+- `returns` = เปอร์เซ็นต์ตายตัวของ `bond`, `fund`, `stock`, `crypto`
+- `impactReasons` = คำอธิบายสั้น ๆ ที่ UI แสดงคู่กับตัวเลขแต่ละสินทรัพย์
 
 อย่าเปลี่ยน `id` หากไม่จำเป็น เพราะ report และ test ใช้ id เป็นตัวอ้างอิง
 
@@ -141,8 +143,10 @@ npm run sim
 - `tagline`, `persona`, `pros`, `cons` = Text ที่หน้าเลือกสไตล์
 - `canAdjustAt` = สเตจที่สไตล์ปรับพอร์ตได้
 - `returnMult` = ตัวคูณผลตอบแทน
-- `shockMult` = ตัวคูณแรงกระแทก
-- `feeRate` = ค่าธรรมเนียม
+- `tradeFeePct` = ค่าธรรมเนียมการปรับพอร์ต (มีเฉพาะบางสไตล์)
+- `buyDipMult` = โบนัสการฟื้นตัวเมื่อซื้อเพิ่ม (มีเฉพาะบางสไตล์)
+
+สไตล์ไม่เปลี่ยนเปอร์เซ็นต์ใน Event Return Matrix เพื่อให้ผลที่ UI อธิบายตรงกับเอนจิน
 
 การแก้ multiplier เปลี่ยนความยากและบทเรียนของเกมโดยตรง ต้องรัน simulation ทุกครั้ง
 
@@ -152,7 +156,6 @@ npm run sim
 
 - `name` = ชื่อเครื่องมือบนหน้าจอ
 - `lesson` = บทเรียนที่ผู้เล่นอ่าน
-- `exposure` = ความอ่อนไหวต่อ tag ของเหตุการณ์ ช่วง 0 ถึง 1
 - `growthMult` = ผลตอบแทนกลางต่อบท
 - `growthVol` = ความผันผวนของผลตอบแทน
 

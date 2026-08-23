@@ -10,9 +10,9 @@ const signedMoney = (value) => {
   return `${rounded > 0 ? '+' : ''}${money(rounded)}`
 }
 
-export default function ChapterTransition({ chapter, prevSummary, startValue, onContinue }) {
+export default function ChapterTransition({ chapter, prevSummary, startValue, incomeAdded, onContinue }) {
   const [mapFailed, setMapFailed] = useState(false)
-  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue })
+  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue, incomeAdded })
 
   return (
     <Modal
@@ -39,11 +39,11 @@ export default function ChapterTransition({ chapter, prevSummary, startValue, on
         <div className="mt-3 space-y-1.5 text-xs sm:text-sm" aria-label="ที่มาของเงินเมื่อเริ่มบทใหม่">
           <div className="cozy-ledger-row"><span>เงินปลายบทก่อน</span><b>{money(transition?.previousValue ?? prevSummary.valueEnd)}</b></div>
           {transition?.cashAdjustment !== 0 && <div className="cozy-ledger-row text-rose-200"><span>เงินสดถูกเงินเฟ้อกินกำลังซื้อ</span><b>{signedMoney(transition.cashAdjustment)}</b></div>}
-          <div className="cozy-ledger-row text-emerald-200"><span>เงินเติมจากช่วงชีวิตใหม่</span><b>{signedMoney(transition?.income ?? chapter.income)}</b></div>
+          <div className="cozy-ledger-row text-emerald-200"><span>เงินเติมจากช่วงชีวิตใหม่</span><b>{signedMoney(transition?.income ?? incomeAdded)}</b></div>
           <div className="cozy-ledger-total"><span>เงินเริ่มบทนี้</span><b>{money(transition?.startValue ?? startValue)}</b></div>
         </div>
         <p className="mt-2 text-center text-[10px] text-white/65 sm:text-xs">ไม่ใช่กำไรจากตลาดทั้งหมด</p>
-        <button type="button" onClick={onContinue} className="cozy-primary pixel-btn mt-3 w-full py-2.5 text-sm font-black sm:text-base">เริ่มจัดพอร์ตบทนี้</button>
+        <button type="button" onClick={onContinue} className="cozy-primary pixel-btn mt-3 w-full py-2.5 text-sm font-black sm:text-base">ดูเงินที่ได้รับในบทนี้</button>
       </div>
     </Modal>
   )

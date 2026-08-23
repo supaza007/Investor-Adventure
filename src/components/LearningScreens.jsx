@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, scoreAssessment } from '../game/learning.js'
+import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, RISK_RECOMMENDATIONS, scoreAssessment } from '../game/learning.js'
+import Modal from './Modal.jsx'
 import preAssessmentBackground from '../assets/ui/pre-assessment-background-user.svg'
 import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.svg'
 import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.svg'
@@ -105,8 +106,9 @@ export function ConsentScreen({ onChoice }) {
   >
     <div className="pixel-frame mt-4 space-y-3 bg-slate-900/80 p-4 text-sm leading-relaxed">
       <p>ยินยอมให้สิทธ์ในการใช้ข้อมูลเพื่อประโยชน์ในการศึกษาหรือไม่</p>
-      <label className="pixel-chip flex min-h-11 items-start gap-3 bg-slate-800 p-3"><input className="mt-1" type="checkbox" checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} /><span>ยินยอมให้เก็บข้อมูลคำตอบแบบประเมินและข้อมูลการเล่นเกมเพื่อประโยชน์ในการศึกษา</span></label>
-      <p className="text-xs text-white/55">Consent version: {CONSENT_VERSION} · ไม่มีชื่อ อีเมล หรือข้อมูลส่วนบุคคล</p>
+      <label className="pixel-chip flex min-h-11 items-start gap-3 bg-slate-800 p-3"><input className="mt-1" type="checkbox" checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} /><span>ยินยอมให้เก็บชื่อหรือนามแฝง ห้องเรียน คำตอบแบบประเมิน และสถิติการเล่นเกมเพื่อประโยชน์ในการศึกษา</span></label>
+      <p className="text-xs leading-relaxed text-white/65">ข้อมูลที่ส่งไปยังฐานข้อมูลประกอบด้วยชื่อหรือนามแฝง ห้องเรียน ตัวละครที่เลือก การจัดพอร์ต การตัดสินใจ ผลลัพธ์ และเวลาเล่น โดยไม่เก็บอีเมล รหัสผ่าน หรือข้อมูลติดต่อ</p>
+      <p className="text-[10px] text-white/45">Consent version: {CONSENT_VERSION}</p>
     </div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       <button
@@ -117,7 +119,32 @@ export function ConsentScreen({ onChoice }) {
       >
         บันทึกและเริ่มเกม
       </button>
+      <button
+        type="button"
+        className="pixel-btn min-h-11 border border-slate-600 bg-slate-800 px-4 py-3 font-bold text-white"
+        onClick={() => onChoice(false)}
+      >
+        ไม่ยินยอม แต่เล่นเกมต่อ
+      </button>
     </div>
+  </Shell>
+}
+
+export function RiskResultScreen({ assessment, onContinue }) {
+  const recommendation = RISK_RECOMMENDATIONS[assessment?.riskProfile] ?? RISK_RECOMMENDATIONS.balanced
+  return <Shell title="ผลประเมินความเสี่ยง" eyebrow="รู้จักตัวเองก่อนลงทุน">
+    <Modal label={`ผลประเมิน: ${recommendation.label}`} panelClassName="pixel-frame max-w-md border border-amber-400/60 bg-slate-950 p-4 text-white sm:p-6">
+      <div className="text-center">
+        <p className="text-xs text-white/60">จากคำตอบของคุณ คุณรับความเสี่ยงได้</p>
+        <h1 className="mt-1 text-2xl font-black text-amber-300">{recommendation.label}</h1>
+        <p className="mt-3 text-sm text-white/75">พอร์ตแนะนำสำหรับใช้ทดลองในเกม</p>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {recommendation.assets.map(([name, percent]) => <li key={name} className="pixel-chip flex justify-between bg-slate-800 p-3"><span>{name}</span><b className="text-emerald-300">{percent}%</b></li>)}
+      </ul>
+      <p className="mt-3 text-xs leading-relaxed text-white/55">คำแนะนำนี้เป็นแนวทางในเกมเท่านั้น คุณยังเลือกจัดพอร์ตเองได้ทั้งหมด และระบบจะไม่จัดพอร์ตให้อัตโนมัติ</p>
+      <button type="button" onClick={onContinue} className="pixel-btn mt-4 w-full bg-emerald-500 py-3 font-bold text-emerald-950">เข้าใจแล้ว ไปต่อ</button>
+    </Modal>
   </Shell>
 }
 

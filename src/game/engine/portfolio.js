@@ -24,7 +24,7 @@ export function hhi(positions) {
   return Object.values(w).reduce((sum, x) => sum + x * x, 0)
 }
 
-// ระดับการกระจุกตัวปรับสเกลเป็น 0..1 เพื่อป้อนสูตร outcome band
+// ระดับการกระจุกตัวปรับสเกลเป็น 0..1 เพื่อใช้สรุปการกระจายพอร์ต
 // 0 = กระจายสมบูรณ์ (ครบ 6 ชนิดเท่าๆ กัน) · 1 = ทุ่มชนิดเดียว
 export function concentration(positions) {
   const total = totalValue(positions)
@@ -41,7 +41,7 @@ function gaussian(rng) {
 }
 
 // เติบโตข้ามบท (1 บท ≈ 10 ปี) — การทบต้นเงียบๆ ที่ให้รางวัลการถือ (ดีไซน์ข้อ 3)
-// returnMult มาจากสไตล์นักลงทุน: ระยะยาว 1.15 / เทรดเดอร์ 0.85
+// returnMult มาจากสไตล์นักลงทุน: ระยะยาว 1.10 / ตัวอื่น 1.0
 //
 // ส่ง rng เข้ามา = ผลตอบแทนสุ่มแบบ lognormal รอบค่ากลาง (ใช้ตอนเล่นจริง)
 // ไม่ส่ง = ได้ค่ากลางเป๊ะๆ (ใช้ตอนคำนวณเกณฑ์อ้างอิงและตอนเทสต์)
@@ -49,15 +49,25 @@ function gaussian(rng) {
 // ความผันผวนเป็นของตลาด ไม่ใช่ของสไตล์ → returnMult คูณเฉพาะค่ากลาง ไม่ไปแตะ vol
 // (ไม่งั้นนักลงทุนระยะยาวที่ถือคริปโตจะ "ขาดทุนเก่งขึ้น" ด้วย ซึ่งไม่มีเหตุผล)
 export function applyGrowth(positions, returnMult = 1, rng = null) {
+  return applyGrowthWithDetails(positions, returnMult, rng).positions
+}
+
+export function applyGrowthWithDetails(positions, returnMult = 1, rng = null) {
   const next = {}
+  const baseline = {}
+  let abilityBonus = 0
   for (const [toolId, amount] of Object.entries(positions)) {
     const tool = getTool(toolId)
     if (!tool) continue
     const median = 1 + (tool.growthMult - 1) * returnMult
-    const mult = rng ? median * Math.exp(tool.growthVol * gaussian(rng)) : median
+    const marketNoise = rng ? Math.exp(tool.growthVol * gaussian(rng)) : 1
+    const mult = median * marketNoise
+    const baselineMult = tool.growthMult * marketNoise
     next[toolId] = Math.max(0, amount * mult)
+    baseline[toolId] = Math.max(0, amount * baselineMult)
+    abilityBonus += next[toolId] - baseline[toolId]
   }
-  return next
+  return { positions: next, baselinePositions: baseline, abilityBonus }
 }
 
 // ย้ายเงินระหว่างเครื่องมือตามสัดส่วนเป้าหมาย { [toolId]: 0..1 }

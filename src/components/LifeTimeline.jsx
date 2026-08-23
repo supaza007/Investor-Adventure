@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { BALANCE } from '../game/engine/balance.js'
-import { luckLabel, prepLabel } from '../game/engine/report.js'
+import { prepLabel } from '../game/engine/report.js'
 import { pct } from './ToolTheme'
 
 const TONE_TEXT = {
@@ -69,8 +69,7 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
 
       {openEntry &&
         (() => {
-          const luck = luckLabel(openEntry.percentile)
-          const prep = prepLabel(openEntry.exposure, openEntry.concentration)
+          const prep = prepLabel(openEntry.shockPct)
           const changePct = openEntry.valueBefore > 0 ? (openEntry.valueEnd - openEntry.valueBefore) / openEntry.valueBefore : 0
           return (
             <div className="pixel-chip mt-1.5 bg-black/40 p-2 text-[10px] leading-relaxed sm:text-xs">
@@ -81,7 +80,6 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
                 <span className={changePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{pct(changePct)}</span>
               </div>
               <div className={`mt-0.5 ${TONE_TEXT[prep.tone]}`}>{prep.text}</div>
-              <div className={TONE_TEXT[luck.tone]}>{luck.text}</div>
             </div>
           )
         })()}

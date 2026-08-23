@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="128" viewBox="0 0 768 128" shape-rendering="crispEdges">
+  <defs>
+    <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#f2c27b"/><stop offset=".18" stop-color="#bd713f"/><stop offset=".72" stop-color="#7c3e29"/><stop offset="1" stop-color="#351d20"/></linearGradient>
+    <linearGradient id="paper" x2="0" y2="1"><stop stop-color="#20303a"/><stop offset="1" stop-color="#111c27"/></linearGradient>
+    <pattern id="grain" width="48" height="12" patternUnits="userSpaceOnUse"><path d="M0 3h12v3H6v3H0zm24 4h18v2H30v2H24z" fill="#8c4a2e" opacity=".65"/><path d="M14 1h6v2h-6zm25 8h7v2h-7z" fill="#f1b567" opacity=".55"/></pattern>
+  </defs>
+
+  <!-- dark silhouette and warm wooden outer frame -->
+  <rect x="8" y="8" width="752" height="112" fill="#241820"/>
+  <path fill="url(#wood)" d="M20 4h728v8h12v104h-12v8H20v-8H8V12h12z"/>
+  <path fill="#f8d38b" d="M28 12h712v6H28zM28 110h712v6H28zM14 26h6v76h-6zm734 0h6v76h-6z"/>
+  <path fill="#6b3426" d="M20 12h64v8H28v24H20zm728 0h-64v8h56v24h8zM20 116h64v-8H28V84H20zm728 0h-64v-8h56V84h8z"/>
+
+  <!-- inner bevel and text-safe centre -->
+  <path fill="#8b482d" d="M92 20h584v6H92zM92 102h584v6H92z"/>
+  <path fill="url(#paper)" d="M48 30h672v6h8v56h-8v6H48v-6h-8V36h8z"/>
+  <path fill="#314b52" d="M54 36h660v4H54zM54 88h660v4H54zM46 44h4v40h-4zm668 0h4v40h-4z"/>
+
+  <!-- pixel wood grain -->
+  <rect x="32" y="20" width="704" height="10" fill="url(#grain)"/>
+  <rect x="32" y="98" width="704" height="10" fill="url(#grain)"/>
+  <path fill="#d48a4a" d="M110 12h34v5h-34zm82 0h18v5h-18zm414 0h36v5h-36zM110 111h34v5h-34zm82 0h18v5h-18zm414 0h36v5h-36z"/>
+
+  <!-- carved corner scrolls -->
+  <path fill="#c77b43" d="M20 12h32v6H32v8H20zm728 0h-32v6h20v8h12zM20 116h32v-6H32v-8H20zm728 0h-32v-6h20v-8h12z"/>
+  <path fill="#4c2924" d="M28 28h16v6H34v12h-6zm712 0h-16v6h10v12h6zM28 100h16v-6H34V82h-6zm712 0h-16v-6h10V82h6z"/>
+  <path fill="#f3b966" d="M22 50h6v28h-6zm718 0h6v28h-6z"/>
+
+  <!-- central clasp accents -->
+  <path fill="#6e3929" d="M350 4h68v8h8v16h-8v8h-68v-8h-8V12h8z"/>
+  <path fill="#d9954d" d="M358 10h52v6h8v6h-8v6h-52v-6h-8v-6h8z"/>
+  <path fill="#f8d38b" d="M370 16h28v6h-28zM350 110h68v8h-68z"/>
+</svg>

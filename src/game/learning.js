@@ -1,6 +1,12 @@
 export const ASSESSMENT_VERSION = 'learning-reflection-v2'
 export const CONSENT_VERSION = 'research-consent-v1'
 
+export const RISK_RECOMMENDATIONS = {
+  conservative: { label: 'ความเสี่ยงต่ำ', assets: [['ตราสารหนี้', 50], ['กองทุนรวม', 25], ['หุ้น', 25]] },
+  balanced: { label: 'ความเสี่ยงปานกลาง', assets: [['กองทุนรวม', 50], ['ตราสารหนี้', 40], ['คริปโต', 10]] },
+  aggressive: { label: 'ความเสี่ยงสูง', assets: [['หุ้น', 40], ['กองทุนรวมผสม', 40], ['คริปโต', 20]] },
+}
+
 /* TEXT: คำถามก่อนเริ่มเกมทั้งหมด 10 ข้อ
    แก้ข้อความคำถามที่ prompt และแก้ข้อความตัวเลือกที่ options */
 export const PRE_QUESTIONS = [
@@ -50,13 +56,12 @@ export function classifyRiskProfile(total, maxScore) {
 }
 
 export function buildReadiness(report, assessment) {
-  const financial = Math.max(0, Math.min(100, Math.round(report.ratio * 60)))
+  const financial = Math.max(0, Math.min(100, Math.round((report.multiple / 8) * 100)))
   const resilience = report.chapters.length ? Math.round(report.chapters.reduce((sum, c) => sum + c.prep.score * 100, 0) / report.chapters.length) : null
   const capability = assessment?.post ? Math.round((assessment.post.total / (POST_QUESTIONS.length * 2)) * 100) : null
   return [
-    { id: 'financial', label: 'ความพร้อมทางการเงินในสถานการณ์จำลอง', score: financial, evidence: `มูลค่าปลายเกมเทียบเกณฑ์จำลอง ${(report.ratio * 100).toFixed(0)}%` },
-    { id: 'resilience', label: 'ความยืดหยุ่นของแผน', score: resilience, evidence: 'คำนวณจากการกระจุกตัวและ exposure ใน 4 บท' },
-    { id: 'life', label: 'ชีวิตและสุขภาพ', score: null, evidence: 'เกมไม่ได้เก็บข้อมูลชีวิตหรือสุขภาพ จึงไม่ประเมิน' },
+    { id: 'financial', label: 'ความพร้อมทางการเงินในสถานการณ์จำลอง', score: financial, evidence: `มูลค่าปลายเกมเป็น ${report.multiple.toFixed(1)} เท่าของเงินที่ได้รับทั้งหมด` },
+    { id: 'resilience', label: 'ความยืดหยุ่นของแผน', score: resilience, evidence: 'คำนวณจากผลที่พอร์ตรับจาก Event Matrix ใน 4 บท' },
     { id: 'capability', label: 'ความรู้และความปลอดภัยทางการเงิน', score: capability, evidence: capability == null ? 'ยังไม่ได้ทำแบบสะท้อนหลังเล่น' : 'คำนวณจากคำตอบหลังเล่น 3 ด้าน' },
   ]
 }

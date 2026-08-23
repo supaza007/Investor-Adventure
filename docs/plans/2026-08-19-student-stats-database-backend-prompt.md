@@ -23,8 +23,8 @@ script ที่รันใน Supabase ไปแล้ว (สมมติว�
 
 ไฟล์ที่เกี่ยวข้อง (อ่านก่อนแก้ เพื่อใช้ของเดิมซ้ำ ไม่เขียนใหม่):
 - src/game/engine/report.js — buildReport() สร้าง object ที่ต้องใช้เป็น payload
-  (finalValue, contributed, benchmark, ratio, multiple, band.id, isRuined, scamVictim,
-  blackSwanCount, chapters[])
+  (finalValue, contributed, benchmark, ratio, multiple, netGain, netGainPct,
+  band.id, isRuined, scamVictim, chapters[])
 - src/game/engine/gameState.js บรรทัด ~269-286 — โครง entry ในแต่ละ chapters[] ตรงกับ
   คอลัมน์ตาราง chapter_events ทุกฟิลด์อยู่แล้ว
 - src/components/CoverScreen.jsx — หน้าแรกสุดที่มีปุ่ม PLAY

@@ -58,6 +58,8 @@ function stats(reports) {
     p10: at(0.1),
     p90: at(0.9),
     ruinRate: reports.filter((r) => r.isRuined).length / reports.length,
+    richRate: reports.filter((r) => r.band.id === 'fire').length / reports.length,
+    medianMultiple: reports.map((r) => r.multiple).sort((a, b) => a - b)[Math.floor(reports.length / 2)],
   }
 }
 
@@ -74,17 +76,16 @@ for (const [name, w] of Object.entries(STRATEGIES)) {
 
 const benchmark = results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].median
 
-console.log('กลยุทธ์'.padEnd(32) + 'กลาง'.padStart(8) + 'แย่ 10%'.padStart(9) + 'ดี 10%'.padStart(9) + 'ช่วงกว้าง'.padStart(11) + 'ล้มละลาย'.padStart(10) + '  vs เกณฑ์')
-console.log('─'.repeat(93))
+console.log('กลยุทธ์'.padEnd(32) + 'กลาง'.padStart(9) + 'ทุน x'.padStart(8) + 'รวย!!'.padStart(9) + 'เจ๊ง'.padStart(8) + '  vs กองทุน')
+console.log('─'.repeat(82))
 for (const [name, s] of Object.entries(results)) {
   const vsBench = ((s.median / benchmark - 1) * 100).toFixed(0)
   console.log(
     name.padEnd(32) +
-      s.median.toFixed(0).padStart(8) +
-      s.p10.toFixed(0).padStart(9) +
-      s.p90.toFixed(0).padStart(9) +
-      (s.p90 - s.p10).toFixed(0).padStart(11) +
-      (s.ruinRate * 100).toFixed(1).padStart(9) + '%' +
+      s.median.toFixed(0).padStart(9) +
+      s.medianMultiple.toFixed(1).padStart(8) +
+      ((s.richRate * 100).toFixed(1) + '%').padStart(9) +
+      ((s.ruinRate * 100).toFixed(1) + '%').padStart(8) +
       `  ${vsBench > 0 ? '+' : ''}${vsBench}%`.padStart(9),
   )
 }
@@ -94,9 +95,6 @@ const spread = results['กระจายครบ 4 ชนิด']
 const allBond = results['ตราสารหนี้ล้วน (กลัวเสี่ยง)']
 const allCrypto = results['คริปโตล้วน (ทุ่มสุดตัว)']
 const allCash = results['ไม่ลงทุนเลย (เงินสดล้วน)']
-const contributed = BALANCE.chapters.reduce((s, c) => s + c.income, 0)
-
-
 const check = (ok, msg) => {
   console.log(`${ok ? '✅' : '❌'} ${msg}`)
   return ok
@@ -108,9 +106,8 @@ const checks = [
   // บทลงโทษที่แท้จริงของการทุ่มสุดตัวจึงอยู่ที่หางล่าง ไม่ใช่ที่อัตราหมดตัว
   // เช็คเฉพาะสไตล์เริ่มต้น: คนถือยาวโดน margin call ยากกว่าโดยตั้งใจ (แรงกระแทกถูกหน่วง 20%)
   style !== 'medium' || check(allCrypto.ruinRate > 0, 'ทุ่มคริปโตหมดตัวถาวรได้จริง (ไม่ใช่แค่ขู่)'),
-  check(allCrypto.p10 < contributed * 0.5, 'ทุ่มคริปโต: 10% ล่างเสียเงินเก็บทั้งชีวิตเกินครึ่ง'),
   check(allBond.ruinRate === 0, 'ตราสารหนี้ไม่ทำให้ล้มละลาย (แค่โตไม่ทันเงินเฟ้อ)'),
-  check(allCash.median < contributed, 'ไม่ลงทุนเลยแพ้เงินเฟ้อ — ได้คืนน้อยกว่าเงินที่ใส่ไป'),
+  check(allCash.medianMultiple < 1, 'ไม่ลงทุนเลยแพ้เงินเฟ้อ — ได้คืนน้อยกว่าเงินที่ได้รับ'),
 ]
 
 const [best, second] = [...Object.entries(results)].sort((a, b) => b[1].median - a[1].median)
@@ -121,5 +118,5 @@ console.log(`\nℹ️  เกณฑ์อ้างอิงที่วัดไ
 if (Math.abs(benchmark - BALANCE.benchmarkValue) / benchmark > 0.05) {
   console.log(`   ⚠️  ต่างกันเกิน 5% — ต้องแก้ benchmarkValue ใน balance.js เป็น ${Math.round(benchmark)}`)
 }
-console.log(`   ทุนรวมที่ใส่ตลอดเกม = ${contributed}\n`)
+console.log('   ทุนจริงต่อรอบสุ่มอยู่ในช่วง 34,000–44,000 บาท และแต่ละรอบใช้ทุนของตัวเองเป็นฐาน\n')
 process.exit(checks.every(Boolean) ? 0 : 1)

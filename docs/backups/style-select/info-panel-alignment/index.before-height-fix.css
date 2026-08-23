@@ -1,0 +1,1227 @@
+@import "tailwindcss";
+
+/* ================= PIXEL ART THEME ================= */
+@font-face {
+  font-family: "SOV BokThang";
+  src: url("./assets/fonts/SOV_BokThang.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --c-line: #0a0b12; /* เส้นขอบดำเข้ม */
+  --c-shadow: rgba(0, 0, 0, 0.55); /* เงาแข็ง */
+  --font-game: "SOV BokThang", "Tahoma", "Segoe UI", ui-monospace, "Courier New", monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  background: #0b0c15;
+}
+
+body {
+  /* ฟอนต์คมสำหรับไทย + โมโนสเปซสำรอง (ฟอนต์พิกเซลจริงไม่รองรับไทย) */
+  font-family: var(--font-game);
+  background-color: #0b0c15;
+  /* พื้นหลังจุด dithered แบบเกมเรโทร */
+  background-image: radial-gradient(rgba(130, 130, 210, 0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  image-rendering: pixelated;
+  letter-spacing: 0.3px;
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+/* ทุกอย่างเป็นเหลี่ยม ไม่มีมุมโค้ง = ฟีลพิกเซล */
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
+}
+
+img {
+  image-rendering: pixelated;
+}
+
+button,
+label,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mobile-modal-panel {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* เส้นสแกนไลน์ CRT คลุมทั้งจอ */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+  opacity: 0.45;
+}
+
+/* กล่อง/แผงแบบเบเวล NES */
+.pixel-frame {
+  border: 4px solid var(--c-line) !important;
+  box-shadow:
+    inset -4px -4px 0 0 rgba(0, 0, 0, 0.35),
+    inset 4px 4px 0 0 rgba(255, 255, 255, 0.1),
+    6px 6px 0 0 var(--c-shadow) !important;
+}
+
+/* ปุ่มแบบพิกเซล มีมิติ กดแล้วยุบ */
+.pixel-btn {
+  border: 3px solid var(--c-line) !important;
+  box-shadow:
+    inset -3px -3px 0 0 rgba(0, 0, 0, 0.4),
+    inset 3px 3px 0 0 rgba(255, 255, 255, 0.22),
+    4px 4px 0 0 var(--c-shadow) !important;
+  image-rendering: pixelated;
+}
+.pixel-btn:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+.pixel-btn:not(:disabled):active {
+  transform: translate(3px, 3px);
+  box-shadow:
+    inset 3px 3px 0 0 rgba(0, 0, 0, 0.4),
+    1px 1px 0 0 var(--c-shadow) !important;
+}
+
+/* วงแหวนโฟกัสสำหรับคนเล่นด้วยคีย์บอร์ด — ใช้ :focus-visible ไม่ใช่ :focus
+   เพื่อไม่ให้วงแหวนเด้งตอนคลิกเมาส์/แตะนิ้ว (เบราว์เซอร์แยกให้เองว่ามาจากคีย์บอร์ดไหม)
+   สีเหลืองเพราะต้องเห็นชัดบนพื้นเข้มทุกหน้าจอ และเข้ากับสีไฮไลต์ที่เกมใช้อยู่แล้ว */
+.pixel-btn:focus-visible,
+.pixel-chip:focus-visible,
+button:focus-visible {
+  outline: 3px solid #facc15 !important;
+  outline-offset: 2px;
+}
+
+/* หลอดเลือด/พลังงานแบบแบ่งช่องพิกเซล */
+.pixel-bar {
+  position: relative;
+  border: 3px solid var(--c-line) !important;
+  box-shadow: inset 2px 2px 0 0 rgba(0, 0, 0, 0.45) !important;
+}
+.pixel-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 9px);
+}
+
+/* ป้าย/ชิปเล็กแบบพิกเซล */
+.pixel-chip {
+  border: 2px solid var(--c-line) !important;
+  box-shadow: 2px 2px 0 0 var(--c-shadow) !important;
+}
+
+/* หน้ายินยอมข้อมูล — แผงอ่านง่ายและมีจุดตัดสินใจชัดเจน */
+.consent-screen {
+  background-color: #071426;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  image-rendering: auto;
+}
+
+.consent-screen > div {
+  width: min(100%, 38rem);
+}
+
+.consent-card {
+  margin-top: clamp(1.25rem, 4vw, 2rem);
+  background: #0d1a2d;
+  border-color: #020811 !important;
+}
+
+.consent-card__body {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 2px solid rgba(88, 124, 163, 0.28);
+  background: linear-gradient(135deg, rgba(29, 49, 73, 0.72), rgba(7, 17, 32, 0.92));
+}
+
+.consent-lede {
+  margin: 0;
+  color: #fff1c3;
+  font-size: clamp(0.9rem, 0.8rem + 0.35vw, 1.08rem);
+  line-height: 1.75;
+}
+
+.consent-lede b {
+  color: #fbd56f;
+}
+
+.consent-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  min-height: 3.5rem;
+  padding: 0.85rem 1rem;
+  background: #152740;
+  color: #f5f0d5;
+  cursor: pointer;
+}
+
+.consent-checkbox {
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.12rem;
+  border: 3px solid #020811;
+  appearance: none;
+  background: #dbe5ec;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.7), inset -2px -2px 0 rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.consent-checkbox:checked {
+  background: #facc15;
+  box-shadow: inset 2px 2px 0 #fff3a6, inset -2px -2px 0 #9a6500;
+}
+
+.consent-toggle__text {
+  font-size: clamp(0.86rem, 0.78rem + 0.3vw, 1rem);
+  line-height: 1.65;
+}
+
+.consent-meta {
+  margin: 0;
+  color: rgba(217, 228, 241, 0.62);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.consent-actions {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+}
+
+.consent-actions .pixel-btn {
+  min-height: 3.5rem;
+  padding: 0.8rem 1rem;
+  font-family: inherit;
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.1rem);
+  font-weight: 800;
+}
+
+.consent-actions__primary {
+  background: #00c58a;
+  color: #031b18;
+}
+
+.consent-actions__primary:disabled {
+  background: #40516a;
+  color: #bac7d4;
+  cursor: not-allowed;
+  filter: saturate(0.45);
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .consent-card__body {
+    padding: 0.9rem;
+  }
+
+  .consent-toggle {
+    gap: 0.7rem;
+    padding: 0.75rem;
+  }
+
+  .consent-meta {
+    font-size: 0.62rem;
+  }
+}
+
+/* ===== อนิเมชันสไปรต์ (steps = ขยับเป็นช็อตๆ แบบเกมพิกเซล) ===== */
+
+/* ตัวละครเด้งย่ำอยู่กับที่ตอนกำลังถูกเลือก */
+@keyframes sprite-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.sprite-bob {
+  animation: sprite-bob 0.8s steps(2, jump-none) infinite;
+}
+
+/* การ์ดตัวละครสไลด์เข้าเมื่อเปลี่ยนตัว */
+@keyframes slide-in {
+  0% { transform: translateX(40px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.slide-in {
+  animation: slide-in 0.22s steps(4, jump-none);
+}
+
+/* เงาใต้ตัวละครหายใจตามจังหวะเด้ง */
+@keyframes shadow-pulse {
+  0%, 100% { transform: scaleX(1); opacity: 0.5; }
+  50% { transform: scaleX(0.72); opacity: 0.32; }
+}
+.sprite-shadow {
+  animation: shadow-pulse 0.8s steps(2, jump-none) infinite;
+}
+
+/* ศัตรูขยับเบาๆ (หายใจ + โยกช้าๆ แบบพิกเซล) */
+@keyframes enemy-idle {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-3px) scaleY(0.96); }
+}
+.enemy-idle {
+  animation: enemy-idle 1.6s steps(2, jump-none) infinite;
+  transform-origin: bottom center;
+}
+
+/* ===== โลโก้/ชื่อเกมสไตล์พิกเซล-แฟนตาซี (ตัวทองขอบหนา) ===== */
+.game-title {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: transparent;
+  background: linear-gradient(#fff3b0 0%, #ffd23f 48%, #f3a100 57%, #b96a10 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0.085em #0a0b12; /* ขอบดำหนา สเกลตามขนาดฟอนต์ */
+  paint-order: stroke fill;
+  filter:
+    drop-shadow(0.05em 0.08em 0 rgba(0, 0, 0, 0.6))
+    drop-shadow(0 0 0.35em rgba(255, 180, 40, 0.35)); /* เงา 3D + เรืองแสงทอง */
+}
+
+/* คำโปรยแบบพิกเซล อ่านง่าย มีเงาแข็ง */
+.game-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e2e7f7;
+  letter-spacing: 0.4px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ===== โลโก้หน้าปก "Invest Adventure" (ทองขอบคู่ ดำ-ขาว สไตล์ RPG) ===== */
+.cover-title {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-game);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  color: transparent;
+  background: linear-gradient(#fff6c2 0%, #ffd23f 46%, #f3a100 58%, #a85f0e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0.06em #1a1206; /* ขอบดำในสุด */
+  paint-order: stroke fill;
+  filter: drop-shadow(0.04em 0.07em 0 rgba(0, 0, 0, 0.75));
+}
+/* ชั้นหลัง = ขอบขาวหนา (ขอบนอก) */
+.cover-title::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-stroke: 0.16em #f4f1e6;
+  paint-order: stroke;
+}
+
+/* ปุ่ม Play เต้นเบาๆ ดึงดูดสายตา */
+@keyframes play-pulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.04); }
+}
+.play-pulse {
+  animation: play-pulse 1s steps(2, jump-none) infinite;
+}
+
+/* ===== ลดการเคลื่อนไหวตามการตั้งค่าของผู้ใช้ =====
+   ตัวละครเด้ง/ศัตรูขยับ/ปุ่ม PLAY เต้น เป็น animation แบบ infinite ทั้งหมด
+   ผู้ใช้บางคนตั้งค่า "ลดการเคลื่อนไหว" ในระบบไว้เพราะภาพขยับตลอดเวลาทำให้เวียนหัว/คลื่นไส้จริงๆ
+   (vestibular disorder) — ต้องเคารพการตั้งค่านั้น
+
+   ไม่ปิด animation ทิ้งทั้งหมดด้วย animation: none เพราะบางตัวมี "สถานะปลายทาง" ที่ต้องคงไว้
+   เช่น slide-in ถ้าโดนตัดกลางคันการ์ดอาจค้างที่ opacity 0 มองไม่เห็น — จึงบีบให้จบทันที
+   ในเฟรมเดียวแทน (0.01ms) ผลคือเห็นสถานะสุดท้ายเลยโดยไม่มีการเคลื่อนไหว */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* เส้นสแกนไลน์ CRT ไม่ขยับอยู่แล้ว แต่ลายเส้นถี่ๆ ก็กวนสายตาคนกลุ่มนี้เหมือนกัน */
+  body::after {
+    opacity: 0.15;
+  }
+}
+
+/* ===== MOBILE / TABLET LANDSCAPE ===== */
+@media (max-height: 500px) {
+  .pixel-frame {
+    border-width: 2px !important;
+    box-shadow:
+      inset -2px -2px 0 0 rgba(0, 0, 0, 0.35),
+      inset 2px 2px 0 0 rgba(255, 255, 255, 0.1),
+      3px 3px 0 0 var(--c-shadow) !important;
+  }
+  .pixel-btn {
+    border-width: 2px !important;
+    box-shadow:
+      inset -2px -2px 0 0 rgba(0, 0, 0, 0.4),
+      inset 2px 2px 0 0 rgba(255, 255, 255, 0.22),
+      2px 2px 0 0 var(--c-shadow) !important;
+  }
+  .pixel-chip {
+    border-width: 1px !important;
+    box-shadow: 1px 1px 0 0 var(--c-shadow) !important;
+  }
+  body::after { opacity: 0.25; }
+}
+
+/* ===== เป้าสัมผัสสำหรับมือถือ ===== */
+/* เข้าเงื่อนไข 2 ทาง เพราะแต่ละทางครอบคลุมคนละกรณี:
+     pointer: coarse  = อุปกรณ์ที่ใช้นิ้วจริง (รวมแท็บเล็ตจอใหญ่)
+     max-width: 640px = จอแคบ (รวมเบราว์เซอร์ที่จำลองมือถือ ซึ่งไม่รายงานว่าเป็น touch)
+   ถ้าใช้ pointer อย่างเดียวจะทดสอบด้วยการย่อหน้าต่างไม่ได้เลย
+   44px คือเป้าสัมผัสขั้นต่ำตามแนวทาง Apple/Google — ก่อนแก้ ปุ่ม +/− สูงแค่ 25px */
+@media (pointer: coarse), (max-width: 640px) {
+  .pixel-btn {
+    min-height: 44px;
+  }
+
+  /* ชิปเล็ก (แถบสเตจ/ปุ่มเลือกสไตล์) ไม่ใช่ปุ่มหลัก จึงไม่บังคับความสูงทั้งแถว
+     แต่เพิ่ม padding ให้พื้นที่แตะกว้างขึ้นโดยไม่ดันเลย์เอาต์ */
+  .pixel-chip {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+  }
+}
+
+/* จอเตี้ย (มือถือแนวนอน) — ที่แนวตั้งมีจำกัดมาก ยอมให้ปุ่มเตี้ยลง
+   ไม่งั้นปุ่ม 44px หลายแถวจะดันเนื้อหาเกมล้นจอจนเล่นไม่ได้ */
+@media (max-height: 500px) {
+  .pixel-btn {
+    min-height: 34px;
+  }
+  .pixel-chip {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+  }
+}
+
+/* ===== ขนาดตัวอักษรขั้นต่ำบนมือถือแนวตั้ง =====
+   เลย์เอาต์เดิมออกแบบมาสำหรับมือถือ "แนวนอน" (จอเตี้ย) จึงบีบฟอนต์ลงเหลือ 7-9px
+   ทุกที่เพื่อให้เนื้อหาลงจอ พอเปิดให้เล่นแนวตั้งได้ ข้อจำกัดกลับด้าน:
+   ที่แนวตั้งเหลือเฟือ (หน้าจัดพอร์ตเหลือช่องว่าง ~180px) แต่ตัวอักษรเล็กจนอ่านไม่ออก
+
+   แก้ที่นี่จุดเดียวแทนการไล่แก้ className 20+ จุดใน 5 ไฟล์ เพราะทุกที่ใช้รูปแบบ
+   `text-[Npx] sm:text-[Mpx]` เหมือนกันหมด และการไล่แก้ทีละจุดพลาดง่ายกว่ามาก
+
+   ⚠️ ถ้าเพิ่ม text-[Npx] ขนาดใหม่ในคอมโพเนนต์ อย่าลืมมาเพิ่มบรรทัดที่นี่ด้วย
+   เงื่อนไข min-height กันไม่ให้กฎนี้ไปโดนมือถือแนวนอนซึ่งต้องการฟอนต์เล็กตามเดิม */
+@media (max-width: 640px) and (min-height: 500px) {
+  .text-\[7px\] {
+    font-size: 9px;
+  }
+  .text-\[8px\] {
+    font-size: 10px;
+  }
+  .text-\[9px\] {
+    font-size: 11px;
+  }
+  .text-\[10px\] {
+    font-size: 11px;
+  }
+  .text-\[11px\] {
+    font-size: 12px;
+  }
+}
+
+/* ===== Safe mobile viewport ===== */
+@media (max-width: 640px) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .cozy-screen,
+  .pre-assessment-screen {
+    min-height: 100svh;
+  }
+
+  .mobile-modal-panel {
+    max-height: calc(100dvh - 1.5rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+/* ===== Cozy Pixel Fantasy vertical slice ===== */
+.cozy-screen {
+  background-color: #071426;
+  background-image:
+    radial-gradient(circle at 50% -20%, rgba(244, 191, 83, 0.2), transparent 42%),
+    linear-gradient(180deg, #10223b 0%, #071426 54%, #040a14 100%);
+}
+
+.cozy-cover {
+  background-color: #071426;
+}
+
+.pre-assessment-screen {
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* UI textures are raster artwork; smooth fractional scaling prevents resize shimmer. */
+  image-rendering: auto;
+}
+
+.pre-assessment-panel {
+  width: min(100%, 58rem);
+  margin-inline: auto;
+  filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.55));
+}
+
+.pre-assessment-panel__content {
+  min-width: 0;
+  padding: clamp(0.75rem, 2vw, 1.5rem) clamp(0.25rem, 1vw, 1rem);
+}
+
+/* ป้ายหัวข้อของหน้าแบบประเมิน
+   ปรับได้: background-size, text-align และ text-shadow */
+.assessment-scroll-label {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Preserve the scroll artwork while scaling it to the text box. */
+  background-size: cover;
+  image-rendering: auto;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 236, 190, 0.55);
+}
+
+/* ป้ายเล็ก “ก่อนเริ่มเกม” */
+.assessment-scroll-label--eyebrow {
+  width: min(14rem, 66vw);
+  min-height: 2.6rem;
+  padding: 0.75rem 2.4rem;
+}
+
+/* หัวข้อใหญ่ของหน้า */
+.assessment-scroll-label--title {
+  width: min(38rem, 100%);
+  min-height: 5rem;
+  padding: 1rem clamp(2rem, 7vw, 4.5rem);
+}
+
+/* คำอธิบายใต้หัวข้อ */
+.assessment-scroll-label--disclaimer {
+  width: min(48rem, 100%);
+  min-height: 5rem;
+  padding: 1rem clamp(2rem, 7vw, 4.5rem);
+}
+
+.pre-assessment-questions {
+  max-height: none;
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+}
+
+.assessment-question-card {
+  min-width: 0;
+  border: clamp(1.6rem, 3.2vw, 3rem) solid transparent;
+  border-image-slice: 112 132 fill;
+  border-image-width: clamp(1.6rem, 3.2vw, 3rem);
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.45));
+}
+
+.assessment-question-card__content {
+  min-width: 0;
+  padding: clamp(0.25rem, 1vw, 0.75rem);
+}
+
+/* หัวข้อของแต่ละคำถามและเลขข้อ */
+.assessment-question-legend {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: fit-content;
+  max-width: min(82%, 34rem);
+  min-height: 3.25rem;
+  margin-inline: auto;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 1.25rem 0.6rem 3.2rem;
+  border: 3px solid #5b2508;
+  background-color: #f5d58a;
+  background-image: none !important;
+  box-shadow:
+    0 0 0 3px #eaa52c,
+    0 0 0 6px #321006,
+    4px 5px 0 6px rgba(12, 5, 2, 0.45),
+    inset 0 0 0 2px #fff0b5,
+    inset 0 -5px 0 rgba(151, 76, 13, 0.18);
+  color: #542507;
+  text-align: center;
+  text-shadow: 0 1px 0 #fff1bd;
+}
+
+.assessment-question-legend + div {
+  clear: both;
+}
+
+.assessment-question-badge {
+  position: absolute;
+  left: -1.8rem;
+  display: grid;
+  width: clamp(2.4rem, 5vw, 3.8rem);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: auto;
+  color: #3b1b07;
+  font-size: clamp(1rem, 2.2vw, 1.75rem);
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.7);
+}
+
+.assessment-answer-row {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-width: 0 clamp(4rem, 8vw, 5.5rem) !important;
+  border-image-slice: 0 110 0 110 fill;
+  border-image-width: 0 clamp(4rem, 8vw, 5.5rem);
+  border-image-repeat: stretch;
+  background-color: transparent;
+
+  image-rendering: auto;
+  box-shadow: none !important;
+  color: #3b1b07;
+  align-items: center;
+  min-height: clamp(3.4rem, 6vw, 4.75rem);
+  font-size: clamp(0.78rem, 0.7rem + 0.45vw, 1rem);
+  line-height: 1.35;
+  padding: clamp(0.7rem, 1.35vw, 1rem) clamp(0.45rem, 1.4vw, 0.9rem);
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.65);
+}
+
+/* ตัวเลือกสลับซ้าย-ขวาตาม layout ในภาพตัวอย่าง */
+.assessment-answer-row--left {
+  width: 72%;
+  margin-inline-start: 3%;
+}
+
+.assessment-answer-row--right {
+  width: 72%;
+  margin-inline-start: auto;
+  margin-inline-end: 3%;
+}
+
+/* ปรับสีและขนาดข้อความคำตอบได้ในบล็อก .assessment-answer-row */
+.assessment-answer-row__text {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(0.95rem, 0.82rem + 0.5vw, 1.2rem);
+  line-height: 1.3;
+}
+.assessment-answer-row input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #0f8a5f;
+}
+
+.assessment-answer-row--selected {
+  color: #053b2c;
+  text-shadow: 0 1px 0 rgba(236, 255, 229, 0.8);
+}
+
+@media (max-width: 640px) {
+  .pre-assessment-panel__content {
+    padding-inline: 0;
+  }
+
+  .assessment-scroll-label--eyebrow {
+    width: min(12rem, 78vw);
+    min-height: 2.4rem;
+    padding-inline: 2rem;
+  }
+
+  .assessment-scroll-label--title,
+  .assessment-scroll-label--disclaimer {
+    min-height: 4.25rem;
+    padding-inline: 1.7rem;
+  }
+
+  .assessment-question-card__content {
+    padding: 0.2rem;
+  }
+
+  .assessment-question-legend {
+    width: fit-content;
+    max-width: 86%;
+    min-height: 3rem;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem 0.55rem 2.2rem;
+  }
+
+  .assessment-question-badge {
+    left: -1.35rem;
+    width: 2.8rem;
+  }
+
+  .assessment-answer-row {
+    min-height: 3.25rem;
+    border-width: 0 3.25rem !important;
+    border-image-width: 0 3.25rem;
+    padding: 0.7rem 0.4rem;
+  }
+
+  .assessment-answer-row--left,
+  .assessment-answer-row--right {
+    width: 100%;
+    margin-inline: 0;
+  }
+}
+
+.cover-play-art {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.cover-play-art:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.06);
+}
+
+.cover-play-art:active:not(:disabled) {
+  transform: translateY(1px) scale(.99);
+}
+
+/* หน้าคัดเลือกสไตล์ — ทำให้ตัวเลือกที่กำลังดูอยู่เด่นและอ่านได้ในครั้งเดียว */
+.style-select-screen {
+  background-color: #071426;
+}
+
+.style-select-header .game-subtitle {
+  color: #fff1b2;
+  font-size: clamp(1rem, 0.85rem + 0.55vw, 1.45rem);
+  text-shadow: 2px 2px 0 rgba(4, 12, 24, 0.85);
+}
+
+.style-select-header > p:last-child {
+  max-width: 42rem;
+  margin-inline: auto;
+  color: rgba(255, 246, 211, 0.78);
+  font-size: clamp(0.72rem, 0.65rem + 0.25vw, 0.9rem);
+  line-height: 1.45;
+}
+
+.style-select-compare .pixel-frame {
+  border-color: rgba(5, 13, 25, 0.95) !important;
+  box-shadow: inset 0 0 0 2px rgba(255, 239, 167, 0.1), 3px 3px 0 rgba(0, 0, 0, 0.62) !important;
+}
+
+.style-select-compare .pixel-frame[aria-pressed="true"] {
+  position: relative;
+  z-index: 2;
+  opacity: 1 !important;
+  filter: brightness(1.3) saturate(1.3) contrast(1.08);
+  transform: translateY(-2px) scale(1.025);
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-image: url('./assets/ui/character-select-frame-wood.svg') 16 fill / 10px / 0 stretch !important;
+  background-image: linear-gradient(180deg, rgba(72, 59, 18, 0.78), rgba(7, 28, 40, 0.96));
+  box-shadow: inset 0 0 0 2px rgba(255, 247, 190, 0.4), 0 0 0 3px rgba(255, 220, 102, 0.42), 0 0 18px rgba(255, 195, 62, 0.34), 3px 5px 0 rgba(0, 0, 0, 0.72) !important;
+}
+
+.style-select-compare .pixel-frame[aria-pressed="true"] > div:first-child {
+  transform: scale(1.1);
+  filter: brightness(1.18) saturate(1.18) contrast(1.08);
+  box-shadow: 0 0 0 2px rgba(255, 236, 145, 0.62), 0 0 14px rgba(255, 196, 64, 0.38);
+}
+
+.style-select-compare .pixel-frame[aria-pressed="true"] > div:first-child img {
+  filter: brightness(1.08) saturate(1.12) contrast(1.06) drop-shadow(0 0 4px rgba(255, 221, 116, 0.24));
+}
+
+.style-select-compare .pixel-frame[aria-pressed="true"] > div:last-child {
+  color: #fff4b0;
+  font-size: clamp(0.68rem, 0.62rem + 0.22vw, 0.86rem) !important;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  padding: 0.12rem 0.18rem;
+  background: rgba(3, 17, 28, 0.78);
+  text-shadow: 2px 2px 0 #071426;
+}
+
+.style-select-compare .pixel-frame:not([aria-pressed="true"]) {
+  opacity: 0.5;
+  filter: saturate(0.72) brightness(0.82);
+}
+
+.style-select-details {
+  position: relative;
+  /* ลบกรอบดำหนารอบแผงรายละเอียด เหลือกรอบสีส้มจาก ::after */
+  border: 0 !important;
+  border-image: none !important;
+  /* ชดเชยพื้นที่ของกรอบเดิม เพื่อไม่ให้กรอบสีส้มทับเนื้อหา */
+  padding: 1.5rem !important;
+  clip-path: polygon(
+    0 14px,
+    14px 14px,
+    14px 0,
+    calc(100% - 14px) 0,
+    calc(100% - 14px) 14px,
+    100% 14px,
+    100% calc(100% - 14px),
+    calc(100% - 14px) calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    14px 100%,
+    14px calc(100% - 14px),
+    0 calc(100% - 14px)
+  );
+  background-image: linear-gradient(145deg, rgba(10, 31, 54, 0.88), rgba(3, 13, 26, 0.96));
+  box-shadow: inset 0 0 0 2px rgba(159, 205, 228, 0.12), 5px 5px 0 rgba(0, 0, 0, 0.62) !important;
+}
+
+.style-select-details::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  border: 5px solid #ee916c;
+  box-shadow: inset 0 0 0 5px #252525;
+  clip-path: polygon(
+    0 5px,
+    5px 5px,
+    5px 0,
+    calc(100% - 5px) 0,
+    calc(100% - 5px) 5px,
+    100% 5px,
+    100% calc(100% - 5px),
+    calc(100% - 5px) calc(100% - 5px),
+    calc(100% - 5px) 100%,
+    5px 100%,
+    5px calc(100% - 5px),
+    0 calc(100% - 5px)
+  );
+}
+
+.style-select-details::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(3, 16, 28, 0.72), rgba(3, 16, 28, 0.58) 48%, rgba(2, 11, 20, 0.78)),
+    repeating-linear-gradient(0deg, rgba(133, 188, 210, 0.045) 0 1px, transparent 1px 4px);
+  opacity: 0.92;
+}
+
+.style-select-details > * {
+  position: relative;
+  z-index: 1;
+}
+
+.style-select-panel-title {
+  align-self: center;
+  min-width: min(80%, 20rem);
+  margin-bottom: 0.7rem;
+  padding: 0.35rem 1rem;
+  border: 0 !important;
+  background-color: transparent;
+  background-image: url('./assets/ui/title-border-wood-high-detail.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: #ffd978;
+  font-size: clamp(0.95rem, 0.8rem + 0.45vw, 1.3rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7);
+}
+
+.style-select-hero-nav {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) 4rem;
+  align-items: center;
+  gap: clamp(0.5rem, 2vw, 1.25rem);
+  width: min(100%, 34rem);
+  margin-inline: auto;
+}
+
+.style-select-hero-arrow.pixel-btn {
+  min-height: 4rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.style-select-hero-arrow img {
+  width: 3.75rem;
+  height: 3.75rem;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.style-select-hero-arrow.pixel-btn:not(:disabled):active {
+  transform: scale(0.94);
+  box-shadow: none !important;
+}
+
+.style-select-hero-nav .style-select-hero {
+  min-width: 0;
+}
+
+.style-select-hero {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.style-select-hero-art {
+  width: 9rem;
+  height: 9rem;
+  border-color: rgba(255, 231, 142, 0.8) !important;
+  box-shadow: 0 0 0 3px rgba(4, 11, 20, 0.9), 0 5px 0 rgba(0, 0, 0, 0.6) !important;
+}
+
+.style-select-profile {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-color: rgba(255, 239, 167, 0.25) !important;
+  background: rgba(2, 12, 24, 0.82);
+  box-shadow: inset 0 0 0 1px rgba(132, 182, 205, 0.12), 3px 3px 0 rgba(0, 0, 0, 0.48) !important;
+}
+
+.style-select-profile__label {
+  color: #f5d779;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.style-select-profile__tagline {
+  margin: 0.35rem 0 0;
+  color: rgba(255, 246, 220, 0.86);
+  font-size: clamp(0.72rem, 0.66rem + 0.25vw, 0.9rem);
+  line-height: 1.55;
+}
+
+.style-select-favorite-assets {
+  color: #ffe06f;
+  font-weight: 900;
+  text-shadow: 1px 1px 0 #241b08, 0 0 5px rgba(255, 210, 74, 0.28);
+}
+
+.style-select-profile .style-select-pros-cons > div {
+  min-height: 2.2rem;
+  font-size: clamp(0.72rem, 0.66rem + 0.25vw, 0.88rem);
+}
+
+.style-select-profile__adjust {
+  color: rgba(210, 227, 237, 0.78);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.style-select-name {
+  color: #fff1b2;
+  background: rgba(3, 16, 28, 0.72);
+  padding: 0.15rem 0.45rem;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.65);
+}
+
+.style-select-persona {
+  max-width: 34rem;
+  color: rgba(255, 246, 220, 0.84);
+  font-size: clamp(0.78rem, 0.7rem + 0.3vw, 1rem);
+  text-shadow: 1px 1px 0 #06131f;
+}
+
+.style-select-pros-cons > div {
+  min-height: 2.6rem;
+  align-items: center;
+  font-size: clamp(0.78rem, 0.7rem + 0.25vw, 0.95rem);
+  line-height: 1.5;
+}
+
+.style-select-stats .pixel-chip {
+  min-height: 4.7rem;
+  border-color: rgba(255, 239, 167, 0.2) !important;
+  background: rgba(1, 10, 21, 0.42);
+}
+
+.style-select-stats .pixel-chip > div:nth-child(2) {
+  font-size: clamp(1.05rem, 0.95rem + 0.45vw, 1.35rem);
+}
+
+.style-select-stats .pixel-chip > div:last-child {
+  max-width: 16rem;
+  font-size: 0.62rem;
+  line-height: 1.4;
+}
+
+.style-select-info {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 0.85rem;
+  border: 2px dashed rgba(177, 218, 220, 0.42) !important;
+  color: rgba(255, 246, 220, 0.74);
+  background: rgba(3, 18, 27, 0.96);
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 #06131f;
+}
+
+.style-select-actions {
+  width: 100%;
+  margin-top: 0.15rem;
+}
+
+.style-select-info__heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.style-select-info__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 1.25rem;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.style-select-freq-diamonds {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+  vertical-align: middle;
+}
+
+.style-select-freq-diamond {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 1.05rem;
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: 0.2;
+}
+
+.style-select-freq-diamond.is-filled {
+  opacity: 1;
+  filter: drop-shadow(0 0 2px rgba(93, 210, 255, 0.5));
+}
+
+.style-select-play-button {
+  display: grid;
+  min-height: 4.75rem;
+  place-items: center;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.style-select-play-button img {
+  width: min(80%, 17.6rem);
+  height: 4.75rem;
+  object-fit: fill;
+  image-rendering: pixelated;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.style-select-play-button:hover img {
+  filter: brightness(1.1) saturate(1.08);
+}
+
+.style-select-play-button:active img {
+  transform: translate(2px, 2px) scale(0.98);
+}
+
+@media (max-width: 640px) {
+  .style-select-header > p:last-child {
+    max-width: 31rem;
+  }
+
+  .style-select-details {
+    padding: 1.5rem !important;
+  }
+
+  .style-select-hero-nav {
+    grid-template-columns: 3.4rem minmax(0, 1fr) 3.4rem;
+    gap: 0.35rem;
+  }
+
+  .style-select-hero-arrow.pixel-btn {
+    min-height: 3.4rem;
+  }
+
+  .style-select-hero-arrow img {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .style-select-hero-art {
+    width: 8.5rem;
+    height: 8.5rem;
+  }
+
+  .style-select-profile {
+    margin-top: 0.8rem;
+    padding: 0.65rem;
+  }
+
+  .style-select-pros-cons > div {
+    min-height: 2.8rem;
+  }
+}
+
+.cozy-hero-lineup {
+  width: min(94vw, 52rem);
+  filter: drop-shadow(0 8px 3px rgba(0, 0, 0, 0.55));
+}
+
+.cozy-hero-lineup img {
+  width: 25%;
+  margin-inline: -0.5%;
+}
+
+.cozy-character-token {
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 2px solid #d8ad58;
+  border-radius: 0.35rem;
+  background: radial-gradient(circle at 50% 30%, rgba(247, 207, 118, 0.25), transparent 58%), #0b1a2c;
+  box-shadow: inset 0 0 0 2px rgba(255, 236, 180, 0.08), 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.cozy-character-token img {
+  filter: drop-shadow(0 3px 1px rgba(0, 0, 0, 0.55));
+}
+
+.cozy-character--thinking img,
+.cozy-character--reveal img { animation: cozy-think 1.8s steps(2, end) infinite; }
+.cozy-character--shock img { animation: cozy-hit 420ms steps(2, end); filter: saturate(.7) contrast(1.1); }
+.cozy-character--behavior img { transform: scale(.94) translateY(2px); }
+.cozy-character--debrief img { animation: cozy-recover 1.2s ease-out; }
+
+@keyframes cozy-think { 50% { transform: translateY(-2px); } }
+@keyframes cozy-hit { 35% { transform: translateX(-3px) rotate(-2deg); } 70% { transform: translateX(3px) rotate(2deg); } }
+@keyframes cozy-recover { from { opacity: .55; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.cozy-hud {
+  border: 2px solid #8f672b;
+  background: linear-gradient(180deg, rgba(18, 42, 72, 0.94), rgba(6, 18, 34, 0.94));
+  box-shadow: inset 0 0 0 2px rgba(255, 232, 174, 0.05), 2px 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.journey-dialog {
+  box-shadow: 0 0 0 3px #17233a, 0 0 0 6px #b67b29, 0 16px 48px rgba(0, 0, 0, 0.72) !important;
+}
+
+.journey-map {
+  background: linear-gradient(145deg, #254c49, #10233b);
+}
+
+.journey-map-shade {
+  background: linear-gradient(180deg, rgba(4, 10, 20, 0.2), rgba(4, 10, 20, 0.12) 42%, rgba(4, 10, 20, 0.82));
+}
+
+.cozy-banner,
+.cozy-map-label {
+  border: 2px solid #d8ad58;
+  background: linear-gradient(180deg, rgba(20, 43, 73, 0.96), rgba(8, 21, 39, 0.96));
+  box-shadow: inset 0 0 0 2px rgba(255, 230, 165, 0.08), 3px 3px 0 rgba(3, 8, 16, 0.75);
+}
+
+.cozy-map-label {
+  padding: 0.35rem 0.55rem;
+  color: #fff0c2;
+}
+
+.cozy-panel {
+  border: 2px solid #8f672b;
+  background: linear-gradient(180deg, rgba(18, 38, 66, 0.98), rgba(6, 18, 34, 0.98));
+  box-shadow: inset 0 0 0 2px rgba(255, 232, 174, 0.06);
+}
+
+.cozy-ledger-row,
+.cozy-ledger-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.55rem;
+  border-bottom: 1px solid rgba(232, 200, 132, 0.2);
+}
+
+.cozy-ledger-total {
+  margin-top: 0.25rem;
+  border: 2px solid #d8ad58;
+  background: rgba(3, 11, 22, 0.58);
+  color: #ffe59b;
+  font-size: 1.05rem;
+}
+
+.cozy-primary {
+  border-color: #ffe4a0 !important;
+  background: linear-gradient(180deg, #f5c459, #c98217) !important;
+  color: #251605 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+@media (max-width: 380px), (max-height: 620px) {
+  .journey-map,
+  .journey-map > div { min-height: 10.5rem; }
+  .cozy-ledger-row,
+  .cozy-ledger-total { min-height: 1.65rem; padding-block: 0.2rem; }
+}
+
+
+
+
+
+
+
+

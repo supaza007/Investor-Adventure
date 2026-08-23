@@ -8,17 +8,24 @@ import { createPlayerRunPayload, submitPlayerRun } from '../lib/playerData.js'
 import { enqueuePlayerRun, flushPlayerDataQueue } from '../lib/playerDataQueue.js'
 
 const BAND_STYLE = {
-  fire: { cls: 'from-amber-800 to-amber-950 border-amber-400/60', text: 'text-amber-300', blurb: 'คุณเกษียณได้ก่อนกำหนดแบบสบายๆ' },
-  comfortable: { cls: 'from-emerald-800 to-emerald-950 border-emerald-400/60', text: 'text-emerald-300', blurb: 'เงินพอใช้ไปตลอดชีวิตหลังเกษียณ' },
-  adequate: { cls: 'from-sky-800 to-sky-950 border-sky-400/60', text: 'text-sky-300', blurb: 'พออยู่ได้ แต่ต้องระวังค่าใช้จ่าย' },
-  tight: { cls: 'from-orange-900 to-orange-950 border-orange-400/60', text: 'text-orange-300', blurb: 'เงินไม่ค่อยพอ อาจต้องทำงานต่อ' },
-  ruined: { cls: 'from-rose-900 to-rose-950 border-rose-400/60', text: 'text-rose-300', blurb: 'พอร์ตพังหมด ไม่เหลืออะไรเลย' },
+  fire: { cls: 'from-amber-800 to-amber-950 border-amber-400/60', text: 'text-amber-300', blurb: 'พอร์ตของคุณแข็งแรงมากในสถานการณ์จำลองนี้' },
+  comfortable: { cls: 'from-emerald-800 to-emerald-950 border-emerald-400/60', text: 'text-emerald-300', blurb: 'พอร์ตของคุณมีฐานที่มั่นคงในสถานการณ์จำลองนี้' },
+  adequate: { cls: 'from-sky-800 to-sky-950 border-sky-400/60', text: 'text-sky-300', blurb: 'พอร์ตยังพอรับมือได้ แต่ควรระวังค่าใช้จ่าย' },
+  tight: { cls: 'from-orange-900 to-orange-950 border-orange-400/60', text: 'text-orange-300', blurb: 'เงินตึงมือ ต้องระวังการตัดสินใจครั้งต่อไป' },
+  ruined: { cls: 'from-rose-900 to-rose-950 border-rose-400/60', text: 'text-rose-300', blurb: 'พอร์ตเสียหายหนักในสถานการณ์จำลองนี้' },
 }
 
 const RISK_PROFILE_LABEL = {
   conservative: 'ระมัดระวัง',
   balanced: 'สมดุล',
   aggressive: 'รับความเสี่ยงสูง',
+}
+
+const ABILITY_LABEL = {
+  flex_rebalance: 'ปรับพอร์ตฟรีหลังรู้เหตุการณ์',
+  patient_compounding: 'อดทนฟื้นตัวและทบต้น',
+  active_rebalance: 'ปรับพอร์ตเชิงรุก',
+  value_buy_dip: 'ซื้อเพิ่มเมื่อราคาลดลง',
 }
 
 function ChapterRow({ c }) {
@@ -34,10 +41,9 @@ function ChapterRow({ c }) {
         <div className="min-w-0 flex-1">
           <div className="truncate text-[10px] font-bold sm:text-sm">
             บท {c.chapter} · อายุ {c.ageFrom}-{c.ageTo} — {c.eventName}
-            {c.isBlackSwan && <span className="ml-1 text-purple-300">(เหตุการณ์หนักที่หลบยาก)</span>}
           </div>
           <div className="truncate text-[8px] text-white/50 sm:text-[10px]">
-            {c.prep.text} · {c.luck.text}
+            {c.prep.text}
             {c.behaviorLabel !== '—' && ` · คุณเลือก "${c.behaviorLabel}"`}
           </div>
         </div>
@@ -49,12 +55,23 @@ function ChapterRow({ c }) {
       {c.scamAccepted && c.scamLost > 0 && (
         <div className="mt-1 text-[8px] text-rose-300/90 sm:text-[10px]">โดนมิจฉาชีพหลอกไป {money(c.scamLost)} — “การันตีผลตอบแทน” ไม่มีอยู่จริงในโลกการลงทุน</div>
       )}
+      {(c.abilityTriggered || c.abilityCost > 0 || c.adjustmentCount > 0) && (
+        <div className="mt-1 border-t border-violet-500/25 pt-1 text-[8px] leading-relaxed text-violet-100/85 sm:text-[10px]">
+          <b className="text-violet-300">ความสามารถ: {ABILITY_LABEL[c.characterAbilityId] ?? c.characterAbilityId}</b>
+          {' · '}โบนัส <span className="text-emerald-300">+{money(c.abilityBonus ?? 0)}</span>
+          {' · '}ค่าใช้จ่าย <span className="text-rose-300">-{money(c.abilityCost ?? 0)}</span>
+          {' · '}สุทธิ <span className={(c.abilityNetEffect ?? 0) >= 0 ? 'text-emerald-200' : 'text-rose-200'}>
+            {(c.abilityNetEffect ?? 0) >= 0 ? '+' : '-'}{money(Math.abs(c.abilityNetEffect ?? 0))}
+          </span>
+          {c.adjustmentCount > 0 && ` · ปรับพอร์ต ${c.adjustmentCount} ครั้ง`}
+        </div>
+      )}
     </div>
   )
 }
 
-// รายงานผลเกษียณ — ไม่ใช่ win/lose แต่เป็นสเปกตรัม เทียบกับเกณฑ์อ้างอิง (ดีไซน์ข้อ 7)
-export default function ReportScreen({ report, session, styleId, gameTiming, learning, onRestart }) {
+// สถานะทางการเงินเทียบกับเงินที่ผู้เล่นได้รับจริงตลอดเกม
+export default function ReportScreen({ report, session, styleId, gameTiming, versions, learning, onRestart }) {
   const submittedRef = useRef(false)
   const sendingRef = useRef(false)
   const [saveStatus, setSaveStatus] = useState('idle')
@@ -77,6 +94,13 @@ export default function ReportScreen({ report, session, styleId, gameTiming, lea
       postAssessment: session.assessment?.post,
       learning,
       timing: gameTiming,
+      consent: session.consent?.researchTelemetry === true ? session.consent : false,
+      anonymousPlayerId: session.anonymousPlayerId,
+      platform: window.electronAPI ? 'electron' : 'web',
+      sessionStatus: 'completed',
+      rulesVersion: versions?.rulesVersion,
+      contentVersion: versions?.contentVersion,
+      rngVersion: versions?.rngVersion,
     })
     if (!run) {
       setSaveStatus('waiting')
@@ -119,27 +143,25 @@ export default function ReportScreen({ report, session, styleId, gameTiming, lea
     <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-y-auto px-2 py-2 sm:px-4 sm:py-4">
         <div className="shrink-0 text-center">
-          <div className="text-[10px] uppercase tracking-widest text-white/45 sm:text-xs">อายุ {BALANCE.retireAge} · รายงานผลเกษียณ</div>
+          <div className="text-[10px] uppercase tracking-widest text-white/45 sm:text-xs">อายุ {BALANCE.retireAge} · สถานะทางการเงินของคุณ</div>
         </div>
 
         <div className={`pixel-frame mt-2 shrink-0 border bg-gradient-to-b p-3 text-center sm:p-4 ${b.cls}`}>
           <div className={`mt-1 text-lg font-black sm:text-3xl ${b.text}`}>{report.band.label}</div>
           <div className="text-[10px] text-white/70 sm:text-sm">{b.blurb}</div>
           <div className="mt-2 text-2xl font-black text-white sm:text-4xl">{money(report.finalValue)}</div>
-          <div className="text-[9px] text-white/55 sm:text-xs">
-            จากเงินที่ใส่ไปทั้งชีวิต {money(report.contributed)} · โตขึ้น {report.multiple.toFixed(1)} เท่า
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[9px] sm:text-xs">
+            <div className="pixel-chip bg-black/20 p-2">เงินที่ได้รับทั้งหมด<br /><b>{money(report.contributed)}</b></div>
+            <div className="pixel-chip bg-black/20 p-2">กำไร/ขาดทุนสุทธิ<br /><b className={report.netGain >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{report.netGain >= 0 ? '+' : '-'}{money(Math.abs(report.netGain))} ({pct(report.netGainPct)})</b></div>
           </div>
+          <div className="mt-2 text-[9px] text-white/55 sm:text-xs">มูลค่าปลายเกมเป็น {report.multiple.toFixed(1)} เท่าของเงินที่ได้รับทั้งหมด</div>
         </div>
 
-        {/* เทียบกับเกณฑ์อ้างอิง — "ถ้าถือกองทุนดัชนีเฉยๆ 40 ปีจะได้เท่าไหร่" */}
-        <div className="pixel-frame mt-1.5 shrink-0 border border-slate-700 bg-slate-900/70 p-2 text-center sm:p-3">
-          <div className="text-[9px] text-white/50 sm:text-xs">ถ้าคุณซื้อกองทุนรวมแล้วนอนเฉยๆ 40 ปี จะได้ประมาณ</div>
-          <div className="text-base font-bold text-violet-300 sm:text-2xl">{money(report.benchmark)}</div>
-          <div className={`mt-0.5 text-[10px] font-bold sm:text-sm ${beat ? 'text-emerald-300' : 'text-rose-300'}`}>
-            คุณทำได้ {beat ? 'ดีกว่า' : 'แย่กว่า'}เกณฑ์นี้ {Math.abs(Math.round(vsBench * 100))}%
-          </div>
-          {!beat && <div className="mt-0.5 text-[8px] leading-snug text-white/55 sm:text-[10px]">นักลงทุนมืออาชีพส่วนใหญ่ก็ทำได้ไม่ถึงเกณฑ์นี้เหมือนกัน — การอยู่เฉยๆ ยากกว่าที่คิด</div>}
-        </div>
+        <details className="pixel-frame mt-1.5 shrink-0 border border-slate-700 bg-slate-900/70 p-2 text-center sm:p-3">
+          <summary className="cursor-pointer text-[10px] font-bold text-violet-300 sm:text-sm">ดูข้อมูลเปรียบเทียบเพิ่มเติม (ไม่ใช้ตัดสินสถานะ)</summary>
+          <div className="mt-2 text-[9px] text-white/50 sm:text-xs">พอร์ตจำลองกองทุนรวมล้วน: {money(report.benchmark)}</div>
+          <div className={`mt-0.5 text-[10px] font-bold sm:text-sm ${beat ? 'text-emerald-300' : 'text-rose-300'}`}>คุณทำได้ {beat ? 'ดีกว่า' : 'แย่กว่า'}ตัวอย่างนี้ {Math.abs(Math.round(vsBench * 100))}%</div>
+        </details>
 
         <div className="mt-2 shrink-0 text-[10px] font-bold text-white/70 sm:text-sm">เกิดอะไรขึ้นบ้างในชีวิตคุณ</div>
         {/* ต้องระบุ grid-cols-1 ห้ามใช้ grid เปล่าๆ — grid เปล่าได้คอลัมน์ auto ที่ยืดตาม min-content
@@ -162,13 +184,12 @@ export default function ReportScreen({ report, session, styleId, gameTiming, lea
               บทที่ทำร้ายคุณมากสุดคือ <b className="text-rose-300">บท {report.worst.chapter} ({report.worst.eventName})</b> — {report.worst.prep.text}
             </div>
           )}
-          {report.blackSwanCount > 0 && <div className="mt-1 text-purple-200">คุณเจอเหตุการณ์หนักที่หลบยาก {report.blackSwanCount} ครั้ง ซึ่งกระทบแทบทุกอย่างพร้อมกัน — ไม่ใช่ความผิดของคุณ</div>}
           {report.scamVictim && <div className="mt-1 text-amber-200">คุณเคยตกเป็นเหยื่อมิจฉาชีพ จำไว้ว่า “การันตีผลตอบแทนสูง” + “ต้องตัดสินใจเดี๋ยวนี้” = โกงเสมอ</div>}
           {report.cashOnlyChapters > 0 && <div className="mt-1 text-slate-200">มี {report.cashOnlyChapters} บทที่คุณถือเงินสดทั้งหมด — ยังไม่มีการกระจายการลงทุน เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ</div>}
         </div>
 
         <section className="pixel-frame mt-3 bg-slate-900/80 p-3" aria-labelledby="readiness-title">
-          <h2 id="readiness-title" className="text-base font-black text-emerald-300 sm:text-xl">ความพร้อม 4 มิติในสถานการณ์จำลอง</h2>
+          <h2 id="readiness-title" className="text-base font-black text-emerald-300 sm:text-xl">ภาพรวมการเงิน 3 ด้านในสถานการณ์จำลอง</h2>
           <p className="mt-1 text-xs text-white/60">ไม่ใช่คำวินิจฉัยหรือคำแนะนำการลงทุนสำหรับชีวิตจริง</p>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">{readiness.map((item) => <div key={item.id} className="pixel-chip bg-slate-800 p-2 text-xs">
             <div className="font-bold">{item.label}</div>
@@ -193,7 +214,7 @@ export default function ReportScreen({ report, session, styleId, gameTiming, lea
           <ul className="mt-2 list-disc space-y-1 pl-5 text-white/65">
             <li>เงินเฟ้อ 2% ต่อปีเป็นค่ากลางของกรอบเป้าหมาย 1–3% และเป็นสมมติฐานเกม</li>
             <li>HHI ใช้วัดการกระจุกตัวด้วยผลรวมสัดส่วนยกกำลังสอง</li>
-            <li>ผลตอบแทน เหตุการณ์ และ Black Swan เป็นพารามิเตอร์จำลอง ไม่ใช่การพยากรณ์</li>
+            <li>ผลตอบแทนและเหตุการณ์เป็นพารามิเตอร์จำลอง ไม่ใช่การพยากรณ์</li>
           </ul>
         </details>
 

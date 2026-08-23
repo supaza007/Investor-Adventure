@@ -49,7 +49,8 @@ dashboard — ไม่กระทบถ้ามีคนเล่นสม่
 | `outcome_band` | text | `report.band.id` ('fire'/'comfortable'/'adequate'/'tight'/'ruined') |
 | `is_ruined` | boolean | `report.isRuined` |
 | `scam_victim` | boolean | `report.scamVictim` |
-| `black_swan_count` | int | `report.blackSwanCount` |
+| `net_gain` | numeric | `report.netGain` |
+| `net_gain_pct` | numeric | `report.netGainPct` |
 
 ### ตาราง `chapter_events` (4 แถว / รอบ — 1 แถวต่อบท)
 
@@ -60,7 +61,11 @@ dashboard — ไม่กระทบถ้ามีคนเล่นสม่
 | `chapter_n` | int | `entry.chapter` |
 | `event_id` | text | `entry.eventId` |
 | `event_name` | text | `entry.eventName` |
-| `is_black_swan` | boolean | `entry.isBlackSwan` |
+| `income_added` | numeric | `entry.incomeAdded` |
+| `allocation_before_event` | jsonb | `entry.allocationBeforeEvent` |
+| `base_asset_returns` | jsonb | `entry.baseReturns` |
+| `age_modifiers` | jsonb | `entry.ageModifiers` |
+| `final_asset_returns` | jsonb | `entry.assetReturns` |
 | `shock_pct` | numeric | `entry.shockPct` |
 | `percentile` | numeric | `entry.percentile` |
 | `exposure` | numeric | `entry.exposure` |
@@ -111,7 +116,8 @@ create table game_sessions (
   outcome_band text not null,
   is_ruined boolean not null default false,
   scam_victim boolean not null default false,
-  black_swan_count integer not null default 0
+  net_gain numeric,
+  net_gain_pct numeric
 );
 
 create table chapter_events (
@@ -120,7 +126,11 @@ create table chapter_events (
   chapter_n integer not null,
   event_id text not null,
   event_name text not null,
-  is_black_swan boolean not null default false,
+  income_added numeric not null default 0,
+  allocation_before_event jsonb not null default '{}'::jsonb,
+  base_asset_returns jsonb not null default '{}'::jsonb,
+  age_modifiers jsonb not null default '{}'::jsonb,
+  final_asset_returns jsonb not null default '{}'::jsonb,
   shock_pct numeric not null,
   percentile numeric not null,
   exposure numeric not null,

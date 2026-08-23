@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { getTool, TAG_LABELS } from '../game/engine/data/tools.js'
+import { getTool, getTools, TAG_LABELS } from '../game/engine/data/tools.js'
+import { EVENT_RULES_DISCLAIMER } from '../game/engine/data/events.js'
 import { currentStage, currentEvent, currentChapter, currentStyle, netWorth, canAdjustNow } from '../game/engine/gameState.js'
 import { BALANCE } from '../game/engine/balance.js'
+import { concentration } from '../game/engine/portfolio.js'
+import { returnsForEvent } from '../game/engine/encounter.js'
 import PortfolioPanel from './PortfolioPanel'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
@@ -65,7 +68,6 @@ function SignalStage({ event }) {
 
 // สเตจ 2 — เผยประเภทเหตุการณ์บางส่วน (บอก tag แต่ยังไม่บอกความรุนแรง)
 function RevealStage({ event }) {
-  const primary = Object.entries(event.tagWeights).sort((a, b) => b[1] - a[1])[0]
   const art = eventArtOf(event.id)
   return (
     <div className="w-full text-center">
@@ -74,31 +76,47 @@ function RevealStage({ event }) {
       </div>
       <div className="mt-2 text-sm font-bold sm:text-xl">{event.name}</div>
       <div className="pixel-chip mx-auto mt-2 inline-block bg-rose-950/70 px-2 py-1 text-[10px] text-rose-200 sm:text-sm">
-        กระทบด้าน {TAG_LABELS[primary[0]]}
+        กระทบด้าน {TAG_LABELS[event.primaryTag]}
       </div>
       <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">{event.description}</p>
-      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังไม่รู้ว่าจะแรงแค่ไหน — สินทรัพย์ที่อ่อนไหวด้านนี้จะเจ็บที่สุด</p>
+      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">เหตุการณ์แต่ละแบบมีผลตอบแทนตายตัว — ผลรายสินทรัพย์จะเปิดเผยเมื่อเกิดขึ้น</p>
+      <p className="mx-auto mt-1 max-w-lg text-[8px] leading-relaxed text-amber-200/65 sm:text-[10px]">{EVENT_RULES_DISCLAIMER}</p>
     </div>
   )
 }
 
-// สเตจ 3 — แรงกระแทกจริง โชว์ทั้งช่วงที่เป็นไปได้และผลที่จับสลากได้ (ระบบแฟร์เนส ดีไซน์ข้อ 7)
+function EventReturnMatrix({ event, shock }) {
+  const baseReturns = shock?.baseReturns ?? returnsForEvent(event)
+  const modifiers = shock?.ageModifiers ?? {}
+  const returns = shock?.assetReturns ?? baseReturns
+  return (
+    <div className="mx-auto mt-3 grid max-w-xl grid-cols-2 gap-1 sm:grid-cols-4">
+      {getTools().map((tool) => {
+        const value = returns[tool.id] ?? 0
+        const tone = value > 0 ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300' : value < 0 ? 'border-rose-500/50 bg-rose-950/40 text-rose-300' : 'border-slate-600 bg-slate-900/70 text-white/70'
+        return (
+          <div key={tool.id} className={`pixel-frame border p-1.5 text-left ${tone}`} title={event.impactReasons?.[tool.id]}>
+            <div className="truncate text-[9px] text-white/70 sm:text-[10px]">{tool.name}</div>
+            <div className="text-[8px] text-white/55">เหตุการณ์ {pct(baseReturns[tool.id] ?? 0)}</div>
+            <div className="text-[8px] text-amber-200">วัย {modifiers[tool.id] ? pct(modifiers[tool.id]) : '0%'}</div>
+            <div className="text-sm font-black sm:text-lg">ผลสุดท้าย {pct(value)}</div>
+            <div className="line-clamp-2 text-[8px] leading-snug text-white/55 sm:text-[9px]">{event.impactReasons?.[tool.id]}</div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// สเตจ 3 — แสดงผลตอบแทนตายตัวของเหตุการณ์และผลรวมที่เกิดกับพอร์ตจริง
 function ShockStage({ state, event }) {
-  const { band, shock, valueBeforeShock } = state
+  const { shock, valueBeforeShock } = state
   const now = netWorth(state)
   const change = now - valueBeforeShock
   const down = change < 0
 
-  const range = band.max - band.min
-  const markerPos = range > 0 ? ((shock.shockPct - band.min) / range) * 100 : 50
-
   return (
     <div className="w-full text-center">
-      {state.isBlackSwan && (
-        <div className="pixel-chip mx-auto mb-2 inline-block bg-purple-950 px-2 py-1 text-[10px] font-bold text-purple-200 sm:text-sm">
-          BLACK SWAN — เหตุการณ์ที่ไม่มีใครเตรียมตัวทันได้
-        </div>
-      )}
       <div className="mx-auto w-fit">
         {eventArtOf(event.id) ? (
           <Portrait src={eventArtOf(event.id)} alt={event.name} size="md" />
@@ -112,19 +130,12 @@ function ShockStage({ state, event }) {
         {down ? '▼' : '▲'} {money(Math.abs(change))}
       </div>
       <div className="text-[10px] text-white/50 sm:text-sm">
-        {money(valueBeforeShock)} → <b className="text-white/80">{money(now)}</b> ({pct(shock.shockPct)})
+        {money(valueBeforeShock)} → <b className="text-white/80">{money(now)}</b> ({pct(shock.portfolioReturn)})
       </div>
+      <EventReturnMatrix event={event} shock={shock} />
 
-      {/* ช่วงผลลัพธ์ที่เป็นไปได้ + จุดที่จับสลากได้จริง */}
-      <div className="mx-auto mt-3 max-w-md">
-        <div className="mb-1 text-[9px] text-white/45 sm:text-[11px]">ช่วงผลลัพธ์ที่พอร์ตของคุณเป็นไปได้ในเหตุการณ์นี้</div>
-        <div className="pixel-bar relative h-4 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-5">
-          <div className="absolute top-0 h-full w-1 bg-white shadow-[0_0_6px_2px_rgba(255,255,255,0.6)]" style={{ left: `calc(${Math.min(98, Math.max(0, markerPos))}% - 2px)` }} />
-        </div>
-        <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
-          <span>แย่สุด {pct(band.min)}</span>
-          <span>ดีสุด {pct(band.max)}</span>
-        </div>
+      <div className="pixel-chip mx-auto mt-2 max-w-xl bg-sky-950/55 px-2 py-1.5 text-[9px] leading-relaxed text-sky-100/85 sm:text-xs">
+        {event.summary}
       </div>
 
       {state.scam?.accepted && state.scam.lost > 0 && (
@@ -142,19 +153,21 @@ function ShockStage({ state, event }) {
 function BehaviorStage({ state, onChoose }) {
   const style = currentStyle(state)
   const hasCash = state.cash > 0.5
-  const lost = Math.max(0, state.valueBeforeShock - netWorth(state))
+  const change = netWorth(state) - state.valueBeforeShock
+  const lost = Math.max(0, -change)
+  const gained = change >= 0
   const confirmed = state.behavior // ตั้งแล้วคือ dispatch ไปแล้วจริง แก้ไม่ได้อีก
   const [pending, setPending] = useState(null)
   const selectedId = confirmed ?? pending
 
   const options = [
-    { id: 'hold', title: 'ถือต่อ', desc: 'ไม่ทำอะไร รอตลาดฟื้น', detail: `ได้คืน ${Math.round(BALANCE.reboundPct * 100)}% ของที่เสียไปในบทหน้า`, cls: 'bg-sky-800 border-sky-500/50' },
-    { id: 'cut', title: 'ตัดขาดทุน', desc: 'ขายทิ้งหมด ย้ายเข้าตราสารหนี้', detail: 'ไม่ฟื้นตัว แต่ปลอดภัยถ้ามีคลื่นตามมาอีก', cls: 'bg-rose-900 border-rose-500/50' },
+    { id: 'hold', title: 'ถือต่อ', desc: gained ? 'คงพอร์ตเดิมไว้' : 'ไม่ทำอะไร รอตลาดฟื้น', detail: gained ? 'ไม่ล็อกกำไรและไม่เสียค่าปรับพอร์ต' : `ได้คืน ${Math.round(BALANCE.reboundPct * 100)}% ของที่เสียไปในบทหน้า`, cls: 'bg-sky-800 border-sky-500/50' },
+    { id: 'cut', title: gained ? 'ลดความเสี่ยง' : 'ตัดขาดทุน', desc: 'ย้ายพอร์ตทั้งหมดเข้าตราสารหนี้', detail: gained ? 'รักษามูลค่าปัจจุบัน แต่เสียโอกาสเติบโตของสินทรัพย์เดิม' : 'ไม่ฟื้นตัว แต่ปลอดภัยถ้ามีคลื่นตามมาอีก', cls: 'bg-rose-900 border-rose-500/50' },
     {
       id: 'buy',
-      title: 'ซื้อเพิ่มตอนถูก',
+      title: gained ? 'เพิ่มการลงทุน' : 'ซื้อเพิ่มตอนถูก',
       desc: hasCash ? `ทุ่มเงินสดที่เหลือ ${money(state.cash)} ลงไปอีก` : 'ต้องมีเงินสดเหลือถึงจะทำได้',
-      detail: hasCash ? `ฟื้นแรง ×${(BALANCE.buyDipReboundMult * (style.buyDipMult ?? 1)).toFixed(1)} — แต่ถ้าร่วงต่อจะเจ็บหนักกว่าเดิม` : 'คุณลงทุนไปหมดแล้วตั้งแต่ต้นบท',
+      detail: hasCash ? (gained ? 'เพิ่มเงินที่รับผลของตลาด — ถ้ามีคลื่นตามก็เสี่ยงมากขึ้น' : `ฟื้นแรง ×${(BALANCE.buyDipReboundMult * (style.buyDipMult ?? 1)).toFixed(1)} — แต่ถ้าร่วงต่อจะเจ็บหนักกว่าเดิม`) : 'คุณลงทุนไปหมดแล้วตั้งแต่ต้นบท',
       cls: 'bg-amber-900 border-amber-500/50',
       disabled: !hasCash,
     },
@@ -162,7 +175,9 @@ function BehaviorStage({ state, onChoose }) {
 
   return (
     <div className="w-full text-center">
-      <div className="text-sm font-bold text-amber-200 sm:text-xl">พอร์ตคุณเพิ่งเสียไป {money(lost)}</div>
+      <div className={`text-sm font-bold sm:text-xl ${gained ? 'text-emerald-300' : 'text-amber-200'}`}>
+        {gained ? `พอร์ตคุณเพิ่มขึ้น ${money(change)}` : `พอร์ตคุณเพิ่งเสียไป ${money(lost)}`}
+      </div>
       <p className="mt-1 text-[10px] text-white/55 sm:text-sm">
         {confirmed ? 'ตัดสินใจแล้ว — เปลี่ยนใจไม่ได้อีก' : 'ตอนนี้คุณจะทำยังไง? ไม่มีตัวเลือกไหนถูกเสมอ'}
       </p>
@@ -215,15 +230,7 @@ function BehaviorStage({ state, onChoose }) {
   )
 }
 
-// คำแปลความหมาย exposure/concentration ให้ครบทุกช่วง ไม่ใช่แค่กรณีสุดโต่ง — ใช้ใน DebriefStage เท่านั้น
-// ไม่เกี่ยวกับเกณฑ์ที่ engine ใช้คำนวณจริง (band.js/balance.js) นี่คือ threshold สำหรับคำอธิบายเฉยๆ
-const exposureNote = (exposure) => {
-  if (exposure >= 0.6) return 'สินทรัพย์ส่วนใหญ่ในพอร์ตอ่อนไหวกับเหตุการณ์แบบนี้'
-  if (exposure >= 0.35) return 'พอร์ตโดนเหตุการณ์นี้กระทบปานกลาง'
-  return 'สินทรัพย์ส่วนใหญ่ในพอร์ตไม่ค่อยเกี่ยวกับเหตุการณ์นี้'
-}
-
-// รับค่า diversification (= 1 - band.concentration) ที่พลิกด้านแล้ว ไม่ใช่ concentration ดิบ
+// รับค่า diversification (= 1 - concentration) ที่พลิกด้านแล้ว ไม่ใช่ concentration ดิบ
 // ป้าย "กระจายตัว" ต้องมากับเลขที่ยิ่งเยอะยิ่งดี ถ้าใช้ concentration ดิบตรงๆ ป้ายกับเลขจะสวนทางกัน
 // (concentration 0 = กระจายดีสุด แต่ถ้าโชว์เป็น "กระจายตัว 0%" จะอ่านผิดว่าไม่กระจายเลย)
 const diversificationNote = (diversification) => {
@@ -240,11 +247,9 @@ const TONE_CLS = {
   neutral: 'border-slate-700 bg-slate-900/70 text-white/70',
 }
 
-const exposureTone = (exposure) => (exposure >= 0.6 ? 'bad' : exposure < 0.35 ? 'good' : 'neutral')
 // เกณฑ์นี้ใช้กับ diversification (พลิกด้านแล้ว) เท่านั้น — กลับด้านจากเกณฑ์ concentration ดิบ
 // (concentration > 0.6 → bad, < 0.25 → good) ห้ามเอาเกณฑ์ 0.6/0.25 มาใช้ตรงๆ กับค่านี้
 const diversificationTone = (diversification) => (diversification >= 0.75 ? 'good' : diversification < 0.4 ? 'bad' : 'neutral')
-const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral' : 'bad')
 
 // ตารางผลกระทบรายสินทรัพย์ — หัวใจของสเตจ 5
 //
@@ -257,7 +262,7 @@ const luckTone = (luckPct) => (luckPct >= 55 ? 'good' : luckPct >= 45 ? 'neutral
 //
 // ทิศการเรียงพลิกตามผลรวม: พอร์ตติดลบ → เสียมากสุดขึ้นก่อน · พอร์ตเป็นบวก → ได้มากสุดขึ้นก่อน
 // ทั้งสองทางคือ "ตัวที่กำหนดผลลัพธ์รอบนี้มากที่สุดอยู่บนสุดเสมอ" กล่องบทเรียนจึงอ้างแถวบนสุดได้
-function ImpactTable({ rows, cash, gained, isBlackSwan }) {
+function ImpactTable({ rows, cash, gained }) {
   const maxAbs = Math.max(1e-9, ...rows.map((r) => Math.abs(r.change)))
   const lead = rows[0]
   const leadRounded = lead ? Math.round(Math.abs(lead.change)) : 0
@@ -272,14 +277,6 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
         </div>
       )}
       <div className="mt-1 text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยพอร์ตในรอบนี้' : 'สินทรัพย์ไหนได้รับผลกระทบในรอบนี้'}</div>
-
-      {/* Black Swan บังคับ exposure เท่ากันหมดทุกตัว (encounter.js) ทุกแถวเลยได้ % เดียวกันเป๊ะ
-          ถ้าไม่บอกไว้ตรงนี้ ตารางจะดูเหมือนบั๊ก ทั้งที่มันคือบทเรียนที่แรงที่สุดของเกม */}
-      {isBlackSwan && (
-        <div className="pixel-chip mt-1 bg-purple-950/50 px-1.5 py-1 text-[9px] leading-snug text-purple-200 sm:text-[11px]">
-          รอบนี้แทบทุกอย่างโดนพร้อมกัน — ไม่ใช่เพราะคุณเลือกผิดทั้งหมด
-        </div>
-      )}
 
       <div className="mt-1 flex flex-col gap-[3px]">
         {rows.map((r) => {
@@ -306,7 +303,7 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
           )
         })}
 
-        {/* เงินสดไม่ผ่าน applyShock เลย จึงไม่มีแถบ — ความต่างทางสายตาบอกเองว่ามันคนละประเภท
+        {/* เงินสดไม่ผ่าน Event Return Matrix เลย จึงไม่มีแถบ — ความต่างทางสายตาบอกเองว่ามันคนละประเภท
             ไม่ใช่แค่ตัวที่บังเอิญเปลี่ยนแปลง 0 และทำให้ผลรวมทุกแถวเท่ากับตัวเลขใหญ่ด้านบนพอดี */}
         {cash > 0.5 && (
           <div className="bg-slate-900/80 px-1.5 py-1 [@media(max-height:500px)]:py-0.5">
@@ -323,14 +320,12 @@ function ImpactTable({ rows, cash, gained, isBlackSwan }) {
 
 // สเตจ 5 — สรุปเฉพาะตัว: อธิบายด้วยตัวเลขจริงว่าทำไมผลถึงออกมาแบบนี้
 function DebriefStage({ state, event }) {
-  const { band, shock } = state
-  const luckPct = Math.round(shock.percentile * 100)
-  const diversification = 1 - band.concentration // แปลงตอนแสดงผลเท่านั้น ไม่แตะ band.concentration ที่ engine ใช้จริง
+  const { shock } = state
   const style = currentStyle(state)
 
-  // เทียบก่อน/หลังแรงกระแทกรายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
-  // ไม่ย้อนคำนวณจาก band.exposure เพราะเคส margin call (เหลือ 0) กับเคสชนพื้น 10% ย้อนกลับไม่ได้
+  // เทียบก่อน/หลังเหตุการณ์รายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
   const before = state.positionsBeforeShock ?? {}
+  const diversification = 1 - concentration(before)
   const investedBefore = Object.values(before).reduce((sum, amount) => sum + amount, 0)
   const cashOnly = investedBefore <= 0 && state.cash > 0
   const impacts = Object.keys(before)
@@ -352,9 +347,10 @@ function DebriefStage({ state, event }) {
       <div className="text-center text-sm font-bold sm:text-lg">เงินเปลี่ยนเพราะอะไร?</div>
 
       <div className="pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
-        <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[exposureTone(band.exposure)]}`}>
-          อ่อนไหวต่อ{event.name} <b>{Math.round(band.exposure * 100)}%</b> — {exposureNote(band.exposure)}
+        <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[shock.portfolioReturn >= 0 ? 'good' : 'bad']}`}>
+          ผลรวมของพอร์ตจาก {event.name}: <b>{pct(shock.portfolioReturn)}</b>
         </div>
+        <EventReturnMatrix event={event} shock={shock} />
         {cashOnly ? (
           <div className="pixel-frame mt-1.5 border border-slate-500/60 bg-slate-800/70 p-1.5 text-slate-200 sm:p-2">
             ถือเงินสดทั้งหมด — <b>ยังไม่มีการกระจายการลงทุน</b> เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ
@@ -365,34 +361,8 @@ function DebriefStage({ state, event }) {
           </div>
         )}
 
-        {/* เดิมเขียนว่า "ผลออกมาที่ อันดับ N% ของช่วงที่เป็นไปได้" ซึ่งผู้เล่นอ่านไม่เข้าใจด้วย 3 เหตุผล:
-              1. "อันดับ" ในภาษาไทยขั้วกลับด้าน — อันดับ 1 คือดีที่สุด คนอ่านเลยเข้าใจว่าเลขน้อย = ดี
-                 แต่ที่นี่เลขน้อย = แย่ (0 = ปลายแย่สุดของช่วง) ชนกับสัญชาตญาณทางภาษาเต็มๆ
-              2. อ้างถึง "ช่วงที่เป็นไปได้" ที่มองไม่เห็นแล้ว — แถบนั้นอยู่สเตจ 3 พอถึงสเตจ 5 มันหายไป
-              3. "อันดับ %" ทำให้เข้าใจว่าเทียบกับผู้เล่นคนอื่น ทั้งที่เป็นตำแหน่งลูกเต๋าในช่วงของตัวเอง
-            แก้โดยเลิกใช้ตัวเลขนามธรรม เอาช่วงจริงมาโชว์ซ้ำพร้อมหมุดชี้ตำแหน่ง — ใช้หน้าตาเดียวกับ
-            แถบในสเตจ 3 ผู้เล่นจึงจำได้ว่าเป็นของเดียวกัน โดยไม่ต้องแตะเอนจิน (band มีข้อมูลครบแล้ว) */}
-        <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[luckTone(luckPct)]}`}>
-          <div>
-            ดวงของคุณรอบนี้: ได้จริง <b>{pct(shock.shockPct)}</b> จากช่วงที่เป็นไปได้ทั้งหมด —{' '}
-            {luckPct >= 55 ? 'โชคดีกว่าค่ากลาง' : luckPct >= 45 ? 'พอดีค่ากลาง' : 'โชคร้ายกว่าค่ากลาง'}
-          </div>
-          {/* luckPct คือ percentile × 100 ซึ่งเท่ากับตำแหน่งหมุดพอดีอยู่แล้ว
-              (shockPct = min + roll × ช่วง) จึงไม่ต้องคำนวณ markerPos ซ้ำแบบสเตจ 3 */}
-          <div className="pixel-bar relative mt-1 h-2 w-full bg-gradient-to-r from-rose-900 via-amber-800 to-emerald-800 sm:h-2.5">
-            <div
-              className="absolute top-0 h-full w-1 bg-white"
-              style={{ left: `calc(${Math.min(98, Math.max(0, luckPct))}% - 2px)` }}
-            />
-          </div>
-          <div className="flex justify-between text-[8px] text-white/55 sm:text-[10px]">
-            <span>แย่สุด {pct(band.min)}</span>
-            <span>ดีสุด {pct(band.max)}</span>
-          </div>
-        </div>
-
         {impacts.length > 0 && (
-          <ImpactTable rows={impacts} cash={state.cash} gained={gained} isBlackSwan={state.isBlackSwan} />
+          <ImpactTable rows={impacts} cash={state.cash} gained={gained} />
         )}
 
         {state.lastFee > 0.5 && (
@@ -409,17 +379,25 @@ function DebriefStage({ state, event }) {
           </div>
         )}
 
-        {state.isBlackSwan && (
-          <details className="mt-1.5 text-purple-200">
-            <summary className="cursor-pointer font-bold">เหตุการณ์หนักที่หลบยาก · ดูเพิ่ม</summary>
-            <div className="mt-1">ในแบบจำลองเรียกว่า Black Swan — กระทบกว้างและเตรียมหลบได้ยาก ไม่ใช่ความผิดของคุณ</div>
-          </details>
-        )}
       </div>
 
       <div className="pixel-chip mt-2 bg-emerald-950/60 p-2 text-[10px] leading-relaxed text-emerald-100/90 sm:text-xs">
-        {lead?.tool.lesson ?? event.description}
+        {event.summary ?? lead?.tool.lesson ?? event.description}
       </div>
+
+      {(state.chapterAbility.triggered || state.chapterAbility.cost > 0) && (
+        <div className="pixel-chip mt-2 bg-violet-950/70 p-2 text-[10px] leading-relaxed text-violet-100 sm:text-xs">
+          <div className="font-bold text-violet-200">ผลความสามารถตัวละครในบทนี้</div>
+          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
+            <span className="text-emerald-300">โบนัส +{money(state.chapterAbility.bonus)}</span>
+            <span className="text-rose-300">ค่าใช้จ่าย -{money(state.chapterAbility.cost)}</span>
+            <span className={state.chapterAbility.bonus - state.chapterAbility.cost >= 0 ? 'text-emerald-200' : 'text-rose-200'}>
+              ผลสุทธิ {state.chapterAbility.bonus - state.chapterAbility.cost >= 0 ? '+' : '-'}{money(Math.abs(state.chapterAbility.bonus - state.chapterAbility.cost))}
+            </span>
+          </div>
+          <div className="mt-1 text-white/55">ปรับพอร์ตระหว่างเหตุการณ์ {state.chapterAbility.adjustmentCount} ครั้ง</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -455,6 +433,32 @@ function ScamOffer({ scam, onAnswer }) {
   )
 }
 
+function AdjustmentPrompt({ stageKey, style, onChoice }) {
+  const isSignal = stageKey === 'signal'
+  return (
+    <Modal label="ความสามารถปรับพอร์ต" panelClassName="pixel-frame max-w-md border border-sky-500/60 bg-gradient-to-b from-sky-950 to-slate-950 p-3 sm:p-5">
+      <div className="text-center">
+        <CharacterToken style={style} state="idle" className="mx-auto h-16 w-16" label={false} />
+        <div className="mt-2 text-sm font-bold text-sky-200 sm:text-lg">ความสามารถของ{style.name}พร้อมใช้งาน</div>
+        <p className="mt-2 text-[10px] leading-relaxed text-white/75 sm:text-sm">
+          {isSignal
+            ? 'พบสัญญาณเตือนแล้ว คุณอยากปรับพอร์ตเพื่อเตรียมรับมือไหม? การปรับของ Trader มีค่าธรรมเนียม 2% ของเงินที่ย้าย'
+            : `รู้เหตุการณ์แล้ว คุณอยากปรับพอร์ตเพื่อรับมือไหม?${style.id === 'trader' ? ' การปรับมีค่าธรรมเนียม 2% ของเงินที่ย้าย' : ' ครั้งนี้ปรับได้ฟรี 1 ครั้งในบทนี้'}`}
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => onChoice('skip')} className="pixel-btn bg-slate-600 px-2 py-2 text-xs font-bold text-white sm:text-sm">
+            {isSignal ? 'รอดูก่อน' : 'ใช้พอร์ตเดิม'}
+          </button>
+          <button type="button" onClick={() => onChoice('adjust')} className="pixel-btn bg-sky-500 px-2 py-2 text-xs font-bold text-sky-950 sm:text-sm">
+            ปรับพอร์ต
+          </button>
+        </div>
+        <p className="mt-2 text-[9px] text-white/45 sm:text-[10px]">เลือกใช้พอร์ตเดิมได้โดยไม่มีบทลงโทษ และปุ่มปรับพอร์ตปกติยังคงอยู่</p>
+      </div>
+    </Modal>
+  )
+}
+
 export default function StageScreen({ state, command, commandError = null, onDismissError, submitting = false, onAdjust }) {
   const stage = currentStage(state)
   const event = currentEvent(state)
@@ -462,6 +466,14 @@ export default function StageScreen({ state, command, commandError = null, onDis
   const canAdjust = canAdjustNow(state)
   const needsBehavior = stage.key === 'behavior' && !state.behavior
   const showScam = stage.key === 'reveal' && state.scam && state.scam.accepted === null
+  const promptAvailable = currentStyle(state).adjustmentPromptStages?.includes(stage.n)
+    && !state.chapterAbility.promptChoices[stage.key]
+  const showAdjustmentPrompt = promptAvailable && !showScam
+
+  const answerAdjustmentPrompt = (choice) => {
+    const result = command({ type: 'RECORD_ADJUSTMENT_PROMPT', choice })
+    if (result.ok && choice === 'adjust') onAdjust()
+  }
 
   return (
     <div
@@ -536,6 +548,7 @@ export default function StageScreen({ state, command, commandError = null, onDis
       </div>
 
       {showScam && <ScamOffer scam={state.scam} onAnswer={(accept) => command({ type: 'ANSWER_SCAM', accept })} />}
+      {showAdjustmentPrompt && <AdjustmentPrompt stageKey={stage.key} style={currentStyle(state)} onChoice={answerAdjustmentPrompt} />}
     </div>
   )
 }

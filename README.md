@@ -46,8 +46,8 @@ npm run sim     # บาลานซ์เกม ต้องขึ้น ✅ �
 4. **เหตุการณ์คลี่ตัว 5 สเตจ** — สัญญาณเตือน → เผยประเภท → แรงกระแทก → จุดตัดสินใจ → สรุป
 5. ทำซ้ำ 4 บท ทำแบบสะท้อนหลังเล่น แล้วดูรายงาน 4 มิติและสรุปการเรียนรู้; ปิดหน้าแล้วกด “เล่นต่อจากเครื่องนี้” ได้
 
-**ไม่มีเฉลยตายตัว** — ทุกเครื่องมือมีจุดตายจริง แม้แต่ตราสารหนี้ (แพ้เงินเฟ้อ) และเงินสด (แพ้เงินเฟ้อหนักสุด)
-ตัดสินใจถูกแล้วยังแพ้ได้เพราะดวง — เกมจะบอกตรงๆ ว่าคุณเตรียมดีแค่ไหน แยกจากดวงคุณเป็นยังไง
+**ไม่มีเฉลยตายตัว** — ทุกเครื่องมือมีเหตุการณ์ที่แพ้ทางและชนะทาง ผลตอบแทนของเหตุการณ์เป็น Matrix ตายตัวที่ผู้เล่นตรวจสอบได้
+เงินสดไม่โดน Event Matrix แต่กำลังซื้อจะลดลงระหว่างบทจากเงินเฟ้อ
 
 ## คำสั่ง
 
@@ -55,7 +55,7 @@ npm run sim     # บาลานซ์เกม ต้องขึ้น ✅ �
 npm run dev             # เล่นแบบ hot-reload
 npm run build           # build desktop ใน dist/ (เปิด dist/index.html หรือทำ .exe)
 npm run build:web       # build แยกไฟล์ใน dist-web/ (สำหรับขึ้นเว็บ โหลดเร็วกว่ามาก)
-npm test                # เทสต์เอนจินเกม 48 ตัว (ใช้ node --test ไม่ต้องลงอะไรเพิ่ม)
+npm test                # เทสต์เอนจินเกม (ใช้ node --test ไม่ต้องลงอะไรเพิ่ม)
 npm run sim             # จำลอง 2,000 เกม เช็คว่าเกมยังสอนถูกอยู่ไหม
 npm run optimize-images # บีบรูปในโฟลเดอร์ assets ให้เล็กลงสำหรับเว็บ
 npm run electron:dev    # เปิดเป็นแอปเดสก์ท็อป
@@ -83,9 +83,16 @@ npm run electron:build  # build เป็น .exe (Windows, portable)
 
 ## เอาขึ้นเว็บ
 
-`.github/workflows/deploy.yml` ตั้งไว้ให้แล้ว — push ขึ้น branch `main` บน GitHub
+`.github/workflows/deploy.yml` ตั้งไว้ให้แล้ว — push ขึ้น branch `release-clean` บน GitHub
 แล้วมันจะรันเทสต์ → ตรวจบาลานซ์ → build → ปล่อยขึ้น GitHub Pages ให้อัตโนมัติ
 (ครั้งแรกต้องไปเปิด Settings → Pages → Source = "GitHub Actions" ก่อน)
+
+ก่อน Deploy ให้เปิด Settings → Secrets and variables → Actions → Variables แล้วเพิ่ม Repository variables:
+
+- `VITE_SUPABASE_URL` = Project URL ของ Supabase
+- `VITE_SUPABASE_ANON_KEY` = Publishable key (`sb_publishable_...`) หรือ Legacy anon key
+
+Workflow จะหยุดก่อน Deploy หากขาดค่าใดค่าหนึ่ง ห้ามใส่ Secret key หรือ `service_role` key เพราะค่าที่ขึ้นต้นด้วย `VITE_` จะถูกฝังในไฟล์เว็บที่ทุกคนเปิดดูได้
 
 ถ้าเทสต์ไม่ผ่านหรือบาลานซ์เกมพัง มันจะไม่ปล่อยขึ้นเว็บ
 
@@ -112,12 +119,12 @@ npm run electron:build  # build เป็น .exe (Windows, portable)
    ├─ game/engine/       เอนจินเกม — JS ล้วน ไม่มี React ไม่มีการสุ่มที่ซ่อนอยู่
    │  ├─ balance.js      ⭐ ตัวเลขจูนได้ทุกตัวรวมที่เดียว (แก้ตรงนี้ที่เดียวพอ)
    │  ├─ gameState.js    state machine 4 บท × 5 สเตจ
-   │  ├─ encounter.js    สูตร exposure / outcome band / margin call
+   │  ├─ encounter.js    ใช้ Fixed Event Return Matrix ลงผลรายสินทรัพย์
    │  ├─ portfolio.js    คณิตศาสตร์พอร์ต (HHI, การกระจุกตัว, ทบต้น)
    │  ├─ scam.js         กลไกมิจฉาชีพ (ไม่ใช่แค่ tag matching)
    │  ├─ report.js       รายงานผลเกษียณ
    │  ├─ rng.js          ตัวสุ่มที่กำหนด seed ได้ (เกม replay ได้)
-   │  ├─ data/           เครื่องมือ 4 ชนิด · เหตุการณ์ 12 ตัว · สไตล์ 4 แบบ
+   │  ├─ data/           เครื่องมือ 4 ชนิด · เหตุการณ์ 10 ตัว · สไตล์ 4 แบบ
    │  └─ *.test.js       เทสต์ 48 ตัว
    ├─ assets/            ภาพที่เกมใช้จริง (บีบแล้ว — ดูหัวข้อด้านบน)
    └─ components/        UI 5 หน้าจอ + LifeTimeline/Portrait/ToolTheme/art
