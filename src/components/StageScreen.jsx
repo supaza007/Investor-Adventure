@@ -7,6 +7,7 @@ import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
 import CharacterToken from './CharacterToken.jsx'
+import chapterResultBackground from '../assets/ui/chapter-result-background-user.jpg'
 import { eventArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
@@ -463,7 +464,15 @@ export default function StageScreen({ state, command, commandError = null, onDis
   const showScam = stage.key === 'reveal' && state.scam && state.scam.accepted === null
 
   return (
-    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div
+      className="stage-screen cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white"
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.34) 0%, rgba(3, 10, 18, 0.82) 100%), url(${chapterResultBackground})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+      }}
+    >
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden px-2 py-2 sm:px-4 sm:py-3">
         <LifeTimeline chapters={BALANCE.chapters} currentChapterN={chapter.n} history={state.history} />
         <header className="cozy-hud mb-1.5 flex shrink-0 items-center justify-between gap-2 px-2 py-1.5">
@@ -480,15 +489,17 @@ export default function StageScreen({ state, command, commandError = null, onDis
             แล้วแต่หัวข้อยังอยู่สูงกว่าขอบ 48px คือมองไม่เห็นและเลื่อนขึ้นไปดูไม่ได้เลย
             safe center สั่งให้สลับไปชิดบนอัตโนมัติเมื่อล้น ทุกบรรทัดจึงเลื่อนถึงได้เสมอ
             เบราว์เซอร์เก่าที่ไม่รู้จักคำนี้จะทิ้งทั้งบรรทัดแล้วได้ค่า default (ชิดบน) ซึ่งก็ยังถูกกว่าเดิม */}
-        <div className="flex min-h-0 flex-1 justify-center overflow-y-auto py-2 [align-items:safe_center]">
-          {stage.key === 'signal' && <SignalStage event={event} />}
-          {stage.key === 'reveal' && <RevealStage event={event} />}
-          {stage.key === 'shock' && <ShockStage state={state} event={event} />}
-          {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => command({ type: 'CHOOSE_BEHAVIOR', choice })} />}
-          {stage.key === 'debrief' && <DebriefStage state={state} event={event} />}
+        <div className="stage-content-viewport flex min-h-0 flex-1 justify-center overflow-y-auto py-2 [align-items:safe_center]">
+          <div className="stage-content-shell">
+            {stage.key === 'signal' && <SignalStage event={event} />}
+            {stage.key === 'reveal' && <RevealStage event={event} />}
+            {stage.key === 'shock' && <ShockStage state={state} event={event} />}
+            {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => command({ type: 'CHOOSE_BEHAVIOR', choice })} />}
+            {stage.key === 'debrief' && <DebriefStage state={state} event={event} />}
+          </div>
         </div>
 
-        <div className="mt-1.5 shrink-0">
+        <div className="stage-footer mt-1.5 shrink-0">
           <PortfolioPanel positions={state.positions} cash={state.cash} compact />
           {commandError && (
             <div role="alert" aria-live="assertive" className="pixel-chip mb-1.5 bg-rose-950/70 px-2 py-1 text-[10px] text-rose-100 sm:text-xs">

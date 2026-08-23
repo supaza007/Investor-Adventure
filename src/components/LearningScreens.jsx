@@ -8,6 +8,7 @@ import preAssessmentOptionFrame from '../assets/ui/pre-assessment-answer-option-
 import preAssessmentOptionSelected from '../assets/ui/pre-assessment-answer-option-selected-user.svg'
 import preAssessmentQuestionBadge from '../assets/ui/pre-assessment-question-number-badge-user.svg'
 import preAssessmentTitle from '../assets/ui/pre-assessment-title-user.svg'
+import consentBackground from '../assets/ui/consent-background-user.jpg'
 
 // โครงหน้ากลางของหน้าแบบประเมินและหน้าการเรียนรู้
 // ปรับได้: className, สีพื้นหลัง, ระยะห่าง และความกว้างของเนื้อหา
@@ -91,15 +92,31 @@ export function PreAssessmentScreen({ onComplete, onSkip }) {
 
 export function ConsentScreen({ onChoice }) {
   const [telemetry, setTelemetry] = useState(false)
-  return <Shell eyebrow="การวิจัยเป็นทางเลือก" title="เลือกการใช้ข้อมูลของคุณ">
+  return <Shell
+    eyebrow="การวิจัยเป็นทางเลือก"
+    title="การยินยอมเปิดเผยข้อมูล"
+    className="consent-screen"
+    style={{
+      backgroundImage: `linear-gradient(180deg, rgba(3, 15, 28, 0.38), rgba(3, 10, 20, 0.82)), url(${consentBackground})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+    }}
+  >
     <div className="pixel-frame mt-4 space-y-3 bg-slate-900/80 p-4 text-sm leading-relaxed">
-      <p>เกมเล่นได้ครบแม้ไม่ยินยอม ขณะนี้เวอร์ชันเว็บ <b>ยังไม่ส่งข้อมูลไปเซิร์ฟเวอร์</b> การเลือกนี้บันทึกในเครื่องเพื่อเตรียม contract เท่านั้น</p>
-      <label className="pixel-chip flex min-h-11 items-start gap-3 bg-slate-800 p-3"><input className="mt-1" type="checkbox" checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} /><span>ยินยอมให้เก็บคำตอบแบบประเมินและเวลาแบบไม่ระบุตัวตน หากระบบวิจัยได้รับอนุมัติในอนาคต</span></label>
+      <p>ยินยอมให้สิทธ์ในการใช้ข้อมูลเพื่อประโยชน์ในการศึกษาหรือไม่</p>
+      <label className="pixel-chip flex min-h-11 items-start gap-3 bg-slate-800 p-3"><input className="mt-1" type="checkbox" checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} /><span>ยินยอมให้เก็บข้อมูลคำตอบแบบประเมินและข้อมูลการเล่นเกมเพื่อประโยชน์ในการศึกษา</span></label>
       <p className="text-xs text-white/55">Consent version: {CONSENT_VERSION} · ไม่มีชื่อ อีเมล หรือข้อมูลส่วนบุคคล</p>
     </div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <button type="button" className="pixel-btn min-h-11 bg-emerald-500 px-4 py-3 font-bold text-emerald-950" onClick={() => onChoice(telemetry)}>บันทึกและเริ่มเกม</button>
-      <button type="button" className="pixel-btn min-h-11 bg-slate-700 px-4 py-3" onClick={() => onChoice(false)}>ไม่ยินยอม แต่เล่นต่อ</button>
+      <button
+        type="button"
+        disabled={!telemetry}
+        className="pixel-btn min-h-11 bg-emerald-500 px-4 py-3 font-bold text-emerald-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-white/45"
+        onClick={() => onChoice(true)}
+      >
+        บันทึกและเริ่มเกม
+      </button>
     </div>
   </Shell>
 }

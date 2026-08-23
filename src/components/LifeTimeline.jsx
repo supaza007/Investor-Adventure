@@ -22,15 +22,24 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
 
   const openEntry = openN != null ? history.find((h) => h.chapter === openN) : null
 
+  const activeChapter = chapters.find((chapter) => chapter.n === currentChapterN)
+
   return (
-    <div className="mb-1.5 shrink-0">
-      <div className="flex items-center">
+    <div className="life-questbar mb-1.5 shrink-0">
+      <div className="life-questbar__body">
+        <div className="life-questbar__crest" aria-hidden="true">⚔</div>
+        <div className="life-questbar__content">
+          <div className="life-questbar__heading">
+            <span>บทที่ {currentChapterN} · อายุ {activeChapter?.ageFrom}–{activeChapter?.ageTo}</span>
+            <span>เส้นทางชีวิต</span>
+          </div>
+          <div className="life-questbar__track">
         {points.map((p, i) => {
           const isPast = p.kind === 'chapter' && p.n < currentChapterN
           const isCurrent = p.kind === 'chapter' && p.n === currentChapterN
 
           return (
-            <div key={p.n} className="flex flex-1 items-center last:flex-none">
+            <div key={p.n} className="life-questbar__step">
               {/* จุดวงกลมเล็กแค่ 20px แต่จุดที่ "ผ่านมาแล้ว" กดดูย้อนหลังได้จริง — เล็กเกินกว่าจะแตะแม่น
                   ขยายพื้นที่แตะด้วย ::after ที่ absolute ออกไปรอบๆ (relative + -inset-3 = ~44px)
                   ไม่ใช้ padding เพราะจะไปดันเส้นเชื่อมระหว่างจุดให้เลย์เอาต์เบี้ยวทั้งแถบ
@@ -40,7 +49,7 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
                 disabled={!isPast}
                 onClick={() => setOpenN((cur) => (cur === p.n ? null : p.n))}
                 aria-label={p.kind === 'retire' ? 'เกษียณ' : `บทที่ ${p.n}${isPast ? ' — ดูสรุปย้อนหลัง' : ''}`}
-                className={`relative flex h-5 w-5 shrink-0 items-center justify-center border-2 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[11px] ${
+                className={`life-questbar__node relative flex h-5 w-5 shrink-0 items-center justify-center border-2 text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[11px] ${
                   isCurrent
                     ? 'border-yellow-400 bg-yellow-500 text-yellow-950'
                     : isPast
@@ -50,10 +59,12 @@ export default function LifeTimeline({ chapters, currentChapterN, history }) {
               >
                 {isCurrent ? '●' : isPast ? '✓' : '🔒'}
               </button>
-              {i < points.length - 1 && <div className={`h-0.5 flex-1 ${p.n < currentChapterN ? 'bg-emerald-500' : 'bg-slate-700'}`} />}
+              {i < points.length - 1 && <div className={`life-questbar__link h-0.5 flex-1 ${p.n < currentChapterN ? 'bg-emerald-500' : 'bg-slate-700'}`} />}
             </div>
           )
         })}
+          </div>
+        </div>
       </div>
 
       {openEntry &&

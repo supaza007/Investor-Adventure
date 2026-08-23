@@ -8,6 +8,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 import ChapterTransition from './ChapterTransition.jsx'
 import CharacterToken from './CharacterToken.jsx'
+import mainGameBackground from '../assets/ui/main-game-background-user.jpg'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 
@@ -284,7 +285,15 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const concentrationLabel = concentration < 0.35 ? 'ต่ำ' : concentration < 0.65 ? 'ปานกลาง' : 'สูง'
 
   return (
-    <div className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div
+      className="cozy-screen flex h-[100dvh] flex-col overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white"
+      style={{
+        backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.28) 0%, rgba(3, 10, 18, 0.78) 100%), url(${mainGameBackground})`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+      }}
+    >
       {showIntro && (prevSummary
         ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />
         : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} onContinue={() => setIntroSeenFor(chapter.n)} />)}

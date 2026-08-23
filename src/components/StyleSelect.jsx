@@ -13,6 +13,8 @@ import mediumPanelBackground from '../assets/ui/main-panel-bg-medium.svg'
 import viPanelBackground from '../assets/ui/main-panel-bg-vi.svg'
 import longtermPanelBackground from '../assets/ui/main-panel-bg-longterm.svg'
 import traderPanelBackground from '../assets/ui/main-panel-bg-trader.svg'
+import portfolioAdjustmentCoin from '../assets/ui/portfolio-adjustment-coin.png'
+import mysticTitleFrame from '../assets/ui/character-select-title-mystic-relic.png'
 
 const STYLE_GRAD = {
   medium: 'from-sky-900/60 to-sky-950 border-sky-500/50',
@@ -65,11 +67,19 @@ const defenseCaption = (style, defensePct) => {
 // ●●●○○ จากจำนวนจุดที่ปรับพอร์ตได้ (รวมจุดจัดพอร์ตต้นบท) — ยิ่งปรับได้บ่อย ยิ่งเต็มดวง
 // จุดติดสีทอง จุดว่างสีเทาจาง จึงต้องแยกสีเป็นสอง span แทนที่จะเป็น string เดียว
 function FreqDots({ n }) {
-  const filled = Math.max(1, Math.min(5, n))
+  const filled = Math.max(0, Math.min(5, n))
   return (
-    <span className="tracking-widest">
-      <span className="text-amber-400">{'●'.repeat(filled)}</span>
-      <span className="text-white/20">{'○'.repeat(5 - filled)}</span>
+    <span className="flex items-center justify-end gap-0.5" aria-label={`ปรับพอร์ตได้ ${filled} ครั้ง`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <img
+          key={i}
+          src={portfolioAdjustmentCoin}
+          alt=""
+          aria-hidden="true"
+          className="h-4 w-4 object-contain sm:h-5 sm:w-5"
+          style={{ opacity: i < filled ? 1 : 0.22 }}
+        />
+      ))}
     </span>
   )
 }
@@ -279,7 +289,18 @@ export default function StyleSelect({ onSelect }) {
             className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}
             style={{ backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.18), rgba(3, 10, 18, 0.68)), url(${PANEL_BACKGROUND[style.id]})`, backgroundSize: '100% 100%' }}
           >
-            <div className="style-select-panel-title">เลือกตัวละคร</div>
+            <div
+              className="style-select-panel-title"
+              style={{
+                backgroundImage: `url(${mysticTitleFrame})`,
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '100% 100%',
+                border: 0,
+              }}
+            >
+              เลือกตัวละคร
+            </div>
 
             {/* 1. hero กลางแผง: ปุ่มเลื่อนอยู่ข้างตัวละคร */}
             <div className="style-select-hero-nav">
@@ -306,8 +327,8 @@ export default function StyleSelect({ onSelect }) {
             {/* 2. persona ซ้าย / จำนวนครั้งปรับพอร์ต+FreqDots ขวา แถวเดียวกัน */}
             <div className="mt-2.5 flex items-start justify-between gap-2 sm:mt-3">
               <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
-              <div className="shrink-0 text-right">
-                <div className="text-[8px] text-white/50 sm:text-[10px]">ปรับพอร์ตได้/ครั้ง</div>
+              <div className="style-select-frequency shrink-0 text-right">
+                <div className="style-select-frequency__label text-[8px] sm:text-[10px]">ปรับพอร์ตได้/ครั้ง</div>
                 <FreqDots n={style.canAdjustAt.length} />
               </div>
             </div>

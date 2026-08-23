@@ -93,11 +93,11 @@ test('scroll backgrounds use a text-safe sizing mode', async () => {
 
 })
 
-test('answer rows preserve the end ornaments with responsive SVG slicing', async () => {
+test('answer rows reserve space for the end ornaments with a responsive background', async () => {
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
-  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?border-image-slice:\s*0 110 0 110 fill/)
-  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?border-width:\s*0 clamp\(4rem,\s*8vw,\s*5\.5rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?border-width:\s*0 3\.25rem/)
+  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
+  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(3\.75rem,\s*8vw,\s*5\.5rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.7rem 3\.25rem/)
 })
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {
