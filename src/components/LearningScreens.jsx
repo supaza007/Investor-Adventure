@@ -9,6 +9,8 @@ import preAssessmentOptionSelected from '../assets/ui/pre-assessment-answer-opti
 import preAssessmentQuestionBadge from '../assets/ui/pre-assessment-question-number-badge-user.svg'
 import preAssessmentTitle from '../assets/ui/pre-assessment-title-user.svg'
 
+// โครงหน้ากลางของหน้าแบบประเมินและหน้าการเรียนรู้
+// ปรับได้: className, สีพื้นหลัง, ระยะห่าง และความกว้างของเนื้อหา
 function Shell({ title, eyebrow, children, className = '', style = {}, contentClassName = 'max-w-2xl' }) {
   return <main className={`cozy-screen min-h-[100dvh] overflow-y-auto bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-3 py-5 text-white ${className}`} style={style}>
     <div className={`mx-auto ${contentClassName}`}>
@@ -19,6 +21,8 @@ function Shell({ title, eyebrow, children, className = '', style = {}, contentCl
   </main>
 }
 
+// แบบฟอร์มคำถามที่ใช้ร่วมกันทั้งแบบประเมินก่อนเล่นและหลังเล่น
+// ปรับได้: actionLabel, ปุ่มข้าม, ข้อความแจ้งเตือน และรูปแบบคำตอบ
 function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' }) {
   const [answers, setAnswers] = useState({})
   const [error, setError] = useState('')
@@ -31,16 +35,16 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
   return <form onSubmit={submit} className={`mt-4 space-y-5 ${className}`} noValidate>
     {questions.map((q, index) => <fieldset key={q.id} className="assessment-question-card min-w-0" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
       <div className="assessment-question-card__content">
-        <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug">
+        <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>
           <span className="assessment-question-badge" style={{ backgroundImage: `url(${preAssessmentQuestionBadge})` }} aria-hidden="true">{index + 1}</span>
           <span className="sr-only">ข้อ {index + 1}: </span>
           <span className="min-w-0 flex-1 break-words">{q.prompt}</span>
         </legend>
-        <div className="mt-3 grid min-w-0 gap-2">{q.options.map(([value, label]) => {
+        <div className="mt-3 grid min-w-0 gap-2">{q.options.map(([value, label], optionIndex) => {
           const selected = answers[q.id] === value
           return <label
             key={value}
-            className={`assessment-answer-row flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
+            className={`assessment-answer-row ${optionIndex % 2 === 0 ? 'assessment-answer-row--left' : 'assessment-answer-row--right'} flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
             style={{ borderImageSource: `url(${selected ? preAssessmentOptionSelected : preAssessmentOptionFrame})` }}
           >
             <input className="sr-only" type="radio" name={q.id} value={value} checked={selected} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
@@ -52,11 +56,12 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
     {error && <p role="alert" className="pixel-chip min-w-0 break-words bg-rose-950 p-3 text-rose-100">{error}</p>}
     <div className="flex flex-wrap gap-3">
       <button className="pixel-btn min-h-11 flex-1 bg-emerald-500 px-4 py-3 font-bold text-emerald-950" type="submit">{actionLabel}</button>
-      <button className="pixel-btn min-h-11 bg-slate-700 px-4 py-3" type="button" onClick={onSkip}>ข้าม · ไม่ประเมิน</button>
     </div>
   </form>
 }
 
+// หน้าแบบประเมินก่อนเริ่มเกม
+// ปรับข้อความและภาพแถบหัวข้อได้ที่บรรทัดด้านล่าง
 export function PreAssessmentScreen({ onComplete, onSkip }) {
   return <Shell
     eyebrow=""
@@ -65,11 +70,15 @@ export function PreAssessmentScreen({ onComplete, onSkip }) {
     style={{ backgroundImage: `linear-gradient(180deg, rgba(3,7,18,.25), rgba(3,7,18,.86)), url(${preAssessmentBackground})` }}
     contentClassName="max-w-4xl"
   >
-    <p className="assessment-scroll-label assessment-scroll-label--eyebrow text-xs uppercase tracking-widest text-amber-950" style={{ backgroundImage: `url(${preAssessmentEyebrow})` }}>ก่อนเริ่มเกม</p>
-    <h1 className="assessment-scroll-label assessment-scroll-label--title mt-1 break-words text-2xl font-black leading-tight text-amber-950 sm:text-4xl" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>แบบสะท้อนความรู้และความเสี่ยง</h1>
-    <p className="assessment-scroll-label assessment-scroll-label--disclaimer mt-2 min-w-0 break-words text-sm leading-relaxed text-amber-950" style={{ backgroundImage: `url(${preAssessmentDisclaimer})` }}>แบบสะท้อนที่ดัดแปลงเพื่อการเรียนรู้ ไม่ใช่แบบทดสอบ TSI ทางการ ไม่ใช้เลือกสไตล์แทนคุณ และไม่มีคำตอบนี้ไปเปลี่ยนผลตอบแทนในเกม</p>
+    {/* TEXT: “ก่อนเริ่มเกม” — ป้ายเล็กด้านบน; ปรับขนาดที่ text-xl */}
+    <p className="assessment-scroll-label assessment-scroll-label--eyebrow text-xl uppercase tracking-widest text-amber-950" style={{ backgroundImage: `url(${preAssessmentEyebrow})` }}>ก่อนเริ่มเกม</p>
+    {/* TEXT: “แบบประเมินของผู้กล้า” — หัวข้อใหญ่; ปรับขนาดที่ text-3xl / sm:text-4xl */}
+    <h1 className="assessment-scroll-label assessment-scroll-label--title mt-1 break-words text-3xl font-black leading-tight text-amber-950 sm:text-4xl" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>แบบประเมินของผู้กล้า</h1>
+    {/* TEXT: คำอธิบายใต้หัวข้อ; ปรับขนาดที่ text-2xl */}
+    <p className="assessment-scroll-label assessment-scroll-label--disclaimer mt-2 min-w-0 break-words text-2xl leading-relaxed text-amber-950" style={{ backgroundImage: `url(${preAssessmentDisclaimer})` }}>อยากรู้ไหมว่า คุณรับความเสี่ยงได้มากแค่ไหน ลองตอบคำถามพวกนี้ดูสิ!!</p>
     <section className="pre-assessment-panel mt-4">
       <div className="pre-assessment-panel__content">
+        {/* PRE_QUESTIONS คือชุดคำถามที่แสดงในหน้านี้ */}
         <Questions questions={PRE_QUESTIONS} actionLabel="บันทึกและไปต่อ" onSubmit={onComplete} onSkip={onSkip} className="pre-assessment-questions" />
       </div>
     </section>
