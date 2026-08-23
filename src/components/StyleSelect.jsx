@@ -237,7 +237,7 @@ export default function StyleSelect({ onSelect }) {
         />
       )}
       <div className="mx-auto flex w-full max-w-[108rem] flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4 sm:py-4">
-        <header className="mb-2 shrink-0 text-center">
+        <header className="style-select-header mb-2 shrink-0 text-center">
           <p className="game-subtitle text-xs sm:text-base">คุณเป็นนักลงทุนแบบไหน?</p>
           <p className="mt-0.5 text-[10px] text-white/50 sm:text-xs">
             ทุกแบบซื้อสินทรัพย์ได้เหมือนกันหมด — ต่างกันที่ว่าคุณ "แตะพอร์ตได้บ่อยแค่ไหน"
@@ -245,17 +245,21 @@ export default function StyleSelect({ onSelect }) {
         </header>
 
         {/* แถบเทียบ 4 สไตล์พร้อมกัน — คลิกใบไหนก็ตั้งเป็นสไตล์ที่เลือกอยู่ */}
-        <div className="mb-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2">
+        <div className="style-select-compare mb-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2">
           {styles.map((s, i) => (
             <CompareCard key={s.id} style={s} selected={i === index} onClick={() => setIndex(i)} />
           ))}
         </div>
 
         <div key={style.id} className="slide-in flex min-h-0 flex-1 flex-col gap-2">
-          <div className={`pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}>
-            {/* 1. หัวการ์ด: portrait + ชื่อ+badge แถวเดียว */}
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-              <div className={`pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}>
+          <div className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}>
+            <div className="style-select-panel-title">เลือกตัวละคร</div>
+
+            {/* 1. hero กลางแผง: ปุ่มเลื่อนอยู่ข้างตัวละคร */}
+            <div className="style-select-hero-nav">
+              <button type="button" onClick={prev} aria-label="ก่อนหน้า" className="style-select-hero-arrow pixel-btn">◀</button>
+              <div className="style-select-hero flex shrink-0 items-center gap-2 sm:gap-3">
+              <div className={`style-select-hero-art pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}>
                 {art ? (
                   <Portrait src={art} alt={style.name} size="fill" fit="cover" objectPosition={PORTRAIT_POSITION[style.id]} />
                 ) : (
@@ -263,37 +267,48 @@ export default function StyleSelect({ onSelect }) {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-base font-bold sm:text-xl">{style.name}</div>
+                <div className="style-select-name text-base font-bold sm:text-xl">{style.name}</div>
                 {style.isDefault && <div className="text-[9px] text-white/50 sm:text-[11px]">แนะนำสำหรับเล่นครั้งแรก</div>}
               </div>
+              </div>
+              <button type="button" onClick={next} aria-label="ถัดไป" className="style-select-hero-arrow pixel-btn">▶</button>
             </div>
 
             {/* 2. persona ซ้าย / จำนวนครั้งปรับพอร์ต+FreqDots ขวา แถวเดียวกัน */}
             <div className="mt-2.5 flex items-start justify-between gap-2 sm:mt-3">
-              <p className="text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
+              <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
               <div className="shrink-0 text-right">
                 <div className="text-[8px] text-white/50 sm:text-[10px]">ปรับพอร์ตได้/ครั้ง</div>
                 <FreqDots n={style.canAdjustAt.length} />
               </div>
             </div>
 
-            {/* 3. จุดแข็ง/จุดอ่อน — เนื้อหาหลัก เด่นกว่าเดิม */}
-            <div className="mt-2.5 space-y-1.5 sm:mt-3">
-              <div className="flex gap-1.5 border-l-[3px] border-emerald-400 bg-emerald-500/10 px-2 py-1.5 text-[11px] sm:text-xs">
-                <span className="shrink-0 text-emerald-300">✓</span>
-                <span className="text-white/90">{style.pros}</span>
+            {/* 3. กรอบข้อมูลตัวละคร — ตัวเลขกำไร/ป้องกันอยู่ใน modal รายละเอียดเท่านั้น */}
+            <div className="style-select-profile pixel-frame mt-3">
+              <div className="style-select-profile__label">ข้อมูลตัวละคร</div>
+              <p className="style-select-profile__tagline">{style.tagline}</p>
+              <div className="style-select-pros-cons mt-2 space-y-1.5">
+                <div className="flex gap-1.5 border-l-[3px] border-emerald-400 bg-emerald-500/10 px-2 py-1.5">
+                  <span className="shrink-0 text-emerald-300">✓</span>
+                  <span className="text-white/90">{style.pros}</span>
+                </div>
+                <div className="flex gap-1.5 border-l-[3px] border-rose-400 bg-rose-500/10 px-2 py-1.5">
+                  <span className="shrink-0 text-rose-300">✗</span>
+                  <span className="text-white/90">{style.cons}</span>
+                </div>
               </div>
-              <div className="flex gap-1.5 border-l-[3px] border-rose-400 bg-rose-500/10 px-2 py-1.5 text-[11px] sm:text-xs">
-                <span className="shrink-0 text-rose-300">✗</span>
-                <span className="text-white/90">{style.cons}</span>
-              </div>
+              <div className="style-select-profile__adjust mt-2">{adjustLabel(style)}</div>
+              {(style.tradeFeePct || style.buyDipMult) && <div className="mt-2 flex flex-wrap gap-1">
+                {style.tradeFeePct && <span className="pixel-chip bg-rose-950/50 px-1.5 py-0.5 text-[9px] text-rose-100">ค่าธรรมเนียม {(style.tradeFeePct * 100).toFixed(0)}%/ครั้ง</span>}
+                {style.buyDipMult && <span className="pixel-chip bg-emerald-950/50 px-1.5 py-0.5 text-[9px] text-emerald-100">ซื้อตอนร่วง ×{style.buyDipMult}</span>}
+              </div>}
             </div>
 
             {/* 4. ลิงก์เปิด modal รายละเอียดเพิ่มเติม */}
             <button
               type="button"
               onClick={() => setShowDetail(true)}
-              className="mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
+              className="style-select-info mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
             >
               ⓘ ดูรายละเอียดเพิ่มเติม
               <span className="block text-[9px] text-white/55 sm:text-[10px]">
@@ -302,20 +317,13 @@ export default function StyleSelect({ onSelect }) {
             </button>
           </div>
 
-          {/* แถวปุ่ม: ◀▶ เป็นทางเลือกเสริมคู่กับแถบเทียบด้านบน */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" onClick={prev} aria-label="ก่อนหน้า" className="pixel-btn shrink-0 bg-slate-700 px-3 py-2 text-base font-bold sm:px-4 sm:py-2.5 sm:text-xl">
-              ◀
-            </button>
+          <div className="style-select-actions flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => onSelect(style.id)}
               className="pixel-btn flex-1 bg-white py-2 text-xs font-semibold text-slate-900 sm:py-2.5 sm:text-base"
             >
               เลือกตัวละครนี้
-            </button>
-            <button type="button" onClick={next} aria-label="ถัดไป" className="pixel-btn shrink-0 bg-slate-700 px-3 py-2 text-base font-bold sm:px-4 sm:py-2.5 sm:text-xl">
-              ▶
             </button>
           </div>
         </div>
