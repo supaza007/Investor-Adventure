@@ -623,12 +623,14 @@ button:focus-visible {
   border-image-width: 0 clamp(4rem, 8vw, 5.5rem);
   border-image-repeat: stretch;
   background-color: transparent;
+  justify-content: center;
+  text-align: center;
 
   image-rendering: auto;
   box-shadow: none !important;
   color: #3b1b07;
   align-items: center;
-  min-height: clamp(3.4rem, 6vw, 4.75rem);
+  min-height: clamp(4rem, 7vw, 5.25rem);
   font-size: clamp(0.78rem, 0.7rem + 0.45vw, 1rem);
   line-height: 1.35;
   padding: clamp(0.7rem, 1.35vw, 1rem) clamp(0.45rem, 1.4vw, 0.9rem);
@@ -637,14 +639,14 @@ button:focus-visible {
 
 /* ตัวเลือกสลับซ้าย-ขวาตาม layout ในภาพตัวอย่าง */
 .assessment-answer-row--left {
-  width: 72%;
-  margin-inline-start: 3%;
+  width: 90%;
+  margin-inline-start: 5%;
 }
 
 .assessment-answer-row--right {
-  width: 72%;
+  width: 90%;
   margin-inline-start: auto;
-  margin-inline-end: 3%;
+  margin-inline-end: 5%;
 }
 
 /* ปรับสีและขนาดข้อความคำตอบได้ในบล็อก .assessment-answer-row */
@@ -653,6 +655,7 @@ button:focus-visible {
   z-index: 1;
   font-size: clamp(0.95rem, 0.82rem + 0.5vw, 1.2rem);
   line-height: 1.3;
+  text-align: center;
 }
 .assessment-answer-row input {
   width: 1rem;
@@ -700,7 +703,7 @@ button:focus-visible {
   }
 
   .assessment-answer-row {
-    min-height: 3.25rem;
+    min-height: 4rem;
     border-width: 0 3.25rem !important;
     border-image-width: 0 3.25rem;
     padding: 0.7rem 0.4rem;
