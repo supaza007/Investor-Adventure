@@ -5,6 +5,14 @@ import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
 import { characterArtOf } from './art'
 import chooseCharacterBackground from '../assets/ui/choose-character-background-user.webp'
+import mediumFrameBackground from '../assets/ui/character-frame-bg-medium.svg'
+import viFrameBackground from '../assets/ui/character-frame-bg-vi.svg'
+import longtermFrameBackground from '../assets/ui/character-frame-bg-longterm.svg'
+import traderFrameBackground from '../assets/ui/character-frame-bg-trader.svg'
+import mediumPanelBackground from '../assets/ui/main-panel-bg-medium.svg'
+import viPanelBackground from '../assets/ui/main-panel-bg-vi.svg'
+import longtermPanelBackground from '../assets/ui/main-panel-bg-longterm.svg'
+import traderPanelBackground from '../assets/ui/main-panel-bg-trader.svg'
 
 const STYLE_GRAD = {
   medium: 'from-sky-900/60 to-sky-950 border-sky-500/50',
@@ -64,6 +72,21 @@ function FreqDots({ n }) {
       <span className="text-white/20">{'○'.repeat(5 - filled)}</span>
     </span>
   )
+}
+
+// Presentation-only SVG chrome. The existing style ids determine which asset is shown.
+const FRAME_BACKGROUND = {
+  medium: mediumFrameBackground,
+  longterm: longtermFrameBackground,
+  trader: traderFrameBackground,
+  vi: viFrameBackground,
+}
+
+const PANEL_BACKGROUND = {
+  medium: mediumPanelBackground,
+  longterm: longtermPanelBackground,
+  trader: traderPanelBackground,
+  vi: viPanelBackground,
 }
 
 // การ์ดเล็กในแถบเทียบ 4 สไตล์ด้านบน — ตัดเหลือแค่ภาพ+ชื่อ (FreqDots/กำไร% ย้ายลงไปในการ์ดหลัก
@@ -252,14 +275,20 @@ export default function StyleSelect({ onSelect }) {
         </div>
 
         <div key={style.id} className="slide-in flex min-h-0 flex-1 flex-col gap-2">
-          <div className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}>
+          <div
+            className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}
+            style={{ backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.18), rgba(3, 10, 18, 0.68)), url(${PANEL_BACKGROUND[style.id]})`, backgroundSize: '100% 100%' }}
+          >
             <div className="style-select-panel-title">เลือกตัวละคร</div>
 
             {/* 1. hero กลางแผง: ปุ่มเลื่อนอยู่ข้างตัวละคร */}
             <div className="style-select-hero-nav">
               <button type="button" onClick={prev} aria-label="ก่อนหน้า" className="style-select-hero-arrow pixel-btn">◀</button>
               <div className="style-select-hero flex shrink-0 items-center gap-2 sm:gap-3">
-              <div className={`style-select-hero-art pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}>
+              <div
+                className={`style-select-hero-art pixel-frame sprite-bob h-16 w-16 shrink-0 overflow-hidden border bg-gradient-to-b sm:h-20 sm:w-20 ${STYLE_GRAD[style.id]}`}
+                style={{ backgroundImage: `url(${FRAME_BACKGROUND[style.id]})`, backgroundSize: '100% 100%' }}
+              >
                 {art ? (
                   <Portrait src={art} alt={style.name} size="fill" fit="cover" objectPosition={PORTRAIT_POSITION[style.id]} />
                 ) : (
