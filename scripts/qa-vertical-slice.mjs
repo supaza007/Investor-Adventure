@@ -126,7 +126,9 @@ try {
     await sleep(420)
   }
 
-  for (let attempt = 0; attempt < 25; attempt += 1) {
+  // Large self-contained SVGs can need more than five seconds to decode on a
+  // cold GitHub Pages load, especially in the mobile-sized headless browser.
+  for (let attempt = 0; attempt < 100; attempt += 1) {
     const ready = await evaluate(`(() => { const image = document.querySelector('[role="dialog"] img'); return Boolean(image?.complete && image.naturalWidth > 0) })()`)
     if (ready) break
     await sleep(200)
