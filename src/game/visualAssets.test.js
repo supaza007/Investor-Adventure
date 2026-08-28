@@ -156,10 +156,10 @@ test('scroll backgrounds use a text-safe sizing mode', async () => {
 test('answer rows reserve space for the end ornaments with a responsive background', async () => {
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
-  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*12\.5%,\s*6rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?width:\s*min\(78%,\s*30rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.55rem clamp\(1\.5rem,\s*7%,\s*2\.4rem\)/)
-  assert.match(css, /\.assessment-answer-row--left,[\s\S]*?\.assessment-answer-row--right\s*\{[\s\S]*?width:\s*min\(78%,\s*30rem\)/)
+  assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*10%,\s*5rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?width:\s*min\(86%,\s*30rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.55rem clamp\(2\.1rem,\s*8%,\s*2\.8rem\)/)
+  assert.match(css, /\.assessment-answer-row--left,[\s\S]*?\.assessment-answer-row--right\s*\{[\s\S]*?width:\s*min\(86%,\s*30rem\)/)
 })
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {
