@@ -169,9 +169,15 @@ test('answer rows reserve space for the end ornaments with a responsive backgrou
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+  const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?font-size:\s*clamp\(/)
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?line-height:\s*1\.4/)
   assert.match(css, /\.assessment-answer-row__text\s*\{[\s\S]*?text-wrap:\s*pretty/)
+  assert.match(css, /\.assessment-answer-row__text\s*\{[\s\S]*?white-space:\s*nowrap/)
+  assert.match(css, /\.assessment-answer-row--long \.assessment-answer-row__text\s*\{[\s\S]*?white-space:\s*normal/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row--long\s*\{[\s\S]*?min-height:\s*6\.4rem/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row--long \.assessment-answer-row__text\s*\{[\s\S]*?font-size:\s*clamp\(0\.92rem,\s*3\.2vw,\s*1\.08rem\)/)
+  assert.match(jsx, /assessment-answer-row--long/)
 })
 
 test('answer rows mount SVG artwork as a responsive background layer', async () => {

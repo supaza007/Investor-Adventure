@@ -64,9 +64,10 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
         </legend>
         <div className="mt-3 grid min-w-0 gap-2">{question.options.map(([value, label], optionIndex) => {
           const selected = selectedAnswer === value
+          const isLongOption = label.trim().length > 28
           return <label
             key={value}
-            className={`assessment-answer-row ${optionIndex % 2 === 0 ? 'assessment-answer-row--left' : 'assessment-answer-row--right'} flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
+            className={`assessment-answer-row ${isLongOption ? 'assessment-answer-row--long' : ''} ${optionIndex % 2 === 0 ? 'assessment-answer-row--left' : 'assessment-answer-row--right'} flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
             style={{
               backgroundImage: `url(${selected ? preAssessmentOptionSelected : preAssessmentOptionFrame})`,
               backgroundRepeat: 'no-repeat',
