@@ -826,22 +826,25 @@ button:focus-visible {
   }
 
   .assessment-answer-row {
-    width: fit-content;
-    min-width: min(9rem, 52%);
-    max-width: 52%;
+    width: min(78%, 30rem);
+    min-width: min(13.5rem, 78%);
+    max-width: 78%;
     min-height: 3.25rem;
-    padding: 0.45rem clamp(1rem, 4%, 1.5rem);
+    padding: 0.55rem clamp(1.5rem, 7%, 2.4rem);
   }
 
   .assessment-answer-row__text {
-    font-size: clamp(0.78rem, 2.8vw, 0.95rem);
-    line-height: 1.2;
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(0.95rem, 3.3vw, 1.2rem);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
   }
 
   .assessment-answer-row--left,
   .assessment-answer-row--right {
-    width: fit-content;
-    max-width: 52%;
+    width: min(78%, 30rem);
+    max-width: 78%;
     margin-inline: auto;
   }
 }
