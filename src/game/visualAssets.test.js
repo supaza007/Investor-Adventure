@@ -157,9 +157,9 @@ test('answer rows reserve space for the end ornaments with a responsive backgrou
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*10%,\s*5rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?width:\s*min\(92%,\s*32rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.55rem clamp\(1\.25rem,\s*5%,\s*2rem\)/)
-  assert.match(css, /\.assessment-answer-row--left,[\s\S]*?\.assessment-answer-row--right\s*\{[\s\S]*?width:\s*min\(92%,\s*32rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?width:\s*min\(94%,\s*32rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.6rem clamp\(1\.4rem,\s*5%,\s*2\.2rem\)/)
+  assert.match(css, /\.assessment-answer-row--left,[\s\S]*?\.assessment-answer-row--right\s*\{[\s\S]*?width:\s*min\(94%,\s*32rem\)/)
 })
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {
