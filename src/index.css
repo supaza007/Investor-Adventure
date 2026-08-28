@@ -827,9 +827,9 @@ button:focus-visible {
 
   /* Keep the question panel compact on phones without making the choices hard to tap. */
   .assessment-question-legend + div {
-    margin-top: 0.2rem !important;
-    gap: 0.2rem;
-    row-gap: 0.2rem;
+    margin-top: 0.1rem !important;
+    gap: 0.1rem;
+    row-gap: 0.1rem;
   }
 
   .assessment-question-badge {
@@ -841,7 +841,7 @@ button:focus-visible {
     width: min(94%, 32rem);
     min-width: min(19rem, 94%);
     max-width: 94%;
-    min-height: 4.2rem;
+    min-height: 5.46rem;
     padding: 0.6rem clamp(1rem, 4%, 1.8rem) 0.6rem clamp(3.25rem, 14%, 4.75rem);
     justify-content: center;
   }
