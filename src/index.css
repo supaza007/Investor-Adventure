@@ -823,7 +823,8 @@ button:focus-visible {
   }
 
   .assessment-answer-row {
-    width: 100%;
+    width: min(92%, 34rem);
+    max-width: 34rem;
     min-height: 3.25rem;
     padding: 0.45rem clamp(2.2rem, 10%, 3rem);
   }

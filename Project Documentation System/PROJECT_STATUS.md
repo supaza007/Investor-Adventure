@@ -13,6 +13,7 @@
 - Assessment viewport is now locked to `100dvh` with no page scroll; header, progress, one question, options and navigation are composed as a single responsive screen, including 320×568 mobile layouts.
 - Follow-up visual correction removed full-height flex stretching from the question card and option group; content now hugs its natural height while the viewport remains locked.
 - Cover mobile composition now groups the character lineup, player form and START action in a lower content block shifted upward for balanced vertical symmetry.
+- Mobile assessment answer choices now use a centered `min(92%, 34rem)` width with preserved touch height and responsive text padding.
 - Browser QA: 390×844 Cover/assessment/style/allocation flow passed; 320×568 allocation review and Signal stage passed; document horizontal overflow was false. At 320×568 the review modal measured 347 px high, both actions measured 54 px high, and the Signal content viewport fit without internal overflow.
 - Verification: `npm test` 106/106 pass; `npm run build:web` pass; no initial-chunk size warning after code splitting.
 - Preserved existing owner work: the uncommitted Cover title/logo change and original `src/assets/title-logo-money-survival.png` remain intact.
