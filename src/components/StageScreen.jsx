@@ -10,8 +10,8 @@ import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
 import Modal from './Modal'
 import CharacterToken from './CharacterToken.jsx'
-import chapterResultBackground from '../assets/ui/chapter-result-background-user.jpg'
-import { eventArtOf } from './art'
+import chapterResultBackground from '../assets/ui/chapter-result-background-user.webp'
+import { eventArtOf, eventStaticArtOf } from './art'
 import LifeTimeline from './LifeTimeline'
 
 // แถบบอกว่าอยู่สเตจไหนของบท — ผู้เล่นต้องรู้เสมอว่าเหลืออีกกี่ก้าว
@@ -69,10 +69,11 @@ function SignalStage({ event }) {
 // สเตจ 2 — เผยประเภทเหตุการณ์บางส่วน (บอก tag แต่ยังไม่บอกความรุนแรง)
 function RevealStage({ event }) {
   const art = eventArtOf(event.id)
+  const staticArt = eventStaticArtOf(event.id)
   return (
     <div className="w-full text-center">
       <div className="enemy-idle mx-auto w-fit">
-        {art ? <Portrait src={art} alt={event.name} size="lg" /> : <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" />}
+        {art ? <Portrait src={art} reducedMotionSrc={staticArt} alt={event.name} size="lg" /> : <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" />}
       </div>
       <div className="mt-2 text-sm font-bold sm:text-xl">{event.name}</div>
       <div className="pixel-chip mx-auto mt-2 inline-block bg-rose-950/70 px-2 py-1 text-[10px] text-rose-200 sm:text-sm">
@@ -119,7 +120,7 @@ function ShockStage({ state, event }) {
     <div className="w-full text-center">
       <div className="mx-auto w-fit">
         {eventArtOf(event.id) ? (
-          <Portrait src={eventArtOf(event.id)} alt={event.name} size="md" />
+          <Portrait src={eventArtOf(event.id)} reducedMotionSrc={eventStaticArtOf(event.id)} alt={event.name} size="md" />
         ) : (
           <PortraitPlaceholder label={event.name} emoji={event.emoji} size="md" />
         )}

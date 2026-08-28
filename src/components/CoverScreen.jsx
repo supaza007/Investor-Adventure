@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { characterArtOf } from './art.js'
-import coverBackground from '../assets/ui/cover-background-user.svg'
-import gameSubtitle from '../assets/ui/cover-adventure-subtitle-user.png'
-import playButton from '../assets/ui/cover-start-button-user.png'
+import coverBackground from '../assets/ui/cover-background-user.webp'
+import gameSubtitle from '../assets/ui/cover-adventure-subtitle-user.webp'
+import playButton from '../assets/ui/cover-start-button-user.webp'
+import titleLogo from '../assets/title-logo-money-survival.webp'
 
-// ⚠️ ไม่ import รูปหน้าปกตรงๆ ด้วยเหตุผลเดียวกับ art.js — ไฟล์รูปไม่ถูก commit ขึ้น git
-// เครื่องที่มีไฟล์ → ใช้โลโก้/พื้นหลังจริง · เครื่องที่ไม่มี (GitHub Actions) → ใช้ชื่อเกมแบบตัวอักษร
-// สไตล์ .cover-title (ตัวทองขอบคู่) มีอยู่ใน index.css อยู่แล้ว จึงไม่ได้ดูเหมือนของขาด
+// พื้นหลังรุ่นเก่ายังโหลดแบบ optional เพื่อให้ build ผ่านได้ แม้ไม่มีไฟล์ SVG ต้นฉบับ
 const ASSETS = import.meta.glob('../assets/title-*.svg', {
   eager: true,
   query: '?url',
@@ -16,9 +15,7 @@ const ASSETS = import.meta.glob('../assets/title-*.svg', {
 const find = (name) => Object.entries(ASSETS).find(([p]) => p.includes(`/${name}.`))?.[1] ?? null
 
 const titleBg = find('title-bg')
-const titleLogo = find('title-logo')
-
-const GAME_TITLE = 'พอร์ตพิชิตเงินเฟ้อ'
+const GAME_TITLE = 'Investor Adventure'
 
 // หน้าปกเกม: พื้นหลัง + ชื่อเกม + ปุ่ม Play
 export default function CoverScreen({ onPlay, onContinue = null, saveError = null }) {
@@ -64,11 +61,12 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
 
         <img src={gameSubtitle} alt="ผจญภัยในโลกแห่งการลงทุน" className="cover-adventure-subtitle mt-1 object-contain" draggable="false" />
 
-        {heroes.length > 0 && <div className="cozy-hero-lineup mt-2 flex h-[min(25vh,12rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
-          {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
-        </div>}
+        <div className="cover-lower-content">
+          {heroes.length > 0 && <div className="cozy-hero-lineup mt-2 flex h-[min(25vh,12rem)] items-end justify-center" aria-label="ตัวละครนักลงทุนทั้งสี่สไตล์">
+            {heroes.map((hero) => <img key={hero.id} src={hero.src} alt="" className="h-full min-w-0 object-contain object-bottom" />)}
+          </div>}
 
-        <form onSubmit={start} className="mt-3 flex w-[min(90vw,22rem)] flex-col items-stretch gap-2 text-left">
+          <form onSubmit={start} className="mt-3 flex w-[min(90vw,22rem)] flex-col items-stretch gap-2 text-left">
           <label className="text-xs font-bold text-white/85" htmlFor="student-name">ชื่อผู้เล่น</label>
           <input
             id="student-name"
@@ -94,13 +92,14 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
             <img src={playButton} alt="" className="cover-start-image block" draggable="false" />
             <span className="sr-only">START</span>
           </button>
-        </form>
+          </form>
 
-        {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
+          {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
 
-        {saveError && <p role="alert" className="mt-3 max-w-lg bg-rose-950/90 p-2 text-xs text-rose-100">เปิดข้อมูลที่บันทึกไว้ไม่ได้ ({saveError}) เกมใหม่ยังเล่นได้ตามปกติ</p>}
+          {saveError && <p role="alert" className="mt-3 max-w-lg bg-rose-950/90 p-2 text-xs text-rose-100">เปิดข้อมูลที่บันทึกไว้ไม่ได้ ({saveError}) เกมใหม่ยังเล่นได้ตามปกติ</p>}
 
-        <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม START เพื่อเริ่มการผจญภัย</p>
+          <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม START เพื่อเริ่มการผจญภัย</p>
+        </div>
       </div>
     </div>
   )

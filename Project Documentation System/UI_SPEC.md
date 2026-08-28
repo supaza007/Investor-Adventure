@@ -718,6 +718,8 @@ Preferred delivery is optimized WebP for raster screens/sprites, with a static f
 - Starting targets pending measurement: background 150–350 KB, portrait/sprite 30–120 KB, optional short animation 100–400 KB, first interactive visual payload approximately 2–3 MB maximum.
 - These are UI performance budgets, not game rules. Session next must measure real compressed assets and record exceptions.
 
+Implementation evidence (2026-08-28): player-facing runtime imports now prefer optimized WebP while PNG/SVG/JPG authoring sources remain preserved. Cover background is 254 KB, canonical portraits are 68–108 KB each, and the Cover title/subtitle/action artwork is 76–145 KB each. Animated events provide 1.5–7.8 KB static reduced-motion frames. Route-level lazy loading reduced the initial JavaScript chunk from 563.68 KB to 264.05 KB. Local QA passed at 390×844 and 320×568 without horizontal document overflow; this evidence is local and does not mark the changes Deployed.
+
 ### 21.7 Production inventory and screen mapping
 
 | Asset group | Minimum production set | Main screens |

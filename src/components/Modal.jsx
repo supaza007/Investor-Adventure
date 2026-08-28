@@ -11,7 +11,7 @@ import { useEffect, useRef } from 'react'
 // dismissible = ไม่ส่ง onClose มา → ปิดไม่ได้เลย (ทั้ง Esc และคลิกฉากหลัง)
 // ใช้กับ modal ที่ "ต้องตัดสินใจก่อนถึงไปต่อได้" คือข้อเสนอมิจฉาชีพกับหน้าแนะนำบท
 // ซึ่งเป็นดีไซน์ตั้งใจ ไม่ใช่ของที่ลืมใส่ปุ่มปิด
-export default function Modal({ children, onClose, label, panelClassName = '' }) {
+export default function Modal({ children, onClose, label, panelClassName = 'cozy-modal-surface pixel-frame max-w-lg p-3 text-white sm:p-5' }) {
   const panelRef = useRef(null)
 
   // เก็บ onClose ไว้ใน ref แล้วให้ effect มี deps ว่าง — ถ้าใส่ onClose ลง deps ตรงๆ
@@ -66,7 +66,7 @@ export default function Modal({ children, onClose, label, panelClassName = '' })
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 sm:p-4"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-2 sm:p-4"
       onClick={onClose ? () => onClose() : undefined}
     >
       <div

@@ -1,14 +1,31 @@
-import { useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef } from 'react'
 import { createInitialState, currentChapter } from './game/engine/gameState.js'
 import CoverScreen from './components/CoverScreen'
-import StyleSelect from './components/StyleSelect'
-import AllocationScreen from './components/AllocationScreen'
-import StageScreen from './components/StageScreen'
-import ReportScreen from './components/ReportScreen'
 import { useGameCommand } from './ui/useGameCommand.js'
-import { PreAssessmentScreen, RiskResultScreen, ConsentScreen, PostAssessmentScreen } from './components/LearningScreens.jsx'
 import { buildLearningSummary } from './game/learning.js'
 import { createSession, parseSession, serializeSession, SESSION_STORAGE_KEY } from './game/sessionStore.js'
+
+const StyleSelect = lazy(() => import('./components/StyleSelect.jsx'))
+const AllocationScreen = lazy(() => import('./components/AllocationScreen.jsx'))
+const StageScreen = lazy(() => import('./components/StageScreen.jsx'))
+const ReportScreen = lazy(() => import('./components/ReportScreen.jsx'))
+const PreAssessmentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.PreAssessmentScreen })))
+const RiskResultScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.RiskResultScreen })))
+const ConsentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.ConsentScreen })))
+const PostAssessmentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.PostAssessmentScreen })))
+
+function ScreenLoading() {
+  return (
+    <main className="cozy-screen flex min-h-[100dvh] items-center justify-center px-4 text-white" role="status" aria-live="polite">
+      <div className="cozy-modal-surface pixel-frame w-full max-w-xs p-5 text-center">
+        <div className="loading-rune mx-auto" aria-hidden="true">✦</div>
+        <p className="mt-3 text-sm font-bold text-amber-100">กำลังเปิดหน้าถัดไป…</p>
+      </div>
+    </main>
+  )
+}
+
+const lazyScreen = (screen) => <Suspense fallback={<ScreenLoading />}>{screen}</Suspense>
 
 // เสียงคลิกปุ่มแบบสังเคราะห์ด้วย Web Audio — ไม่ใช้ไฟล์เสียงเลย
 //
@@ -117,18 +134,18 @@ export default function App() {
   }
 
   if (journey === 'cover') return <CoverScreen onPlay={(player) => { setSession((s) => ({ ...s, player })); setJourney('pre') }} onContinue={savedRun ? continueSaved : null} saveError={saveError} />
-  if (journey === 'pre') return <PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('risk-result') }} onSkip={() => setJourney('consent')} />
-  if (journey === 'risk-result') return <RiskResultScreen assessment={session.assessment.pre} onContinue={() => setJourney('consent')} />
-  if (journey === 'consent') return <ConsentScreen onChoice={beginCore} />
-  if (state.phase === 'report' && journey === 'game') return <PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />
+  if (journey === 'pre') return lazyScreen(<PreAssessmentScreen onComplete={(pre) => { setSession((s) => ({ ...s, assessment: { ...s.assessment, pre } })); setJourney('risk-result') }} onSkip={() => setJourney('consent')} />)
+  if (journey === 'risk-result') return lazyScreen(<RiskResultScreen assessment={session.assessment.pre} onContinue={() => setJourney('consent')} />)
+  if (journey === 'consent') return lazyScreen(<ConsentScreen onChoice={beginCore} />)
+  if (state.phase === 'report' && journey === 'game') return lazyScreen(<PostAssessmentScreen onComplete={finishAssessment} onSkip={() => finishAssessment(null)} />)
 
-  if (state.phase === 'style') return <div className={busy ? 'pointer-events-none opacity-75' : ''} aria-busy={busy}>
+  if (state.phase === 'style') return lazyScreen(<div className={busy ? 'pointer-events-none opacity-75' : ''} aria-busy={busy}>
     {busy && <div role="status" className="fixed inset-x-0 top-2 z-50 mx-auto w-fit bg-slate-950 px-4 py-2 text-sm text-white">กำลังเริ่มเกม…</div>}
     <StyleSelect onSelect={(styleId) => command({ type: 'SELECT_STYLE', styleId, at: new Date().toISOString() })} />
-  </div>
+  </div>)
 
   if (state.phase === 'allocation') {
-    return (
+    return lazyScreen(
       <AllocationScreen
         state={state}
         chapter={currentChapter(state)}
@@ -145,7 +162,7 @@ export default function App() {
 
   if (state.phase === 'stage') {
     if (adjusting) {
-      return (
+      return lazyScreen(
         <AllocationScreen
           state={state}
           chapter={currentChapter(state)}
@@ -159,11 +176,11 @@ export default function App() {
         />
       )
     }
-    return <StageScreen state={state} command={command} commandError={commandError} onDismissError={clearCommandError} submitting={busy} onAdjust={() => setAdjusting(true)} />
+    return lazyScreen(<StageScreen state={state} command={command} commandError={commandError} onDismissError={clearCommandError} submitting={busy} onAdjust={() => setAdjusting(true)} />)
   }
 
   if (state.phase === 'report') {
-    return <ReportScreen report={state.report} session={session} styleId={state.styleId} gameTiming={state.timing} versions={state.versions} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />
+    return lazyScreen(<ReportScreen report={state.report} session={session} styleId={state.styleId} gameTiming={state.timing} versions={state.versions} learning={buildLearningSummary(session.assessment.pre, session.assessment.post)} onRestart={restart} />)
   }
 
   return null

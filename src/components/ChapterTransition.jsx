@@ -3,7 +3,7 @@ import Modal from './Modal'
 import { money } from './ToolTheme'
 import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 
-const mapUrl = new URL('../assets/worlds/chapter-transition-map.svg', import.meta.url).href
+const mapUrl = new URL('../assets/worlds/chapter-transition-map.webp', import.meta.url).href
 
 const signedMoney = (value) => {
   const rounded = Math.round(value)

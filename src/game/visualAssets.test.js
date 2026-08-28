@@ -24,16 +24,74 @@ test('canonical runtime characters stay inside the approved 30–120 KB budget',
 test('user-supplied Cover assets stay within the web delivery budget', async () => {
   const budgets = {
     'cover-background-user.webp': 350,
-    'game-subtitle-user.webp': 30,
-    'play-button-user.webp': 30,
-    'cover-adventure-subtitle-user.png': 500,
-    'cover-start-button-user.png': 500,
+    'cover-adventure-subtitle-user.webp': 150,
+    'cover-start-button-user.webp': 100,
   }
   for (const [name, maxKb] of Object.entries(budgets)) {
     const path = fileURLToPath(new URL(`../assets/ui/${name}`, import.meta.url))
     const info = await stat(path)
     assert.ok(info.size <= maxKb * 1024, `${name} exceeds ${maxKb} KB: ${info.size} bytes`)
   }
+
+  const titleLogo = await stat(fileURLToPath(new URL('../assets/title-logo-money-survival.webp', import.meta.url)))
+  assert.ok(titleLogo.size <= 180 * 1024, `title logo exceeds 180 KB: ${titleLogo.size} bytes`)
+})
+
+test('mobile runtime imports optimized artwork instead of authoring assets', async () => {
+  const sources = {
+    '../components/CoverScreen.jsx': [
+      'cover-background-user.webp',
+      'cover-adventure-subtitle-user.webp',
+      'cover-start-button-user.webp',
+      'title-logo-money-survival.webp',
+    ],
+    '../components/LearningScreens.jsx': [
+      'pre-assessment-background-user.webp',
+      'pre-assessment-frame-user.webp',
+      'consent-background-user.webp',
+    ],
+    '../components/ChapterTransition.jsx': ['chapter-transition-map.webp'],
+  }
+
+  for (const [source, assets] of Object.entries(sources)) {
+    const jsx = await readFile(fileURLToPath(new URL(source, import.meta.url)), 'utf8')
+    for (const asset of assets) assert.ok(jsx.includes(asset), `${source} does not use ${asset}`)
+  }
+
+  const art = await readFile(fileURLToPath(new URL('../components/art.js', import.meta.url)), 'utf8')
+  assert.match(art, /CHARACTER_RASTER_ART\[id \+ '-canonical'\] \?\? CHARACTER_ART\[id \+ '-canonical'\]/)
+})
+
+test('animated events have lightweight static artwork for reduced motion', async () => {
+  for (const id of ['inflation', 'pandemic', 'reserve_boss', 'scammer', 'tariff_boss', 'tomyumkung']) {
+    const path = fileURLToPath(new URL(`../assets/events/${id}-static.webp`, import.meta.url))
+    const info = await stat(path)
+    assert.ok(info.size <= 20 * 1024, `${id} static frame exceeds 20 KB: ${info.size} bytes`)
+  }
+
+  const portrait = await readFile(fileURLToPath(new URL('../components/Portrait.jsx', import.meta.url)), 'utf8')
+  assert.match(portrait, /prefers-reduced-motion: reduce/)
+  assert.match(portrait, /reducedMotionSrc/)
+})
+
+test('shared modal has a readable default surface on mobile', async () => {
+  const modal = await readFile(fileURLToPath(new URL('../components/Modal.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+  assert.match(modal, /panelClassName = 'cozy-modal-surface pixel-frame/)
+  assert.match(css, /\.cozy-modal-surface\s*\{[\s\S]*?background:/)
+  assert.match(css, /\.modal-backdrop\s*\{[\s\S]*?safe-area-inset-top/)
+})
+
+test('assessment presents one question at a time with progress and navigation', async () => {
+  const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+  assert.match(jsx, /คำถามที่ \{questionIndex \+ 1\} \/ \{questions\.length\}/)
+  assert.match(jsx, /const question = questions\[questionIndex\]/)
+  assert.match(jsx, /ย้อนกลับ/)
+  assert.match(jsx, /ถัดไป/)
+  assert.doesNotMatch(jsx, /questions\.map\(\(q, index\)/)
+  assert.match(css, /\.pre-assessment-screen\s*\{[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden !important/)
+  assert.match(css, /\.pre-assessment-questions > \.assessment-question-card\s*\{[\s\S]*?flex:\s*0 0 auto/)
 })
 
 
@@ -99,7 +157,7 @@ test('answer rows reserve space for the end ornaments with a responsive backgrou
   const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*12\.5%,\s*6rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*1rem clamp\(2\.6rem,\s*12\.5%,\s*3\.25rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.45rem clamp\(2\.2rem,\s*10%,\s*3rem\)/)
 })
 
 test('answer text scales with the viewport and stays inside the artwork', async () => {

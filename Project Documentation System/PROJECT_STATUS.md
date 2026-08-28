@@ -1,5 +1,22 @@
 # Project Status
 
+## Mobile Optimization Pass — 2026-08-28
+
+- Status: **Implemented and locally verified; not deployed in this session**.
+- Scope: presentation delivery and responsive UI only. No game rule, balance, RNG, inflation, scoring, command, save/load or Supabase behavior changed.
+- Runtime artwork now prefers optimized WebP for Cover, canonical characters, pre-assessment chrome, consent, Style Selection UI details, gameplay backgrounds and chapter transitions. Original PNG/SVG/JPG authoring assets remain preserved.
+- Cover runtime reductions: background 4.90 MB SVG → 254 KB WebP; title logo 946 KB PNG → 145 KB WebP; subtitle 430 KB PNG → 124 KB WebP; START button 456 KB PNG → 76 KB WebP; canonical characters now load 68–108 KB WebP instead of 0.6–1.0 MB SVG files.
+- Added 1.5–7.8 KB static WebP frames for animated events and a `prefers-reduced-motion` picture source. CSS motion and dense scanline treatment are also reduced under the operating-system preference.
+- Added lazy screen loading. The initial JavaScript chunk decreased from 563.68 KB to 264.05 KB; Style, Allocation, Stage, Learning and Report load as separate chunks.
+- Shared `Modal` now has a readable cozy navy/gold default surface and safe-area-aware backdrop. Mobile small-text floors and 320×568 stage-header compaction were increased without removing content.
+- Assessment flow now presents exactly one question per screen with progress, back/next navigation, draft answer retention, required-answer validation and an explicit skip action for both pre- and post-assessment.
+- Assessment viewport is now locked to `100dvh` with no page scroll; header, progress, one question, options and navigation are composed as a single responsive screen, including 320×568 mobile layouts.
+- Follow-up visual correction removed full-height flex stretching from the question card and option group; content now hugs its natural height while the viewport remains locked.
+- Cover mobile composition now groups the character lineup, player form and START action in a lower content block shifted upward for balanced vertical symmetry.
+- Browser QA: 390×844 Cover/assessment/style/allocation flow passed; 320×568 allocation review and Signal stage passed; document horizontal overflow was false. At 320×568 the review modal measured 347 px high, both actions measured 54 px high, and the Signal content viewport fit without internal overflow.
+- Verification: `npm test` 106/106 pass; `npm run build:web` pass; no initial-chunk size warning after code splitting.
+- Preserved existing owner work: the uncommitted Cover title/logo change and original `src/assets/title-logo-money-survival.png` remain intact.
+
 ## End-to-End Feature Integration — 2026-08-21
 
 - Update: pre-assessment now uses the Project Owner's 10-question risk-profile draft in `learning-reflection-v2`; scoring is 0/1/2 per answer with conservative/balanced/aggressive profile displayed separately from knowledge gain. This remains an educational reflection adapted for the game, not the official SET TSI questionnaire.

@@ -8,7 +8,7 @@ import { BALANCE } from '../game/engine/balance.js'
 import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 import ChapterTransition from './ChapterTransition.jsx'
 import CharacterToken from './CharacterToken.jsx'
-import mainGameBackground from '../assets/ui/main-game-background-user.jpg'
+import mainGameBackground from '../assets/ui/main-game-background-user.webp'
 
 const STEP = 5 // ปรับทีละ 5% — ละเอียดพอให้คิด แต่ไม่ละเอียดจนกดนาน
 

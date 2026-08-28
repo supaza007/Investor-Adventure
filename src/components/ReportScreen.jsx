@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { BALANCE } from '../game/engine/balance.js'
 import { money, pct } from './ToolTheme'
 import Portrait, { PortraitPlaceholder } from './Portrait'
-import { eventArtOf } from './art'
+import { eventArtOf, eventStaticArtOf } from './art'
 import { buildReadiness } from '../game/learning.js'
 import { createPlayerRunPayload, submitPlayerRun } from '../lib/playerData.js'
 import { enqueuePlayerRun, flushPlayerDataQueue } from '../lib/playerDataQueue.js'
@@ -34,7 +34,7 @@ function ChapterRow({ c }) {
     <div className="pixel-frame border border-slate-700 bg-slate-900/70 p-1.5 sm:p-2">
       <div className="flex items-center gap-1.5">
         {eventArtOf(c.eventId) ? (
-          <Portrait src={eventArtOf(c.eventId)} alt={c.eventName} size="sm" />
+          <Portrait src={eventArtOf(c.eventId)} reducedMotionSrc={eventStaticArtOf(c.eventId)} alt={c.eventName} size="sm" />
         ) : (
           <PortraitPlaceholder label={c.eventName} emoji={c.emoji} size="sm" />
         )}

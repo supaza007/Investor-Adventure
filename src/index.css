@@ -36,6 +36,8 @@ body {
   margin: 0;
   min-width: 320px;
   overflow-x: hidden;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
 }
 
 /* ทุกอย่างเป็นเหลี่ยม ไม่มีมุมโค้ง = ฟีลพิกเซล */
@@ -59,6 +61,38 @@ label,
 .mobile-modal-panel {
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+}
+
+.modal-backdrop {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+  padding-right: max(0.5rem, env(safe-area-inset-right));
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+}
+
+.cozy-modal-surface {
+  border-color: #b98635 !important;
+  background:
+    linear-gradient(180deg, rgba(22, 48, 77, 0.98), rgba(5, 17, 32, 0.99)),
+    repeating-linear-gradient(0deg, rgba(255, 235, 175, 0.035) 0 1px, transparent 1px 4px);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 232, 174, 0.07),
+    0 0 0 2px #071526,
+    0 14px 40px rgba(0, 0, 0, 0.72) !important;
+}
+
+@keyframes loading-rune-turn {
+  to { transform: rotate(1turn); }
+}
+
+.loading-rune {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 2px solid #d8ad58;
+  color: #ffe59b;
+  animation: loading-rune-turn 1.2s steps(8, end) infinite;
 }
 
 /* เส้นสแกนไลน์ CRT คลุมทั้งจอ */
@@ -371,7 +405,7 @@ button:focus-visible {
 
   /* เส้นสแกนไลน์ CRT ไม่ขยับอยู่แล้ว แต่ลายเส้นถี่ๆ ก็กวนสายตาคนกลุ่มนี้เหมือนกัน */
   body::after {
-    opacity: 0.15;
+    opacity: 0.08;
   }
 }
 
@@ -441,19 +475,19 @@ button:focus-visible {
    เงื่อนไข min-height กันไม่ให้กฎนี้ไปโดนมือถือแนวนอนซึ่งต้องการฟอนต์เล็กตามเดิม */
 @media (max-width: 640px) and (min-height: 500px) {
   .text-\[7px\] {
-    font-size: 9px;
-  }
-  .text-\[8px\] {
     font-size: 10px;
   }
-  .text-\[9px\] {
+  .text-\[8px\] {
     font-size: 11px;
+  }
+  .text-\[9px\] {
+    font-size: 12px;
   }
   .text-\[10px\] {
-    font-size: 11px;
+    font-size: 12px;
   }
   .text-\[11px\] {
-    font-size: 12px;
+    font-size: 13px;
   }
 }
 
@@ -487,11 +521,35 @@ button:focus-visible {
 }
 
 .pre-assessment-screen {
+  height: 100dvh;
+  min-height: 0 !important;
+  overflow: hidden !important;
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
   /* UI textures are raster artwork; smooth fractional scaling prevents resize shimmer. */
   image-rendering: auto;
+}
+
+.pre-assessment-screen > div {
+  display: flex;
+  min-height: 0;
+  height: 100%;
+  flex-direction: column;
+}
+
+.pre-assessment-screen .pre-assessment-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.pre-assessment-screen .pre-assessment-panel__content {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 .pre-assessment-panel {
@@ -542,8 +600,42 @@ button:focus-visible {
 }
 
 .pre-assessment-questions {
+  display: flex;
+  min-height: 0;
   max-height: none;
-  margin-top: clamp(1.25rem, 3vw, 2rem);
+  margin-top: clamp(0.5rem, 1.5vw, 1rem);
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: clamp(0.4rem, 1vw, 0.8rem);
+}
+
+.pre-assessment-questions > * {
+  margin-top: 0 !important;
+}
+
+.pre-assessment-questions > .assessment-question-card {
+  display: flex;
+  min-height: 0;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
+.pre-assessment-questions > .assessment-question-card .assessment-question-card__content {
+  display: flex;
+  min-height: 0;
+  flex: 0 0 auto;
+  flex-direction: column;
+}
+
+.pre-assessment-questions > .assessment-question-card .assessment-question-legend {
+  flex: 0 0 auto;
+}
+
+.pre-assessment-questions > .assessment-question-card .assessment-question-legend + div {
+  display: grid;
+  min-height: 0;
+  flex: 0 0 auto;
+  align-content: start;
 }
 
 .assessment-question-card {
@@ -674,24 +766,47 @@ button:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .pre-assessment-screen {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .pre-assessment-screen > div {
+    height: 100%;
+  }
+
   .pre-assessment-panel__content {
     padding-inline: 0;
   }
 
   .assessment-scroll-label--eyebrow {
     width: min(12rem, 78vw);
-    min-height: 2.4rem;
-    padding-inline: 2rem;
+    min-height: 1.8rem;
+    padding: 0.25rem 1.5rem;
+    font-size: 0.78rem;
   }
 
   .assessment-scroll-label--title,
   .assessment-scroll-label--disclaimer {
-    min-height: 4.25rem;
-    padding-inline: 1.7rem;
+    min-height: 2.6rem;
+    padding: 0.4rem 1rem;
+  }
+
+  .assessment-scroll-label--title {
+    font-size: 1.35rem;
+  }
+
+  .assessment-scroll-label--disclaimer {
+    font-size: 0.9rem;
+    line-height: 1.25;
   }
 
   .assessment-question-card__content {
     padding: 0.2rem;
+  }
+
+  .assessment-question-card {
+    border-width: 1.1rem;
+    border-image-width: 1.1rem;
   }
 
   .assessment-question-legend {
@@ -709,8 +824,13 @@ button:focus-visible {
 
   .assessment-answer-row {
     width: 100%;
-    min-height: 5.25rem;
-    padding: 1rem clamp(2.6rem, 12.5%, 3.25rem);
+    min-height: 3.25rem;
+    padding: 0.45rem clamp(2.2rem, 10%, 3rem);
+  }
+
+  .assessment-answer-row__text {
+    font-size: clamp(0.78rem, 2.8vw, 0.95rem);
+    line-height: 1.2;
   }
 
   .assessment-answer-row--left,
@@ -733,6 +853,17 @@ button:focus-visible {
   margin-block: -0.65rem;
   image-rendering: pixelated;
   filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.72));
+}
+
+.cover-lower-content {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  /* ยกกลุ่มตัวละคร/ฟอร์ม/ปุ่มขึ้นจากขอบล่าง ให้สมดุลกับพื้นที่โลโก้ด้านบน */
+  .cover-lower-content {
+    transform: translateY(-clamp(0.9rem, 4vh, 2.25rem));
+  }
 }
 
 .cover-start-image {
@@ -1231,10 +1362,10 @@ button:focus-visible {
 .stage-screen .stage-content-shell .text-2xl { font-size: 1.8rem !important; }
 .stage-screen .stage-content-shell .text-3xl { font-size: 2.25rem !important; }
 .stage-screen .stage-content-shell .text-4xl { font-size: 3rem !important; }
-.stage-screen .stage-content-shell [class~="text-[8px]"] { font-size: 0.6rem !important; }
-.stage-screen .stage-content-shell [class~="text-[9px]"] { font-size: 0.675rem !important; }
-.stage-screen .stage-content-shell [class~="text-[10px]"] { font-size: 0.75rem !important; }
-.stage-screen .stage-content-shell [class~="text-[11px]"] { font-size: 0.825rem !important; }
+.stage-screen .stage-content-shell [class~="text-[8px]"] { font-size: 0.7rem !important; }
+.stage-screen .stage-content-shell [class~="text-[9px]"] { font-size: 0.75rem !important; }
+.stage-screen .stage-content-shell [class~="text-[10px]"] { font-size: 0.8rem !important; }
+.stage-screen .stage-content-shell [class~="text-[11px]"] { font-size: 0.85rem !important; }
 
 .stage-screen .stage-content-shell .max-w-lg,
 .stage-screen .stage-content-shell .max-w-md,
@@ -1257,6 +1388,36 @@ button:focus-visible {
 
   .stage-screen .cozy-hud {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 380px) and (max-height: 620px) {
+  .stage-screen .life-questbar__body {
+    grid-template-columns: 1.75rem minmax(0, 1fr);
+    gap: 0.3rem;
+    padding: 0.25rem;
+  }
+
+  .stage-screen .life-questbar__crest {
+    min-height: 1.7rem;
+    font-size: 0.9rem;
+  }
+
+  .stage-screen .life-questbar__track {
+    margin-top: 0.25rem;
+  }
+
+  .stage-screen .cozy-hud {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .stage-screen .cozy-hud .cozy-character-token {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .stage-screen .stage-content-shell {
+    padding: 0.65rem 0.55rem;
   }
 }
 

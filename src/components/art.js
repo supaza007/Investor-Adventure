@@ -48,8 +48,9 @@ export const EVENT_RASTER_ART = byId(EVENT_RASTER_FILES)
 const ANIMATED_CHARACTER_IDS = new Set(['longterm', 'medium', 'trader'])
 const ANIMATED_EVENT_IDS = new Set(['inflation', 'pandemic', 'reserve_boss', 'scammer', 'tariff_boss', 'tomyumkung'])
 
-export const characterArtOf = (id) => CHARACTER_ART[id + '-canonical'] ?? (ANIMATED_CHARACTER_IDS.has(id) ? CHARACTER_RASTER_ART[id] ?? CHARACTER_ART[id] : CHARACTER_ART[id]) ?? null
+export const characterArtOf = (id) => CHARACTER_RASTER_ART[id + '-canonical'] ?? CHARACTER_ART[id + '-canonical'] ?? (ANIMATED_CHARACTER_IDS.has(id) ? CHARACTER_RASTER_ART[id] ?? CHARACTER_ART[id] : CHARACTER_ART[id]) ?? null
 export const eventArtOf = (id) => (ANIMATED_EVENT_IDS.has(id) ? EVENT_RASTER_ART[id] ?? EVENT_ART[id] : EVENT_ART[id]) ?? null
+export const eventStaticArtOf = (id) => EVENT_RASTER_ART[id + '-static'] ?? EVENT_RASTER_ART[id] ?? EVENT_ART[id] ?? null
 
 // มีรูปครบไหม — ใช้ตอน debug ว่าทำไมบางจอขึ้น emoji แทนรูป
 export const hasArt = () => Object.keys(EVENT_ART).length > 0

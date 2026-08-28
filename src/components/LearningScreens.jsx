@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, RISK_RECOMMENDATIONS, scoreAssessment } from '../game/learning.js'
 import Modal from './Modal.jsx'
-import preAssessmentBackground from '../assets/ui/pre-assessment-background-user.svg'
-import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.svg'
-import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.svg'
-import preAssessmentFrame from '../assets/ui/pre-assessment-frame-user.svg'
-import preAssessmentOptionFrame from '../assets/ui/pre-assessment-answer-option-frame-user.svg'
-import preAssessmentOptionSelected from '../assets/ui/pre-assessment-answer-option-selected-user.svg'
-import preAssessmentQuestionBadge from '../assets/ui/pre-assessment-question-number-badge-user.svg'
-import preAssessmentTitle from '../assets/ui/pre-assessment-title-user.svg'
-import consentBackground from '../assets/ui/consent-background-user.jpg'
+import preAssessmentBackground from '../assets/ui/pre-assessment-background-user.webp'
+import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.webp'
+import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.webp'
+import preAssessmentFrame from '../assets/ui/pre-assessment-frame-user.webp'
+import preAssessmentOptionFrame from '../assets/ui/pre-assessment-answer-option-frame-user.webp'
+import preAssessmentOptionSelected from '../assets/ui/pre-assessment-answer-option-selected-user.webp'
+import preAssessmentQuestionBadge from '../assets/ui/pre-assessment-question-number-badge-user.webp'
+import preAssessmentTitle from '../assets/ui/pre-assessment-title-user.webp'
+import consentBackground from '../assets/ui/consent-background-user.webp'
 
 // โครงหน้ากลางของหน้าแบบประเมินและหน้าการเรียนรู้
 // ปรับได้: className, สีพื้นหลัง, ระยะห่าง และความกว้างของเนื้อหา
@@ -27,23 +27,43 @@ function Shell({ title, eyebrow, children, className = '', style = {}, contentCl
 // ปรับได้: actionLabel, ปุ่มข้าม, ข้อความแจ้งเตือน และรูปแบบคำตอบ
 function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' }) {
   const [answers, setAnswers] = useState({})
+  const [questionIndex, setQuestionIndex] = useState(0)
   const [error, setError] = useState('')
+  const question = questions[questionIndex]
+  const selectedAnswer = question ? answers[question.id] : null
+  const isLastQuestion = questionIndex === questions.length - 1
+
   const submit = (event) => {
     event.preventDefault()
     const result = scoreAssessment(questions, answers)
     if (!result) { setError('กรุณาตอบทุกข้อ หรือเลือกข้ามแบบสะท้อนนี้'); return }
     onSubmit(result)
   }
+  const continueToNext = () => {
+    if (selectedAnswer == null) { setError('กรุณาเลือกคำตอบก่อนดำเนินการต่อ'); return }
+    setError('')
+    setQuestionIndex((index) => Math.min(index + 1, questions.length - 1))
+  }
+  const goBack = () => {
+    setError('')
+    setQuestionIndex((index) => Math.max(index - 1, 0))
+  }
   return <form onSubmit={submit} className={`mt-4 space-y-5 ${className}`} noValidate>
-    {questions.map((q, index) => <fieldset key={q.id} className="assessment-question-card min-w-0" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
+    <div className="flex items-center justify-between gap-3 text-xs font-bold uppercase tracking-widest text-emerald-200" aria-live="polite">
+      <span>คำถามที่ {questionIndex + 1} / {questions.length}</span>
+      <span aria-hidden="true" className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-700">
+        <span className="block h-full rounded-full bg-emerald-400 transition-[width] duration-300" style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }} />
+      </span>
+    </div>
+    {question && <fieldset key={question.id} className="assessment-question-card min-w-0" style={{ borderImageSource: `url(${preAssessmentFrame})` }}>
       <div className="assessment-question-card__content">
         <legend className="assessment-question-legend max-w-full break-words px-1 font-bold leading-snug" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>
-          <span className="assessment-question-badge" style={{ backgroundImage: `url(${preAssessmentQuestionBadge})` }} aria-hidden="true">{index + 1}</span>
-          <span className="sr-only">ข้อ {index + 1}: </span>
-          <span className="min-w-0 flex-1 break-words">{q.prompt}</span>
+          <span className="assessment-question-badge" style={{ backgroundImage: `url(${preAssessmentQuestionBadge})` }} aria-hidden="true">{questionIndex + 1}</span>
+          <span className="sr-only">ข้อ {questionIndex + 1}: </span>
+          <span className="min-w-0 flex-1 break-words">{question.prompt}</span>
         </legend>
-        <div className="mt-3 grid min-w-0 gap-2">{q.options.map(([value, label], optionIndex) => {
-          const selected = answers[q.id] === value
+        <div className="mt-3 grid min-w-0 gap-2">{question.options.map(([value, label], optionIndex) => {
+          const selected = selectedAnswer === value
           return <label
             key={value}
             className={`assessment-answer-row ${optionIndex % 2 === 0 ? 'assessment-answer-row--left' : 'assessment-answer-row--right'} flex min-h-11 min-w-0 cursor-pointer items-center gap-3 leading-snug ${selected ? 'assessment-answer-row--selected' : ''}`}
@@ -53,16 +73,20 @@ function Questions({ questions, actionLabel, onSubmit, onSkip, className = '' })
               backgroundSize: '100% 100%',
             }}
           >
-            <input className="sr-only" type="radio" name={q.id} value={value} checked={selected} onChange={() => { setAnswers((a) => ({ ...a, [q.id]: value })); setError('') }} />
+            <input className="sr-only" type="radio" name={question.id} value={value} checked={selected} onChange={() => { setAnswers((a) => ({ ...a, [question.id]: value })); setError('') }} />
             <span className="assessment-answer-row__text min-w-0 flex-1 break-words">{label}</span>
           </label>
         })}</div>
       </div>
-    </fieldset>)}
+    </fieldset>}
     {error && <p role="alert" className="pixel-chip min-w-0 break-words bg-rose-950 p-3 text-rose-100">{error}</p>}
     <div className="flex flex-wrap gap-3">
-      <button className="pixel-btn min-h-11 flex-1 bg-emerald-500 px-4 py-3 font-bold text-emerald-950" type="submit">{actionLabel}</button>
+      {questionIndex > 0 && <button className="pixel-btn min-h-11 flex-1 border border-slate-600 bg-slate-800 px-4 py-3 font-bold text-white" type="button" onClick={goBack}>ย้อนกลับ</button>}
+      {isLastQuestion
+        ? <button className="pixel-btn min-h-11 flex-1 bg-emerald-500 px-4 py-3 font-bold text-emerald-950" type="submit">{actionLabel}</button>
+        : <button className="pixel-btn min-h-11 flex-1 bg-emerald-500 px-4 py-3 font-bold text-emerald-950" type="button" onClick={continueToNext}>ถัดไป</button>}
     </div>
+    {onSkip && <button type="button" className="mx-auto block min-h-11 px-3 py-2 text-xs font-bold text-white/60 underline underline-offset-4 hover:text-white" onClick={onSkip}>ข้ามแบบประเมินนี้</button>}
   </form>
 }
 

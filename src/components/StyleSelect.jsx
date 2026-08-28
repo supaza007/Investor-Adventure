@@ -13,8 +13,8 @@ import mediumPanelBackground from '../assets/ui/main-panel-bg-medium.svg'
 import viPanelBackground from '../assets/ui/main-panel-bg-vi.svg'
 import longtermPanelBackground from '../assets/ui/main-panel-bg-longterm.svg'
 import traderPanelBackground from '../assets/ui/main-panel-bg-trader.svg'
-import portfolioAdjustmentCoin from '../assets/ui/portfolio-adjustment-coin.png'
-import mysticTitleFrame from '../assets/ui/character-select-title-mystic-relic.png'
+import portfolioAdjustmentCoin from '../assets/ui/portfolio-adjustment-coin.webp'
+import mysticTitleFrame from '../assets/ui/character-select-title-mystic-relic.webp'
 
 const STYLE_GRAD = {
   medium: 'from-sky-900/60 to-sky-950 border-sky-500/50',

@@ -19,16 +19,20 @@ const LABEL_TEXT = {
 // เหมือนช่องรูปมอนสเตอร์ในเกม JRPG — กรอบพิกเซลหนาทำให้ดูตั้งใจแม้พื้นหลังภาพต่างกัน
 // fit: 'contain' (ค่าเริ่มต้น, เห็นภาพเต็มไม่ครอป) หรือ 'cover' (เต็มกรอบ ไม่มีขอบเหลือ แต่ครอปได้)
 // objectPosition: จุดยึดตอนครอป — ใช้ตอน fit='cover' กับภาพที่ครอปกลางแล้วเสียองค์ประกอบ (เช่น หัวโดนตัด)
-export default function Portrait({ src, alt, size = 'md', className = '', fit = 'contain', objectPosition = 'center' }) {
+export default function Portrait({ src, reducedMotionSrc = null, alt, size = 'md', className = '', fit = 'contain', objectPosition = 'center' }) {
   if (!src) return null
+  const imageClassName = `h-full w-full ${fit === 'cover' ? 'object-cover' : 'object-contain'}`
+  const imageStyle = { imageRendering: 'pixelated', objectPosition }
   return (
     <div className={`pixel-frame shrink-0 overflow-hidden bg-black/30 ${SIZES[size]} ${className}`}>
-      <img
-        src={src}
-        alt={alt}
-        className={`h-full w-full ${fit === 'cover' ? 'object-cover' : 'object-contain'}`}
-        style={{ imageRendering: 'pixelated', objectPosition }}
-      />
+      {reducedMotionSrc && reducedMotionSrc !== src ? (
+        <picture className="block h-full w-full">
+          <source media="(prefers-reduced-motion: reduce)" srcSet={reducedMotionSrc} />
+          <img src={src} alt={alt} className={imageClassName} style={imageStyle} />
+        </picture>
+      ) : (
+        <img src={src} alt={alt} className={imageClassName} style={imageStyle} />
+      )}
     </div>
   )
 }
