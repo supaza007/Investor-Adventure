@@ -158,7 +158,9 @@ test('answer rows reserve space for the end ornaments with a responsive backgrou
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?background-size:\s*100% 100%/)
   assert.match(css, /\.assessment-answer-row\s*\{[\s\S]*?padding:\s*clamp\([^;]+\) clamp\(2\.75rem,\s*10%,\s*5rem\)/)
   assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?width:\s*min\(94%,\s*32rem\)/)
-  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.6rem clamp\(1\.4rem,\s*5%,\s*2\.2rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row\s*\{[\s\S]*?padding:\s*0\.6rem clamp\(1rem,\s*4%,\s*1\.8rem\) 0\.6rem clamp\(3\.25rem,\s*14%,\s*4\.75rem\)/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-question-legend \+ div\s*\{[\s\S]*?gap:\s*0\.2rem/)
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.assessment-answer-row__text\s*\{[\s\S]*?overflow-wrap:\s*anywhere/)
   assert.match(css, /\.assessment-answer-row--left,[\s\S]*?\.assessment-answer-row--right\s*\{[\s\S]*?width:\s*min\(94%,\s*32rem\)/)
 })
 
