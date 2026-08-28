@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>PROTOTYPE — Assessment Question UI</title>
+  <style>
+    :root { color-scheme: dark; font-family: Georgia, 'Noto Serif Thai', serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #071426; color: #4a210b; }
+    .prototype { width: min(100%, 760px); min-height: 100dvh; padding: 20px 16px 84px; display: grid; place-items: center; position: relative; }
+    .frame { width: min(100%, 680px); padding: 28px 26px 34px; background: #1680d2; border: 10px solid #e8a02c; box-shadow: inset 0 0 0 5px #fbd36c, 0 10px 0 #351706, 0 18px 34px #0009; }
+    .eyebrow { margin: -10px auto 18px; width: fit-content; padding: 5px 34px; background: #f7d996; border: 3px solid #77330b; font-weight: 700; font-size: 15px; }
+    .question { margin: 0 auto 28px; width: min(92%, 540px); min-height: 66px; padding: 14px 28px 14px 70px; position: relative; display: grid; place-items: center; text-align: center; background: #f7d996; border: 4px solid #77330b; box-shadow: 0 0 0 3px #f2ad34, 0 6px 0 #351706; font-size: clamp(18px, 4vw, 27px); font-weight: 700; }
+    .badge { position: absolute; left: -29px; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: #fff0c4; border: 4px solid #9c570d; box-shadow: 0 0 0 3px #f4bd40; font-size: 25px; }
+    .answers { display: grid; gap: 20px; justify-items: center; }
+    .answer { width: min(86%, 500px); min-height: 66px; display: flex; align-items: center; gap: 14px; padding: 10px 32px 10px 16px; border: 4px solid #8d4b0d; border-radius: 32px; background: #f7d996; box-shadow: inset 0 0 0 3px #ffe9aa, 0 4px 0 #3b1805; font-size: clamp(15px, 3vw, 21px); line-height: 1.2; text-align: center; }
+    .answer input { width: 27px; height: 27px; flex: 0 0 auto; accent-color: #08976d; }
+    .answer span { flex: 1; }
+    .variant-b .answers { gap: 14px; }
+    .variant-b .answer { width: fit-content; min-width: 58%; max-width: 78%; min-height: 58px; padding-inline: 13px 26px; }
+    .variant-c .frame { padding-inline: 14px; }
+    .variant-c .question { width: 100%; }
+    .variant-c .answer { width: 92%; min-height: 78px; padding-inline: 18px 28px; }
+    .switcher { position: fixed; z-index: 5; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 14px; padding: 9px 13px; border: 1px solid #facc15; border-radius: 99px; background: #111827ee; color: #fef3c7; box-shadow: 0 6px 24px #0008; font: 700 13px/1.1 system-ui, sans-serif; }
+    .switcher button { width: 30px; height: 30px; border: 1px solid #facc15; border-radius: 50%; background: #26354d; color: white; font-size: 18px; cursor: pointer; }
+    .switcher button:active { transform: scale(.94); }
+    .note { position: fixed; top: 8px; right: 10px; color: #fef3c7; opacity: .65; font: 10px system-ui, sans-serif; }
+    @media (max-width: 420px) { .prototype { padding: 12px 8px 78px; } .frame { padding: 22px 10px 28px; border-width: 7px; } .eyebrow { margin-bottom: 14px; font-size: 13px; } .question { margin-bottom: 22px; padding-left: 48px; font-size: 17px; } .badge { left: -22px; width: 46px; height: 46px; font-size: 20px; } .answers { gap: 14px; } .answer, .variant-b .answer, .variant-c .answer { width: min(88%, 330px); max-width: 88%; min-height: 58px; padding: 8px 18px 8px 10px; font-size: 15px; } .answer input { width: 23px; height: 23px; } }
+  </style>
+</head>
+<body>
+  <main class="prototype" id="prototype"><span class="note">PROTOTYPE • question UI only</span></main>
+  <nav class="switcher" aria-label="Prototype variants"><button id="prev" aria-label="ก่อนหน้า">‹</button><span id="label"></span><button id="next" aria-label="ถัดไป">›</button></nav>
+  <script>
+    const variants = [
+      { key: 'A', name: 'สมดุล', className: 'variant-a' },
+      { key: 'B', name: 'กระชับตามข้อความ', className: 'variant-b' },
+      { key: 'C', name: 'เน้นพื้นที่กด', className: 'variant-c' },
+    ]
+    const params = new URLSearchParams(location.search)
+    let index = Math.max(0, Math.min(variants.length - 1, Number(params.get('variant') || 0)))
+    const render = () => {
+      const current = variants[index]
+      document.querySelector('#prototype').innerHTML = `<section class="frame ${current.className}"><div class="eyebrow">กรอบนอก</div><h1 class="question"><span class="badge">1</span>ตอนนี้คุณอยู่ช่วงไหนของชีวิต</h1><div class="answers"><label class="answer"><input type="radio" name="answer"><span>ยังอายุไม่เกิน 30 ปี เพิ่งเริ่มหางานหรือเริ่มเก็บเงิน</span></label><label class="answer"><input type="radio" name="answer"><span>อายุ 31–55 ปี อยู่ในวัยทำงานและเริ่มมีเงินเก็บ</span></label><label class="answer"><input type="radio" name="answer"><span>อายุเกิน 55 ปี ใกล้เกษียณและอยากใช้ชีวิตสบาย ๆ</span></label></div></section>`
+      document.querySelector('#label').textContent = `${current.key} — ${current.name}`
+      const url = new URL(location.href); url.searchParams.set('variant', index); history.replaceState(null, '', url)
+    }
+    const step = delta => { index = (index + delta + variants.length) % variants.length; render() }
+    document.querySelector('#prev').onclick = () => step(-1); document.querySelector('#next').onclick = () => step(1)
+    addEventListener('keydown', event => { if (event.target.matches('input,textarea,[contenteditable]')) return; if (event.key === 'ArrowLeft') step(-1); if (event.key === 'ArrowRight') step(1) })
+    render()
+  </script>
+</body>
+</html>
