@@ -703,7 +703,9 @@ button:focus-visible {
 
 .assessment-answer-row {
   position: relative;
-  width: min(94%, 48rem);
+  width: fit-content;
+  min-width: min(18rem, 88%);
+  max-width: 92%;
   height: auto;
   min-width: 0;
   margin-inline: auto;
@@ -745,7 +747,8 @@ button:focus-visible {
   position: relative;
   z-index: 1;
   display: grid;
-  width: 100%;
+  width: auto;
+  flex: 0 1 auto;
   max-width: 100%;
   min-width: 0;
   place-items: center;
@@ -823,8 +826,9 @@ button:focus-visible {
   }
 
   .assessment-answer-row {
-    width: min(82%, 30rem);
-    max-width: 30rem;
+    width: fit-content;
+    min-width: min(16rem, 88%);
+    max-width: 88%;
     min-height: 3.25rem;
     padding: 0.45rem clamp(2.2rem, 10%, 3rem);
   }
