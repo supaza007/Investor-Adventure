@@ -848,7 +848,7 @@ button:focus-visible {
     min-width: min(19rem, 94%);
     max-width: 94%;
     min-height: 5.46rem;
-    padding: 0.6rem clamp(2.75rem, 10%, 4rem) 0.6rem clamp(3.25rem, 14%, 4.75rem);
+    padding: 0.72rem clamp(3.3rem, 12%, 4.8rem) 0.72rem clamp(3.9rem, 16.8%, 5.7rem);
     justify-content: center;
   }
 
