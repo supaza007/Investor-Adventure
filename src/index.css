@@ -827,9 +827,15 @@ button:focus-visible {
 
   /* Keep the question panel compact on phones without making the choices hard to tap. */
   .assessment-question-legend + div {
-    margin-top: 0.1rem !important;
-    gap: 0.1rem;
-    row-gap: 0.1rem;
+    margin-top: 0 !important;
+    gap: 0 !important;
+    row-gap: 0 !important;
+  }
+
+  /* The option artwork has transparent top/bottom insets, so pull following rows
+     upward as well as removing the grid gap. This changes the hit areas too. */
+  .assessment-question-legend + div > .assessment-answer-row + .assessment-answer-row {
+    margin-top: -1.25rem !important;
   }
 
   .assessment-question-badge {
