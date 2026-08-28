@@ -827,10 +827,10 @@ button:focus-visible {
 
   .assessment-answer-row {
     width: fit-content;
-    min-width: min(16rem, 88%);
-    max-width: 88%;
+    min-width: min(11.5rem, 72%);
+    max-width: 72%;
     min-height: 3.25rem;
-    padding: 0.45rem clamp(2.2rem, 10%, 3rem);
+    padding: 0.45rem clamp(1.5rem, 6%, 2.2rem);
   }
 
   .assessment-answer-row__text {
@@ -840,7 +840,8 @@ button:focus-visible {
 
   .assessment-answer-row--left,
   .assessment-answer-row--right {
-    width: 100%;
+    width: fit-content;
+    max-width: 72%;
     margin-inline: auto;
   }
 }
