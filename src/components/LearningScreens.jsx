@@ -101,7 +101,7 @@ export function PreAssessmentScreen({ onComplete, onSkip }) {
     contentClassName="max-w-4xl"
   >
     {/* TEXT: “ก่อนเริ่มเกม” — ป้ายเล็กด้านบน; ปรับขนาดที่ text-xl */}
-    <p className="assessment-scroll-label assessment-scroll-label--eyebrow text-xl uppercase tracking-widest text-amber-950" style={{ backgroundImage: `url(${preAssessmentEyebrow})` }}>ก่อนเริ่มเกม</p>
+    <p className="sr-only" aria-hidden="true" style={{ backgroundImage: `url(${preAssessmentEyebrow})` }}>ก่อนเริ่มเกม</p>
     {/* TEXT: “แบบประเมินของผู้กล้า” — หัวข้อใหญ่; ปรับขนาดที่ text-3xl / sm:text-4xl */}
     <h1 className="assessment-scroll-label assessment-scroll-label--title mt-1 break-words text-3xl font-black leading-tight text-amber-950 sm:text-4xl" style={{ backgroundImage: `url(${preAssessmentTitle})` }}>แบบประเมินของผู้กล้า</h1>
     {/* TEXT: คำอธิบายใต้หัวข้อ; ปรับขนาดที่ text-2xl */}
