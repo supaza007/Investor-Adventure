@@ -1,11 +1,10 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { getTools } from '../game/engine/data/tools.js'
 import { netWorth, applyAllocation, currentStyle } from '../game/engine/gameState.js'
-import { colorOf, money, pct } from './ToolTheme'
+import { colorOf, money } from './ToolTheme'
 import LifeTimeline from './LifeTimeline'
 import Modal from './Modal'
 import { BALANCE } from '../game/engine/balance.js'
-import { buildChapterTransitionBreakdown } from '../game/presentation.js'
 import ChapterTransition from './ChapterTransition.jsx'
 import CharacterToken from './CharacterToken.jsx'
 import mainGameBackground from '../assets/ui/main-game-background-user.webp'
@@ -166,58 +165,6 @@ function ToolDetailModal({ tool, onClose }) {
   )
 }
 
-// popup กันหน้าจัดพอร์ต — บังคับให้อ่านว่ากำลังอยู่บทไหนก่อนเริ่มลาก slider
-// ถ้ามีบทก่อนหน้า (prevSummary) จะโชว์สรุปสั้นๆ ของบทที่เพิ่งจบด้วย เพื่อสะกิดให้คิดก่อนปรับพอร์ตใหม่
-function signedMoney(value) {
-  const rounded = Math.round(value)
-  return `${rounded > 0 ? '+' : ''}${money(rounded)}`
-}
-
-function ChapterIntroModal({ chapter, prevSummary, startValue, incomeAdded, onContinue }) {
-  const prevChangePct = prevSummary && prevSummary.valueBefore > 0 ? (prevSummary.valueEnd - prevSummary.valueBefore) / prevSummary.valueBefore : 0
-  const transition = buildChapterTransitionBreakdown({ prevSummary, chapter, startValue, incomeAdded })
-
-  return (
-    // ไม่ส่ง onClose = ปิดเองไม่ได้ ต้องกด "เริ่มจัดพอร์ตบทนี้" เท่านั้น (ตั้งใจ — บังคับให้อ่านก่อน)
-    <Modal label={`บทที่ ${chapter.n} — ${chapter.theme}`} panelClassName="pixel-frame max-w-md border border-slate-600 bg-gradient-to-b from-slate-900 to-slate-950 p-4 text-center sm:p-6">
-      <div>
-        {prevSummary && (
-          <div className="pixel-chip mb-3 bg-black/40 p-2 text-left text-[10px] leading-relaxed sm:text-xs">
-            <div className="font-bold text-white/85">จบบทที่ {prevSummary.chapter} แล้ว — {prevSummary.eventName}</div>
-            <div className="mt-1 text-white/65">
-              พอร์ตปลายบท <b className="text-white">{money(prevSummary.valueEnd)}</b>{' '}
-              <span className={prevChangePct >= 0 ? 'text-emerald-300' : 'text-rose-300'}>({pct(prevChangePct)})</span>
-            </div>
-            {transition && (
-              <div className="mt-2 border-t border-white/10 pt-2" aria-label="ที่มาของเงินเมื่อเริ่มบทใหม่">
-                <div className="font-bold text-amber-200">เริ่มบทใหม่ เงินเปลี่ยนเพราะอะไร?</div>
-                <div className="mt-1 flex justify-between gap-3"><span>เงินเติมจากช่วงชีวิตใหม่</span><b>{signedMoney(transition.income)}</b></div>
-                {transition.cashAdjustment !== 0 && (
-                  <div className="flex justify-between gap-3"><span>เงินสดถูกเงินเฟ้อกินกำลังซื้อ</span><b>{signedMoney(transition.cashAdjustment)}</b></div>
-                )}
-                <div className="mt-1 flex justify-between gap-3 border-t border-white/10 pt-1 font-bold"><span>{transition.netChange >= 0 ? 'เงินเพิ่มสุทธิ' : 'เงินลดสุทธิ'}</span><span>{signedMoney(transition.netChange)}</span></div>
-                <div className="mt-1 text-white/60">เงินเริ่มบทนี้ <b className="text-white">{money(transition.startValue)}</b> · ไม่ใช่กำไรจากตลาดทั้งหมด</div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="text-[10px] uppercase tracking-widest text-white/55 sm:text-xs">
-          บทที่ {chapter.n} · อายุ {chapter.ageFrom}-{chapter.ageTo}
-        </div>
-        <div className="mt-1 text-lg font-black sm:text-2xl">{chapter.theme}</div>
-        <p className="mt-3 text-[11px] leading-relaxed text-white/60 sm:text-sm">
-          ก่อนจัดพอร์ต ลองคิดดูว่าทศวรรษนี้คุณจะรับความเสี่ยงได้แค่ไหน — ไม่มีคำตอบที่ถูกเสมอ
-        </p>
-
-        <button type="button" onClick={onContinue} className="pixel-btn mt-4 w-full bg-emerald-500 py-2.5 text-sm font-bold text-emerald-950 sm:text-base">
-          ดูเงินที่ได้รับในบทนี้
-        </button>
-      </div>
-    </Modal>
-  )
-}
-
 function IncomePopup({ chapter, incomeAdded, cumulativeIncome, onContinue }) {
   return <Modal label={`เงินที่ได้รับในบทที่ ${chapter.n}`} panelClassName="pixel-frame max-w-md border border-emerald-400/60 bg-slate-950 p-5 text-center text-white">
     <div className="text-xs uppercase tracking-widest text-emerald-300">{chapter.n === 1 ? 'ทุนเริ่มต้น' : 'รายได้และเงินออมใหม่'}</div>
@@ -267,7 +214,6 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
   const [incomeSeenFor, setIncomeSeenFor] = useState(null)
   const showChapterIntro = isChapterStart && chapterIntroSeenFor !== chapter.n
   const showIncome = isChapterStart && chapterIntroSeenFor === chapter.n && incomeSeenFor !== chapter.n
-  const prevSummary = state.history[state.history.length - 1] ?? null
   const incomeAdded = state.incomeSchedule[state.chapterIndex] ?? 0
   const cumulativeIncome = state.incomeSchedule.slice(0, state.chapterIndex + 1).reduce((sum, amount) => sum + amount, 0)
 
@@ -295,9 +241,7 @@ export default function AllocationScreen({ state, chapter, onConfirm, isChapterS
         backgroundSize: 'cover',
       }}
     >
-      {showChapterIntro && (prevSummary
-        ? <ChapterTransition chapter={chapter} prevSummary={prevSummary} startValue={total} incomeAdded={incomeAdded} onContinue={() => setChapterIntroSeenFor(chapter.n)} />
-        : <ChapterIntroModal chapter={chapter} prevSummary={prevSummary} startValue={total} incomeAdded={incomeAdded} onContinue={() => setChapterIntroSeenFor(chapter.n)} />)}
+      {showChapterIntro && <ChapterTransition chapter={chapter} startValue={total} onContinue={() => setChapterIntroSeenFor(chapter.n)} />}
       {showIncome && <IncomePopup chapter={chapter} incomeAdded={incomeAdded} cumulativeIncome={cumulativeIncome} onContinue={() => setIncomeSeenFor(chapter.n)} />}
       {detailTool && <ToolDetailModal tool={detailTool} onClose={() => setDetailTool(null)} />}
       {reviewing && <Modal label="ทบทวนพอร์ตก่อนยืนยัน" onClose={() => !submitting && setReviewing(false)}>

@@ -106,6 +106,199 @@ body::after {
   opacity: 0.45;
 }
 
+/* ================= FRIENDLY RISK RESULT ================= */
+.risk-result-screen {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  background-position: center;
+  background-size: cover;
+  color: #fff8dd;
+}
+
+.risk-result-card {
+  position: relative;
+  width: min(100%, 30rem);
+  overflow: hidden;
+  border: 3px solid #dba63e;
+  padding-top: 0.75rem;
+  background: linear-gradient(145deg, #21183f, #09172b 48%, #07111f);
+  box-shadow:
+    inset 0 0 0 3px #704018,
+    8px 8px 0 rgba(0, 0, 0, 0.55),
+    0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.risk-result-card::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(255, 224, 142, 0.2);
+  pointer-events: none;
+}
+
+.risk-result-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0 1rem;
+  border-bottom: 2px solid #a77a36;
+  padding: 0.5rem 0.2rem;
+}
+
+.risk-result-card__topline span {
+  color: #ffe5a0;
+  font-weight: 900;
+}
+
+.risk-result-card__topline small {
+  color: #77dabe;
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.risk-result-card__hero {
+  display: grid;
+  grid-template-columns: 8.3rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.8rem 1rem 0.5rem;
+}
+
+.risk-result-donut {
+  display: grid;
+  width: 7.1rem;
+  height: 7.1rem;
+  place-items: center;
+  border-radius: 50% !important;
+  background: conic-gradient(var(--risk-result-gradient));
+  box-shadow: 0 0 0 3px #d6a744, 5px 5px 0 #030812;
+}
+
+.risk-result-donut::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 4.65rem;
+  height: 4.65rem;
+  border-radius: 50% !important;
+  background: #081526;
+  box-shadow: inset 0 0 0 2px #1f3853;
+}
+
+.risk-result-donut > span {
+  z-index: 1;
+  grid-area: 1 / 1;
+  display: grid;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.risk-result-donut b { color: #ffe6a6; }
+.risk-result-donut small { margin-top: 0.25rem; color: #8edcc8; font-size: 0.55rem; }
+
+.risk-result-card__intro { min-width: 0; }
+.risk-result-card__intro > p:first-child { margin: 0; color: #8ce9d0; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.05em; }
+.risk-result-card__intro h1 { margin: 0.35rem 0; font-size: clamp(1.25rem, 5.5vw, 1.65rem); line-height: 1.05; }
+.risk-result-card__intro h1 strong { color: #ffd15b; }
+.risk-result-card__intro h1 + p { margin: 0; color: rgba(255, 248, 221, 0.7); font-size: 0.68rem; line-height: 1.4; }
+.risk-result-card__intro > span { display: inline-block; margin-top: 0.55rem; border: 1px solid rgba(255, 209, 91, 0.5); padding: 0.28rem 0.42rem; background: rgba(111, 70, 20, 0.45); color: #ffe49b; font-size: 0.61rem; font-weight: 800; }
+
+.risk-result-assets {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0.25rem 1rem 0.65rem;
+  padding: 0;
+  list-style: none;
+}
+
+.risk-result-assets li {
+  display: flex;
+  min-height: 3.25rem;
+  align-items: center;
+  border: 2px solid #14253a;
+  padding: 0.35rem 0.6rem;
+  background: linear-gradient(90deg, rgba(13, 34, 56, 0.98), #101b2c);
+  box-shadow: inset 3px 0 0 var(--risk-result-asset-color);
+}
+
+.risk-result-assets__icon {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: 0 0 auto;
+  place-items: center;
+  margin-right: 0.55rem;
+  border: 1px solid var(--risk-result-asset-color);
+  background: #07101d;
+  color: var(--risk-result-asset-color);
+}
+
+.risk-result-assets__copy { display: grid; min-width: 0; flex: 1; line-height: 1.2; }
+.risk-result-assets__copy b { font-size: 0.86rem; }
+.risk-result-assets__copy small { margin-top: 0.18rem; overflow-wrap: anywhere; color: rgba(255, 255, 255, 0.55); font-size: 0.62rem; }
+.risk-result-assets li > strong { margin-left: 0.5rem; color: var(--risk-result-asset-color); font-size: 0.95rem; }
+
+.risk-result-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 1rem;
+}
+
+.risk-result-benefits span {
+  border: 1px solid #426079;
+  padding: 0.25rem 0.4rem;
+  background: #0d2238;
+  color: #92dcc7;
+  font-size: 0.58rem;
+}
+
+.risk-result-continue {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: calc(100% - 2rem);
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0.75rem 1rem 0.9rem;
+  border: 3px solid #07130f;
+  background: linear-gradient(#24d39e, #0aa979);
+  box-shadow: inset 0 3px rgba(255, 255, 255, 0.22), 4px 4px 0 #020907;
+  color: #04251c;
+  font: 900 1rem var(--font-game);
+}
+
+.risk-result-continue:not(:disabled):hover { filter: brightness(1.1); }
+.risk-result-continue:active { transform: translate(3px, 3px); box-shadow: inset 0 3px rgba(255, 255, 255, 0.1), 1px 1px 0 #020907; }
+.risk-result-continue > span { font-size: 1.5rem; line-height: 1; }
+
+.risk-result-disclaimer {
+  margin: -0.45rem 1rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  font-size: 0.55rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 390px), (max-height: 760px) {
+  .risk-result-screen { align-items: start; padding-top: max(0.5rem, env(safe-area-inset-top)); }
+  .risk-result-card__topline { padding-block: 0.4rem; }
+  .risk-result-card__hero { grid-template-columns: 7.1rem minmax(0, 1fr); padding-block: 0.55rem 0.35rem; }
+  .risk-result-donut { width: 6.15rem; height: 6.15rem; }
+  .risk-result-donut::before { width: 4.05rem; height: 4.05rem; }
+  .risk-result-assets { gap: 0.28rem; }
+  .risk-result-assets li { min-height: 2.85rem; padding-block: 0.25rem; }
+  .risk-result-continue { min-height: 2.9rem; margin-block: 0.6rem 0.8rem; }
+}
+
 /* กล่อง/แผงแบบเบเวล NES */
 .pixel-frame {
   border: 4px solid var(--c-line) !important;
@@ -1533,6 +1726,186 @@ button:focus-visible {
   .journey-map > div { min-height: 10.5rem; }
   .cozy-ledger-row,
   .cozy-ledger-total { min-height: 1.65rem; padding-block: 0.2rem; }
+}
+
+/* ================= CHAPTER OPENING UI (PRODUCTION + LOCAL PREVIEW) ================= */
+.chapter-opening-dialog {
+  width: min(100%, 31rem);
+  max-width: 31rem;
+  max-height: calc(100dvh - 1rem) !important;
+  overflow: hidden !important;
+  border: 0;
+  background: #071426;
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.82);
+}
+
+.chapter-prototype-screen {
+  height: 100dvh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(5.5rem, calc(env(safe-area-inset-bottom) + 4.75rem));
+  background:
+    radial-gradient(circle at 50% 20%, rgba(65, 117, 115, 0.25), transparent 42%),
+    linear-gradient(180deg, #071426, #020711);
+  color: #fff7da;
+}
+
+.chapter-prototype-screen__content { width: min(100%, 31rem); }
+
+.chapter-prototype {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 3px solid #d6a744;
+  background: #071426;
+  box-shadow: inset 0 0 0 3px #623713, 8px 8px 0 rgba(0, 0, 0, 0.65);
+}
+
+.chapter-prototype__start {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  min-height: 3.2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  border: 3px solid #06150f;
+  background: linear-gradient(#29daa3, #08a976);
+  box-shadow: inset 0 3px rgba(255, 255, 255, 0.2), 4px 4px 0 rgba(0, 0, 0, 0.65);
+  color: #03261b;
+  font: 900 1rem var(--font-game);
+}
+
+.chapter-prototype__start > span { font-size: 24px; line-height: 1; }
+
+/* A — cinematic portal */
+.chapter-prototype--portal {
+  min-height: min(42rem, calc(100dvh - 6.5rem));
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+.chapter-prototype__backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; animation: chapter-backdrop-arrive 520ms steps(6, end) both; }
+.chapter-prototype__portal-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(2, 8, 16, 0.14), rgba(2, 8, 16, 0.5) 42%, rgba(2, 8, 16, 0.97) 82%); }
+.chapter-prototype__portal-content { position: relative; z-index: 1; display: flex; min-height: inherit; flex-direction: column; align-items: center; padding: 1rem; text-align: center; }
+.chapter-prototype__completed { align-self: flex-start; margin: 0; border: 1px solid rgba(137, 226, 199, 0.65); padding: 0.48rem 0.72rem; background: rgba(3, 20, 29, 0.94); color: #c9ffef; font-size: 21px; font-weight: 800; line-height: 1.2; text-shadow: none; }
+.chapter-prototype__completed span { color: #37e0a5; }
+.chapter-prototype__chapter-number { display: grid; width: 8.2rem; height: 8.2rem; place-items: center; align-content: center; margin-top: 1.6rem; border: 3px solid #f0c75b; background: radial-gradient(circle, rgba(16, 51, 71, 0.88), rgba(3, 15, 28, 0.96)); box-shadow: 0 0 0 5px rgba(5, 19, 30, 0.8), 0 0 35px rgba(255, 194, 68, 0.38); border-radius: 50% !important; }
+.chapter-prototype__chapter-number small { color: #7ee2ca; font-size: 9px; letter-spacing: 0.15em; }
+.chapter-prototype__chapter-number strong { color: #ffe08a; font-size: 51px; line-height: 0.9; text-shadow: 2px 2px 0 #6c3715; }
+.chapter-prototype__age { margin: 0.75rem 0 0.2rem; padding: 0.2rem 0.5rem; background: rgba(3, 20, 29, 0.92); color: #c8fff0; font-size: 23px; font-weight: 900; line-height: 1.2; text-shadow: none; }
+.chapter-prototype--portal h1 { margin: 0; color: #ffe29a; font-size: clamp(56px, 15vw, 79px); line-height: 1.2; text-shadow: 2px 2px 0 #4e240f; }
+.chapter-prototype__story { width: 100%; max-width: 25rem; margin: 0.3rem 0; border-left: 4px solid #e1b24b; padding: 0.55rem 0.7rem; background: rgba(2, 13, 24, 0.94); color: #fff8df; font-size: 24px; line-height: 1.45; text-align: left; text-shadow: none; }
+.chapter-prototype__reward { display: grid; width: 100%; margin-top: auto; border: 2px solid #b98231; padding: 0.55rem; background: rgba(5, 20, 35, 0.88); }
+.chapter-prototype__reward span { color: #c9ffef; font-size: 20px; font-weight: 800; }
+.chapter-prototype__reward strong { color: #ffd76a; font-size: 43px; line-height: 1.15; }
+.chapter-prototype__reward small { color: rgba(255, 255, 255, 0.82); font-size: 17px; }
+.chapter-prototype--portal .chapter-prototype__start { min-height: 4rem; margin-top: 0.45rem; font-size: 27px; }
+.chapter-prototype--portal[data-chapter="1"] { border-color: #f0c75b; }
+.chapter-prototype--portal[data-chapter="2"] { border-color: #dfac4a; }
+.chapter-prototype--portal[data-chapter="3"] { border-color: #9aaad3; }
+.chapter-prototype--portal[data-chapter="3"] .chapter-prototype__portal-shade { background: linear-gradient(180deg, rgba(2, 8, 20, 0.12), rgba(2, 8, 20, 0.46) 38%, rgba(2, 8, 20, 0.96) 80%); }
+.chapter-prototype--portal[data-chapter="4"] { border-color: #f2aa51; }
+
+@keyframes chapter-backdrop-arrive {
+  from { opacity: 0; transform: scale(1.035); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-prototype__backdrop { animation: none; }
+}
+
+/* B — life-map timeline */
+.chapter-prototype--journey { padding: 1rem; background: linear-gradient(160deg, #0d3440, #071426 46%, #050d19); }
+.chapter-prototype--journey > header { text-align: center; }
+.chapter-prototype--journey > header p { margin: 0; color: #83dec7; font-size: 0.65rem; letter-spacing: 0.08em; }
+.chapter-prototype--journey > header h1 { margin: 0.25rem 0; color: #ffe09a; font-size: 1.65rem; }
+.chapter-prototype--journey > header span { color: rgba(255, 255, 255, 0.58); font-size: 0.65rem; }
+.chapter-prototype__timeline { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); margin: 1.25rem 0; }
+.chapter-prototype__timeline::before { content: ""; position: absolute; top: 1.15rem; right: 8%; left: 8%; height: 3px; background: linear-gradient(90deg, #37d6a4 0 35%, #42536b 35%); }
+.chapter-prototype__timeline > div { z-index: 1; display: grid; justify-items: center; gap: 0.35rem; color: #65758b; text-align: center; }
+.chapter-prototype__timeline b { display: grid; width: 2.35rem; height: 2.35rem; place-items: center; border: 3px solid #33465d; background: #0a1727; color: #697a91; }
+.chapter-prototype__timeline span { display: grid; font-size: 0.62rem; font-weight: 800; line-height: 1.2; }
+.chapter-prototype__timeline small { margin-top: 0.2rem; font-size: 0.5rem; font-weight: 400; }
+.chapter-prototype__timeline .is-done { color: #81d8c1; }
+.chapter-prototype__timeline .is-done b { border-color: #32c99b; color: #071e17; background: #32c99b; }
+.chapter-prototype__timeline .is-current { color: #ffe195; }
+.chapter-prototype__timeline .is-current b { border-color: #ffd060; color: #ffd970; box-shadow: 0 0 16px rgba(255, 205, 77, 0.38); }
+.chapter-prototype__journey-card { border: 2px solid #b07b31; padding: 0.75rem; background: linear-gradient(135deg, rgba(22, 47, 68, 0.95), rgba(6, 17, 30, 0.98)); }
+.chapter-prototype__journey-card > div > small { color: #65d8bb; font-size: 0.6rem; }
+.chapter-prototype__journey-card h2 { margin: 0.15rem 0; color: #ffe09a; font-size: 1.25rem; }
+.chapter-prototype__journey-card p { margin: 0; color: rgba(255, 255, 255, 0.62); font-size: 0.67rem; line-height: 1.45; }
+.chapter-prototype__journey-card dl { display: grid; gap: 0.32rem; margin: 0.7rem 0 0; }
+.chapter-prototype__journey-card dl > div { display: flex; justify-content: space-between; gap: 0.5rem; border-top: 1px solid #2c435a; padding-top: 0.32rem; font-size: 0.65rem; }
+.chapter-prototype__journey-card dt { color: rgba(255, 255, 255, 0.58); }
+.chapter-prototype__journey-card dd { margin: 0; color: #ffe19a; font-weight: 900; }
+.chapter-prototype__journey-card dd.is-positive { color: #67e3bd; }
+.chapter-prototype--journey .chapter-prototype__start { margin-top: 0.7rem; }
+
+/* C — RPG mission dossier */
+.chapter-prototype--mission { padding: 1rem; background: linear-gradient(145deg, #281a39, #0a1729 44%, #07111f); }
+.chapter-prototype--mission > header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #a9782d; padding-bottom: 0.55rem; }
+.chapter-prototype--mission > header span { border: 1px solid #e4b848; padding: 0.25rem 0.45rem; background: #603b18; color: #ffe097; font-size: 0.62rem; letter-spacing: 0.1em; }
+.chapter-prototype--mission > header small { color: #83dfc7; font-size: 0.6rem; }
+.chapter-prototype__mission-title { display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem 0 0.55rem; }
+.chapter-prototype__mission-title > span { display: grid; width: 4.4rem; height: 4.4rem; flex: 0 0 auto; place-items: center; border: 3px solid #d7a844; background: #121e34; color: #ffe08f; font-size: 2rem; box-shadow: 4px 4px #030711; }
+.chapter-prototype__mission-title small { color: #81ddc5; font-size: 0.65rem; }
+.chapter-prototype__mission-title h1 { margin: 0.1rem 0 0; color: #ffe5a8; font-size: 1.8rem; }
+.chapter-prototype__mission-story { margin: 0 0 0.75rem; border-left: 3px solid #dbad45; padding: 0.45rem 0.6rem; background: rgba(218, 174, 76, 0.08); color: rgba(255, 255, 255, 0.66); font-size: 0.68rem; line-height: 1.45; }
+.chapter-prototype__objectives { border: 2px solid #344d69; padding: 0.65rem; background: rgba(5, 17, 32, 0.76); }
+.chapter-prototype__objectives h2 { margin: 0 0 0.45rem; color: #a2ead5; font-size: 0.75rem; }
+.chapter-prototype__objectives > div { display: flex; align-items: center; gap: 0.6rem; border-top: 1px solid #263d56; padding: 0.42rem 0; }
+.chapter-prototype__objectives > div > span { display: grid; width: 1.9rem; height: 1.9rem; flex: 0 0 auto; place-items: center; border: 1px solid #c89b3e; color: #ffd873; }
+.chapter-prototype__objectives p { display: grid; margin: 0; line-height: 1.2; }
+.chapter-prototype__objectives b { font-size: 0.7rem; }
+.chapter-prototype__objectives small { margin-top: 0.18rem; color: rgba(255, 255, 255, 0.48); font-size: 0.55rem; }
+.chapter-prototype__mission-reward { display: grid; margin-top: 0.65rem; border: 2px solid #b38031; padding: 0.55rem; text-align: center; background: linear-gradient(90deg, #18283b, #122031); }
+.chapter-prototype__mission-reward small { color: #86dcc4; font-size: 0.56rem; }
+.chapter-prototype__mission-reward strong { color: #ffe08a; font-size: 1.4rem; }
+.chapter-prototype__mission-reward span { color: rgba(255, 255, 255, 0.5); font-size: 0.55rem; }
+.chapter-prototype--mission .chapter-prototype__start { margin-top: 0.65rem; }
+
+.chapter-prototype-switcher {
+  position: fixed;
+  z-index: 10000;
+  left: 50%;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  display: grid;
+  width: min(calc(100% - 1.5rem), 21rem);
+  grid-template-columns: 2.65rem minmax(0, 1fr) 2.65rem;
+  align-items: center;
+  transform: translateX(-50%);
+  border: 2px solid #f0c54d;
+  padding: 0.3rem;
+  background: rgba(4, 11, 23, 0.97);
+  box-shadow: 4px 4px rgba(0, 0, 0, 0.7);
+}
+.chapter-prototype-switcher button { min-height: 2.65rem; border: 1px solid #806a28; background: #14263d; color: #ffe06e; font-size: 1.35rem; }
+.chapter-prototype-switcher span { overflow: hidden; padding: 0 0.45rem; color: #fff2c8; text-align: center; text-overflow: ellipsis; white-space: nowrap; font-size: 0.68rem; }
+.chapter-prototype-switcher b { color: #ffd54f; }
+
+@media (max-width: 390px), (max-height: 720px) {
+  .chapter-prototype-screen { align-items: start; padding-top: 0.45rem; }
+  .chapter-prototype--portal { min-height: calc(100dvh - 5.8rem); }
+  .chapter-prototype__portal-content { padding: 0.7rem; }
+  .chapter-prototype__chapter-number { width: 5.2rem; height: 5.2rem; margin-top: 0.3rem; }
+  .chapter-prototype__chapter-number strong { font-size: 36px; }
+  .chapter-prototype__age { margin-top: 0.35rem; font-size: 22px; }
+  .chapter-prototype--portal h1 { font-size: 59px; }
+  .chapter-prototype--portal[data-chapter="4"] h1 { font-size: 50px; }
+  .chapter-prototype__story { padding-block: 0.42rem; font-size: 22px; line-height: 1.4; }
+  .chapter-prototype__reward { padding-block: 0.35rem; }
+  .chapter-prototype__reward span { font-size: 19px; }
+  .chapter-prototype__reward strong { font-size: 40px; }
+  .chapter-prototype__reward small { font-size: 16px; }
+  .chapter-prototype--journey,
+  .chapter-prototype--mission { padding: 0.75rem; }
+  .chapter-prototype__timeline { margin-block: 0.85rem; }
+  .chapter-prototype__mission-title { padding-block: 0.55rem 0.4rem; }
+  .chapter-prototype__objectives > div { padding-block: 0.32rem; }
 }
 
 

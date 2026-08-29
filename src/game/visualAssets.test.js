@@ -4,12 +4,20 @@ import assert from 'node:assert/strict'
 import { readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-test('chapter transition background stays inside the approved 150–350 KB budget', async () => {
-  const path = fileURLToPath(new URL('../assets/worlds/chapter-transition-map.webp', import.meta.url))
-  const info = await stat(path)
+test('chapter opening backgrounds stay inside the approved 150–350 KB budget', async () => {
+  const assets = [
+    'chapter-1-fresh-dawn.webp',
+    'chapter-2-growing-town.webp',
+    'chapter-3-storm-pressure.webp',
+    'chapter-4-warm-homecoming.webp',
+  ]
 
-  assert.ok(info.size >= 150 * 1024, `background is unexpectedly small: ${info.size} bytes`)
-  assert.ok(info.size <= 350 * 1024, `background exceeds 350 KB: ${info.size} bytes`)
+  for (const asset of assets) {
+    const path = fileURLToPath(new URL(`../assets/worlds/chapter-openings/${asset}`, import.meta.url))
+    const info = await stat(path)
+    assert.ok(info.size >= 150 * 1024, `${asset} is unexpectedly small: ${info.size} bytes`)
+    assert.ok(info.size <= 350 * 1024, `${asset} exceeds 350 KB: ${info.size} bytes`)
+  }
 })
 
 test('canonical runtime characters stay inside the approved 30–120 KB budget', async () => {
@@ -50,7 +58,12 @@ test('mobile runtime imports optimized artwork instead of authoring assets', asy
       'pre-assessment-frame-user.webp',
       'consent-background-user.webp',
     ],
-    '../components/ChapterTransition.jsx': ['chapter-transition-map.webp'],
+    '../components/ChapterOpeningCard.jsx': [
+      'chapter-1-fresh-dawn.webp',
+      'chapter-2-growing-town.webp',
+      'chapter-3-storm-pressure.webp',
+      'chapter-4-warm-homecoming.webp',
+    ],
   }
 
   for (const [source, assets] of Object.entries(sources)) {
@@ -60,6 +73,15 @@ test('mobile runtime imports optimized artwork instead of authoring assets', asy
 
   const art = await readFile(fileURLToPath(new URL('../components/art.js', import.meta.url)), 'utf8')
   assert.match(art, /CHARACTER_RASTER_ART\[id \+ '-canonical'\] \?\? CHARACTER_ART\[id \+ '-canonical'\]/)
+})
+
+test('every chapter start uses the shared production chapter opening card', async () => {
+  const allocation = await readFile(fileURLToPath(new URL('../components/AllocationScreen.jsx', import.meta.url)), 'utf8')
+  const transition = await readFile(fileURLToPath(new URL('../components/ChapterTransition.jsx', import.meta.url)), 'utf8')
+
+  assert.match(allocation, /showChapterIntro && <ChapterTransition/)
+  assert.doesNotMatch(allocation, /ChapterIntroModal/)
+  assert.match(transition, /<ChapterOpeningCard/)
 })
 
 test('animated events have lightweight static artwork for reduced motion', async () => {
@@ -186,6 +208,20 @@ test('answer rows mount SVG artwork as a responsive background layer', async () 
   assert.match(jsx, /backgroundSize: '100% 100%'/)
   assert.doesNotMatch(jsx, /className="assessment-answer-row__art"/)
 })
+
+test('friendly risk result renders every profile as a responsive loadout', async () => {
+  const jsx = await readFile(fileURLToPath(new URL('../components/RiskResultScreen.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+
+  for (const profile of ['conservative', 'balanced', 'aggressive']) assert.match(jsx, new RegExp(`${profile}:`))
+  for (const asset of ['กองทุนรวมผสม', 'ตราสารหนี้', 'หุ้น', 'คริปโต']) assert.match(jsx, new RegExp(asset))
+  assert.match(jsx, /onClick=\{onContinue\}/)
+  assert.match(jsx, /aria-label=\{`สัดส่วนพอร์ตแนะนำ:/)
+  assert.match(css, /\.risk-result-screen\s*\{[\s\S]*?min-height:\s*100dvh/)
+  assert.match(css, /\.risk-result-donut\s*\{[\s\S]*?conic-gradient\(var\(--risk-result-gradient\)\)/)
+  assert.match(css, /@media \(max-width: 390px\), \(max-height: 760px\)/)
+})
+
 test('pre-assessment visual chrome remains mounted', async () => {
   const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
   for (const asset of ['preAssessmentBackground', 'preAssessmentDisclaimer', 'preAssessmentEyebrow', 'preAssessmentQuestionBadge', 'preAssessmentTitle']) {

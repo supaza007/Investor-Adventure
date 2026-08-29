@@ -10,9 +10,12 @@ const AllocationScreen = lazy(() => import('./components/AllocationScreen.jsx'))
 const StageScreen = lazy(() => import('./components/StageScreen.jsx'))
 const ReportScreen = lazy(() => import('./components/ReportScreen.jsx'))
 const PreAssessmentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.PreAssessmentScreen })))
-const RiskResultScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.RiskResultScreen })))
+const RiskResultScreen = lazy(() => import('./components/RiskResultScreen.jsx'))
 const ConsentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.ConsentScreen })))
 const PostAssessmentScreen = lazy(() => import('./components/LearningScreens.jsx').then((module) => ({ default: module.PostAssessmentScreen })))
+const ChapterTransitionPrototype = import.meta.env.DEV
+  ? lazy(() => import('./components/ChapterTransitionPrototype.jsx'))
+  : null
 
 function ScreenLoading() {
   return (
@@ -74,7 +77,7 @@ function useClickSound() {
   }, [])
 }
 
-export default function App() {
+function GameApp() {
   useClickSound()
   const { state, command, restoreState, busy, commandError, clearCommandError } = useGameCommand(() => createInitialState(Date.now()))
   const [journey, setJourney] = useState('cover')
@@ -184,4 +187,9 @@ export default function App() {
   }
 
   return null
+}
+
+export default function App() {
+  const showChapterPrototype = import.meta.env.DEV && new URLSearchParams(window.location.search).get('prototype') === 'chapter-transition'
+  return showChapterPrototype ? lazyScreen(<ChapterTransitionPrototype />) : <GameApp />
 }

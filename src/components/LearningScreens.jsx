@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, RISK_RECOMMENDATIONS, scoreAssessment } from '../game/learning.js'
-import Modal from './Modal.jsx'
+import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, scoreAssessment } from '../game/learning.js'
 import preAssessmentBackground from '../assets/ui/pre-assessment-background-user.webp'
 import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.webp'
 import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.webp'
@@ -152,24 +151,6 @@ export function ConsentScreen({ onChoice }) {
         ไม่ยินยอม แต่เล่นเกมต่อ
       </button>
     </div>
-  </Shell>
-}
-
-export function RiskResultScreen({ assessment, onContinue }) {
-  const recommendation = RISK_RECOMMENDATIONS[assessment?.riskProfile] ?? RISK_RECOMMENDATIONS.balanced
-  return <Shell title="ผลประเมินความเสี่ยง" eyebrow="รู้จักตัวเองก่อนลงทุน">
-    <Modal label={`ผลประเมิน: ${recommendation.label}`} panelClassName="pixel-frame max-w-md border border-amber-400/60 bg-slate-950 p-4 text-white sm:p-6">
-      <div className="text-center">
-        <p className="text-xs text-white/60">จากคำตอบของคุณ คุณรับความเสี่ยงได้</p>
-        <h1 className="mt-1 text-2xl font-black text-amber-300">{recommendation.label}</h1>
-        <p className="mt-3 text-sm text-white/75">พอร์ตแนะนำสำหรับใช้ทดลองในเกม</p>
-      </div>
-      <ul className="mt-3 space-y-2">
-        {recommendation.assets.map(([name, percent]) => <li key={name} className="pixel-chip flex justify-between bg-slate-800 p-3"><span>{name}</span><b className="text-emerald-300">{percent}%</b></li>)}
-      </ul>
-      <p className="mt-3 text-xs leading-relaxed text-white/55">คำแนะนำนี้เป็นแนวทางในเกมเท่านั้น คุณยังเลือกจัดพอร์ตเองได้ทั้งหมด และระบบจะไม่จัดพอร์ตให้อัตโนมัติ</p>
-      <button type="button" onClick={onContinue} className="pixel-btn mt-4 w-full bg-emerald-500 py-3 font-bold text-emerald-950">เข้าใจแล้ว ไปต่อ</button>
-    </Modal>
   </Shell>
 }
 
