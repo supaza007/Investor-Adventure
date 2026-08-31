@@ -17,7 +17,7 @@ import { buildReport } from './report.js'
 
 export const STAGES = BALANCE.stages
 const LAST_CHAPTER = BALANCE.chapters.length - 1
-export const RULES_VERSION = '2026-08-character-abilities-v3'
+export const RULES_VERSION = '2026-09-risk-balance-v5'
 export const RNG_VERSION = 'mulberry32-v1'
 
 function createChapterAbility(styleId = null) {
@@ -51,6 +51,7 @@ export function createInitialState(seed = Date.now()) {
     valueBeforeShock: 0,
     scam: null, // { offerAmount, accepted }
     behavior: null, // 'hold' | 'cut' | 'buy'
+    behaviorEffect: null, // breakdown ที่ UI ใช้อธิบายผล โดยไม่คำนวณย้อนจากพอร์ตปัจจุบัน
     reboundOwed: 0,
     immuneToAftershock: false,
     lastAftershock: null,
@@ -149,6 +150,13 @@ function startRun(state, styleId, startedAt = null) {
 // เอนจินจัดการย้ายเงินให้ตรงเป้าเอง ผู้เล่นแค่บอกว่าอยากได้สัดส่วนไหน
 const CASH_BUCKET = '__cash' // ถังเงินสดปลอม ใช้เฉพาะตอนคำนวณ ไม่ใช่เครื่องมือ จึงไม่มี exposure
 
+function effectiveTradeFeePct(state) {
+  const style = currentStyle(state)
+  const base = style?.tradeFeePct ?? 0
+  const isFirstChapterTrade = state.phase === 'stage' && state.chapterAbility.adjustmentCount === 0
+  return isFirstChapterTrade ? base * (style?.firstTradeFeeMult ?? 1) : base
+}
+
 export function applyAllocation(state, weights) {
   if (!weights || typeof weights !== 'object' || Array.isArray(weights)) {
     return { ...state, validationError: 'จัดพอร์ตไม่สำเร็จ: กรุณาเลือกสัดส่วนสินทรัพย์ใหม่อีกครั้ง' }
@@ -177,7 +185,7 @@ export function applyAllocation(state, weights) {
     if (w > 0) target[id === 'cash' ? CASH_BUCKET : id] = w
   }
 
-  const { positions, fee } = rebalance(current, target, currentStyle(state)?.tradeFeePct ?? 0)
+  const { positions, fee } = rebalance(current, target, effectiveTradeFeePct(state))
   const cash = positions[CASH_BUCKET] ?? 0
   delete positions[CASH_BUCKET]
   return { ...state, positions, cash, lastFee: fee, validationError: null }
@@ -251,6 +259,7 @@ function resolveShock(state) {
     ageModifiers: result.ageModifiers,
     assetReturns: result.assetReturns,
     impacts: result.impacts,
+    cashBefore: cash,
   }
 
   return {
@@ -263,11 +272,12 @@ function resolveShock(state) {
     shock,
     valueBeforeShock,
     behavior: null,
+    behaviorEffect: null,
   }
 }
 
 // สเตจ 4 — จุดตัดสินใจพฤติกรรม (ถือต่อ / ตัดขาดทุน / ซื้อเพิ่ม)
-function chooseBehavior(state, choice) {
+function chooseBehavior(state, choice, toolId = null) {
   const style = currentStyle(state)
   const lost = Math.max(0, state.valueBeforeShock - netWorth(state))
   let next = { ...state, behavior: choice, validationError: null }
@@ -278,6 +288,17 @@ function chooseBehavior(state, choice) {
     const recoveryBonus = actualRecovery - baseRecovery
     next.reboundOwed = actualRecovery
     next.immuneToAftershock = false
+    next.behaviorEffect = {
+      choice,
+      toolId: null,
+      cashInvested: 0,
+      amountRebalanced: 0,
+      baseRecovery,
+      abilityRecoveryBonus: recoveryBonus,
+      totalRecovery: actualRecovery,
+      fee: 0,
+      avoidsAftershock: false,
+    }
     if (recoveryBonus > 0) next.chapterAbility = {
       ...state.chapterAbility,
       triggered: true,
@@ -287,8 +308,21 @@ function chooseBehavior(state, choice) {
   }
 
   if (choice === 'cut') {
-    // ล็อกขาดทุน: ย้ายทุกอย่างไปตราสารหนี้ที่มูลค่าปัจจุบัน — ไม่ฟื้น แต่กันคลื่นตามได้
-    const { positions, fee } = rebalance(state.positions, { bond: 1 }, style.tradeFeePct ?? 0)
+    // ขายเฉพาะสินทรัพย์เสี่ยงที่เสียหาย 70% ส่วนที่เหลือยังอยู่ในตลาด
+    // จึงลดความเสี่ยงโดยไม่เปลี่ยนทั้งพอร์ตเป็นตราสารหนี้ทันที
+    const losingIds = new Set((state.shock?.impacts ?? [])
+      .filter((impact) => impact.change < 0 && impact.toolId !== 'bond')
+      .map((impact) => impact.toolId))
+    const positions = { ...state.positions }
+    let traded = 0
+    for (const id of losingIds) {
+      const sold = (positions[id] ?? 0) * BALANCE.cutLossSellPct
+      if (sold <= 0) continue
+      positions[id] -= sold
+      traded += sold
+    }
+    const fee = traded * effectiveTradeFeePct(state)
+    if (traded > 0) positions.bond = (positions.bond ?? 0) + traded - fee
     next.positions = positions
     next.lastFee = fee
     if (style.id === 'trader' && fee > 0) next.chapterAbility = {
@@ -297,32 +331,54 @@ function chooseBehavior(state, choice) {
       cost: state.chapterAbility.cost + fee,
     }
     next.reboundOwed = 0
-    next.immuneToAftershock = true
+    next.immuneToAftershock = false
+    next.behaviorEffect = {
+      choice,
+      toolId: 'bond',
+      cashInvested: 0,
+      amountRebalanced: traded,
+      baseRecovery: 0,
+      abilityRecoveryBonus: 0,
+      totalRecovery: 0,
+      fee,
+      avoidsAftershock: false,
+    }
   }
 
   if (choice === 'buy') {
     if (state.cash <= 0.5) {
       return { ...state, validationError: 'ต้องมีเงินสดเหลือจึงจะซื้อเพิ่มได้' }
     }
-    // ซื้อเพิ่มตอนราคาถูก: เทเงินสดที่เหลือลงพอร์ตตามสัดส่วนเดิม
-    const invested = state.cash
-    const total = totalValue(state.positions)
-    const positions = { ...state.positions }
-    if (total > 0) {
-      for (const id of Object.keys(positions)) {
-        positions[id] += invested * (positions[id] / total)
-      }
-    } else {
-      positions[BALANCE.benchmarkToolId] = invested
+    if (!getTool(toolId)) {
+      return { ...state, validationError: 'กรุณาเลือกสินทรัพย์ที่จะซื้อเพิ่ม' }
     }
+    // ซื้อเพิ่มตอนราคาถูก: ผู้เล่นเลือกปลายทางเอง และเทเงินสดทั้งหมดเข้าสินทรัพย์นั้น
+    const invested = state.cash
+    const positions = { ...state.positions }
+    positions[toolId] = (positions[toolId] ?? 0) + invested
     next.positions = positions
     next.cash = 0
     const baseRecovery = lost * BALANCE.reboundPct * BALANCE.buyDipReboundMult
-    const actualRecovery = baseRecovery * (style.buyDipMult ?? 1)
+    const cashShare = invested / Math.max(1, invested + totalValue(state.positions))
+    const qualifiesForStyleBonus = cashShare >= (style.minBuyDipCashShare ?? 0)
+    const actualRecovery = baseRecovery * (qualifiesForStyleBonus ? (style.buyDipMult ?? 1) : 1)
     const recoveryBonus = actualRecovery - baseRecovery
     next.reboundOwed = actualRecovery
     next.immuneToAftershock = false
     next.investedOnDip = invested
+    next.behaviorEffect = {
+      choice,
+      toolId,
+      cashInvested: invested,
+      cashShare,
+      qualifiesForStyleBonus,
+      amountRebalanced: 0,
+      baseRecovery,
+      abilityRecoveryBonus: recoveryBonus,
+      totalRecovery: actualRecovery,
+      fee: 0,
+      avoidsAftershock: false,
+    }
     if (recoveryBonus > 0) next.chapterAbility = {
       ...state.chapterAbility,
       triggered: true,
@@ -406,7 +462,7 @@ function finishChapter(state, endedAt = null) {
     incomeAdded: state.incomeSchedule[state.chapterIndex] ?? 0,
     allocationBeforeEvent: {
       ...state.positionsBeforeShock,
-      cash: state.cash,
+      cash: state.shock?.cashBefore ?? state.cash,
     },
     shockPct: state.shock?.portfolioReturn ?? 0,
     baseReturns: state.shock?.baseReturns ?? {},
@@ -416,6 +472,7 @@ function finishChapter(state, endedAt = null) {
     concentration: concentration(state.positionsBeforeShock),
     cashOnly: totalValue(state.positions) <= 0 && state.cash > 0,
     behavior: state.behavior,
+    behaviorEffect: state.behaviorEffect,
     scamAccepted: state.scam?.accepted ?? false,
     scamLost: state.scam?.lost ?? 0,
     valueBefore: state.valueBeforeShock,
@@ -446,6 +503,7 @@ function finishChapter(state, endedAt = null) {
     positionsBeforeShock: {}, // ล้างพร้อม shock — ข้อมูลของบทที่จบไปแล้วต้องไม่ค้างมาบทใหม่
     scam: null,
     behavior: null,
+    behaviorEffect: null,
     reboundOwed: 0,
     immuneToAftershock: false,
     lastAftershock,
@@ -516,7 +574,7 @@ export function gameReducer(state, action) {
       if (!['hold', 'cut', 'buy'].includes(action.choice)) {
         return { ...state, validationError: 'เลือกวิธีรับมือไม่สำเร็จ: กรุณาเลือกหนึ่งในตัวเลือกที่แสดง' }
       }
-      return chooseBehavior(state, action.choice)
+      return chooseBehavior(state, action.choice, action.toolId)
 
     case 'NEXT_STAGE':
       if (state.phase !== 'stage') return state

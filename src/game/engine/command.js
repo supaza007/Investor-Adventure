@@ -132,6 +132,9 @@ function validateCommand(state, command) {
       if (command.choice === 'buy' && state.cash <= 0.5) {
         return error(COMMAND_ERROR.INVALID_DECISION, 'ต้องมีเงินสดเหลือจึงจะซื้อเพิ่มได้', 'choice')
       }
+      if (command.choice === 'buy' && !getTool(command.toolId)) {
+        return error(COMMAND_ERROR.INVALID_DECISION, 'กรุณาเลือกสินทรัพย์ที่จะซื้อเพิ่ม', 'toolId')
+      }
       return null
     case 'NEXT_STAGE':
       if (state.phase !== 'stage') return error(COMMAND_ERROR.WRONG_PHASE, 'ยังดำเนินเรื่องต่อจากหน้าปัจจุบันไม่ได้')

@@ -87,7 +87,10 @@ End condition คือจบบท 4; ไม่มี game over กลางท
 
 ### Growth and P/L
 
-- แต่ละ asset ใช้ lognormal growth ต่อบทจาก `growthMult`, `growthVol`, style `returnMult` และ seeded RNG
+- แต่ละ asset ใช้ mean-corrected lognormal growth ต่อบทจาก `growthMult`, `growthVol`, style `returnMult` และ seeded RNG เพื่อไม่ให้ความผันผวนสร้างผลตอบแทนเฉลี่ยฟรี
+- ตัดขาดทุนขาย 70% เฉพาะสินทรัพย์ที่เสียหายไปตราสารหนี้ ไม่ย้ายทั้งพอร์ต
+- VI ฟื้น 100% เมื่อเงินสดที่ซื้อเพิ่มมีอย่างน้อย 15% ของพอร์ต; ต่ำกว่านั้นฟื้น 50%
+- Trader จ่ายค่าธรรมเนียมครึ่งหนึ่งในการปรับพอร์ตครั้งแรกของแต่ละบท
 - Event P/L amount = `valueAfter - valueBefore`; P/L % = amount/valueBefore เมื่อฐาน >0
 - Final multiple = final net worth / total contributed (340)
 - Benchmark ratio = final net worth / 1421; FIRE ≥1.5, comfortable ≥0.9, adequate ≥0.5, tight ≥0
@@ -107,9 +110,9 @@ End condition คือจบบท 4; ไม่มี game over กลางท
 ### Cash and behavior
 
 - Cash purchasing-power decay ตอน transition หลังบท 1–3 ก่อนรับ income บทถัดไป; **ไม่ decay หลังบท 4 ตาม implementation**. สูตรที่ใช้จริงตั้งแต่ Session นี้คือ `cash × (1 + inflationAnnualRate)^(-yearsPerChapter)` โดยใช้ `inflationAnnualRate = 0.02` และ `yearsPerChapter = 10`; 2% เป็นค่ากลางของกรอบเป้าหมายเงินเฟ้อไทย 1–3% ของ ธปท. ([แหล่งอ้างอิง](https://www.bot.or.th/th/our-roles/monetary-policy/monetary-policy-target.html)) จึงต้องแสดงว่าเป็น simulation assumption ไม่ใช่การพยากรณ์
-- hold: rebound = loss×40%, เสี่ยง aftershock
+- hold: rebound = loss×20%, เสี่ยง aftershock
 - cut: rebalance ไป bond ทั้งหมด, จ่าย style fee, ไม่มี rebound, immune aftershock
-- buy: เท cash ทั้งหมดตามพอร์ตเดิม (ถ้าพอร์ตศูนย์ใช้ fund), rebound = loss×40%×2×VI bonus 1.5
+- buy: เลือกสินทรัพย์แล้วเท cash ทั้งหมดเข้าสินทรัพย์นั้น, rebound ปกติ = loss×50%, VI = loss×100%
 - Aftershock chance 25%, severity = shock เดิม×0.5; แล้วจึง growth
 
 ### Scam and determinism

@@ -149,6 +149,37 @@ describe('command contract', () => {
     assert.equal(result.state.seed, state.seed)
     assert.notEqual(result.state, state)
   })
+
+  test('ซื้อเพิ่มต้องเลือกสินทรัพย์จริง และคำสั่งผิดไม่หักเงิน', () => {
+    let state = run(createInitialState(111), { type: 'START' })
+    state = run(state, { type: 'SELECT_STYLE', styleId: 'medium' })
+    state = run(state, { type: 'CONFIRM_ALLOCATION', weights: { stock: 0.7, cash: 0.3 } })
+    while (currentStage(state).key !== 'behavior') {
+      if (state.scam?.accepted === null) state = run(state, { type: 'ANSWER_SCAM', accept: false })
+      state = run(state, { type: 'NEXT_STAGE', expectedStageIndex: state.stageIndex })
+    }
+
+    const cashBefore = state.cash
+    const netWorthBefore = netWorth(state)
+    const marketChange = state.shock.impacts.reduce((sum, impact) => sum + impact.change, 0)
+    assert.ok(Math.abs(marketChange - (netWorthBefore - state.valueBeforeShock)) < 1e-9)
+    for (const command of [
+      { type: 'CHOOSE_BEHAVIOR', choice: 'buy' },
+      { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'unknown' },
+    ]) {
+      const rejected = executeCommand(state, command)
+      assert.equal(rejected.ok, false)
+      assert.equal(rejected.error.code, COMMAND_ERROR.INVALID_DECISION)
+      assert.equal(rejected.state, state)
+      assert.equal(rejected.state.cash, cashBefore)
+    }
+
+    const bought = run(state, { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'crypto' })
+    assert.equal(bought.cash, 0)
+    assert.equal(bought.behaviorEffect.toolId, 'crypto')
+    assert.equal(bought.behaviorEffect.cashInvested, cashBefore)
+    assert.ok(Math.abs(netWorth(bought) - netWorthBefore) < 1e-9, 'ซื้อเพิ่มเป็นการย้ายเงินสด มูลค่ารวมต้องไม่เพิ่มทันที')
+  })
 })
 
 describe('command integration flow', () => {

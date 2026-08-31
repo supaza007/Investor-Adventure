@@ -57,11 +57,11 @@ function StageTrack({ stageIndex }) {
 // สเตจ 1 — สัญญาณเตือนคลุมเครือ: รู้ว่ามีบางอย่างมา แต่ไม่รู้ว่าอะไร
 function SignalStage({ event }) {
   return (
-    <div className="w-full text-center">
+    <div className="signal-stage w-full text-center">
       <div className="enemy-idle text-5xl font-black opacity-40 grayscale sm:text-7xl">?</div>
-      <div className="mt-3 text-sm font-bold text-amber-200 sm:text-xl">มีบางอย่างกำลังก่อตัว...</div>
-      <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">“{event.hint}”</p>
-      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
+      <div className="signal-stage__title mt-3 text-sm font-bold text-amber-200 sm:text-xl">มีบางอย่างกำลังก่อตัว...</div>
+      <p className="signal-stage__hint mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">“{event.hint}”</p>
+      <p className="signal-stage__note mt-2 text-[9px] text-white/55 sm:text-xs">ยังบอกไม่ได้ว่าจะกลายเป็นอะไร — นี่คือข้อมูลทั้งหมดที่คุณมี</p>
     </div>
   )
 }
@@ -71,37 +71,41 @@ function RevealStage({ event }) {
   const art = eventArtOf(event.id)
   const staticArt = eventStaticArtOf(event.id)
   return (
-    <div className="w-full text-center">
-      <div className="enemy-idle mx-auto w-fit">
-        {art ? <Portrait src={art} reducedMotionSrc={staticArt} alt={event.name} size="lg" /> : <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" />}
+    <div className="reveal-stage w-full text-center">
+      <div className="reveal-stage__title mt-2 text-sm font-bold sm:text-xl">{event.name}</div>
+      <div className="enemy-idle mx-auto mt-2 w-fit">
+        {art ? <Portrait src={art} reducedMotionSrc={staticArt} alt={event.name} size="lg" className="reveal-stage__portrait" /> : <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" className="reveal-stage__portrait" />}
       </div>
-      <div className="mt-2 text-sm font-bold sm:text-xl">{event.name}</div>
-      <div className="pixel-chip mx-auto mt-2 inline-block bg-rose-950/70 px-2 py-1 text-[10px] text-rose-200 sm:text-sm">
+      <div className="reveal-stage__tag pixel-chip mx-auto mt-2 inline-block bg-rose-950/70 px-2 py-1 text-[10px] text-rose-200 sm:text-sm">
         กระทบด้าน {TAG_LABELS[event.primaryTag]}
       </div>
-      <p className="mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">{event.description}</p>
-      <p className="mt-2 text-[9px] text-white/55 sm:text-xs">เหตุการณ์แต่ละแบบมีผลตอบแทนตายตัว — ผลรายสินทรัพย์จะเปิดเผยเมื่อเกิดขึ้น</p>
-      <p className="mx-auto mt-1 max-w-lg text-[8px] leading-relaxed text-amber-200/65 sm:text-[10px]">{EVENT_RULES_DISCLAIMER}</p>
+      <p className="reveal-stage__description mx-auto mt-2 max-w-lg text-[11px] leading-relaxed text-white/75 sm:text-sm">{event.description}</p>
+      <p className="reveal-stage__note mt-2 text-[9px] text-white/55 sm:text-xs">เหตุการณ์แต่ละแบบมีผลตอบแทนตายตัว — ผลรายสินทรัพย์จะเปิดเผยเมื่อเกิดขึ้น</p>
+      <p className="reveal-stage__disclaimer mx-auto mt-1 max-w-lg text-[8px] leading-relaxed text-amber-200/65 sm:text-[10px]">{EVENT_RULES_DISCLAIMER}</p>
     </div>
   )
 }
 
+function impactSummary(toolId, value) {
+  if (toolId === 'bond') return value >= 0 ? 'เงินไหลเข้าความมั่นคง' : 'ดอกเบี้ยและค่าเงินกดดัน'
+  if (toolId === 'fund') return value > 0 ? 'การกระจายพอร์ตช่วยพยุง' : value < 0 ? 'ตลาดรวมฉุดผลตอบแทน' : 'ผลกระทบใกล้ศูนย์'
+  if (toolId === 'stock') return value >= 0 ? 'หุ้นได้แรงหนุน' : 'หุ้นถูกแรงขาย'
+  return value >= 0 ? 'แรงซื้อสินทรัพย์ทางเลือก' : 'ลดการถือสินทรัพย์เสี่ยง'
+}
+
 function EventReturnMatrix({ event, shock }) {
   const baseReturns = shock?.baseReturns ?? returnsForEvent(event)
-  const modifiers = shock?.ageModifiers ?? {}
   const returns = shock?.assetReturns ?? baseReturns
   return (
-    <div className="mx-auto mt-3 grid max-w-xl grid-cols-2 gap-1 sm:grid-cols-4">
+    <div className="event-return-matrix mx-auto mt-3 grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
       {getTools().map((tool) => {
         const value = returns[tool.id] ?? 0
         const tone = value > 0 ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300' : value < 0 ? 'border-rose-500/50 bg-rose-950/40 text-rose-300' : 'border-slate-600 bg-slate-900/70 text-white/70'
         return (
-          <div key={tool.id} className={`pixel-frame border p-1.5 text-left ${tone}`} title={event.impactReasons?.[tool.id]}>
-            <div className="truncate text-[9px] text-white/70 sm:text-[10px]">{tool.name}</div>
-            <div className="text-[8px] text-white/55">เหตุการณ์ {pct(baseReturns[tool.id] ?? 0)}</div>
-            <div className="text-[8px] text-amber-200">วัย {modifiers[tool.id] ? pct(modifiers[tool.id]) : '0%'}</div>
-            <div className="text-sm font-black sm:text-lg">ผลสุดท้าย {pct(value)}</div>
-            <div className="line-clamp-2 text-[8px] leading-snug text-white/55 sm:text-[9px]">{event.impactReasons?.[tool.id]}</div>
+          <div key={tool.id} className={`pixel-frame border p-2 text-left ${tone}`} title={event.impactReasons?.[tool.id]}>
+            <div className="event-return-matrix__name text-base font-bold">{tool.name}</div>
+            <div className="event-return-matrix__final text-xs font-bold">ผลสุดท้าย {pct(value)}</div>
+            <div className="event-return-matrix__reason text-[8px] leading-snug text-white/55 sm:text-[9px]" title={event.impactReasons?.[tool.id]}>{impactSummary(tool.id, value)}</div>
           </div>
         )
       })}
@@ -117,15 +121,15 @@ function ShockStage({ state, event }) {
   const down = change < 0
 
   return (
-    <div className="w-full text-center">
+    <div className="shock-stage w-full text-center">
+      <div className="mt-1 text-sm font-bold sm:text-xl">{event.name}เกิดขึ้นแล้ว</div>
       <div className="mx-auto w-fit">
         {eventArtOf(event.id) ? (
-          <Portrait src={eventArtOf(event.id)} reducedMotionSrc={eventStaticArtOf(event.id)} alt={event.name} size="md" />
+          <Portrait src={eventArtOf(event.id)} reducedMotionSrc={eventStaticArtOf(event.id)} alt={event.name} size="lg" className="shock-stage__portrait" />
         ) : (
-          <PortraitPlaceholder label={event.name} emoji={event.emoji} size="md" />
+          <PortraitPlaceholder label={event.name} emoji={event.emoji} size="lg" className="shock-stage__portrait" />
         )}
       </div>
-      <div className="mt-1 text-sm font-bold sm:text-xl">{event.name}เกิดขึ้นแล้ว</div>
 
       <div className={`mt-2 text-2xl font-black sm:text-4xl ${down ? 'text-rose-400' : 'text-emerald-400'}`}>
         {down ? '▼' : '▲'} {money(Math.abs(change))}
@@ -154,21 +158,26 @@ function ShockStage({ state, event }) {
 function BehaviorStage({ state, onChoose }) {
   const style = currentStyle(state)
   const hasCash = state.cash > 0.5
+  const cashShare = state.cash / Math.max(1, netWorth(state))
+  const qualifiesForBuyBonus = cashShare >= (style.minBuyDipCashShare ?? 0)
+  const buyRecoveryPct = BALANCE.reboundPct * BALANCE.buyDipReboundMult
+    * (qualifiesForBuyBonus ? (style.buyDipMult ?? 1) : 1)
   const change = netWorth(state) - state.valueBeforeShock
   const lost = Math.max(0, -change)
   const gained = change >= 0
   const confirmed = state.behavior // ตั้งแล้วคือ dispatch ไปแล้วจริง แก้ไม่ได้อีก
   const [pending, setPending] = useState(null)
+  const [buyToolId, setBuyToolId] = useState(null)
   const selectedId = confirmed ?? pending
 
   const options = [
     { id: 'hold', title: 'ถือต่อ', desc: gained ? 'คงพอร์ตเดิมไว้' : 'ไม่ทำอะไร รอตลาดฟื้น', detail: gained ? 'ไม่ล็อกกำไรและไม่เสียค่าปรับพอร์ต' : `ได้คืน ${Math.round(BALANCE.reboundPct * 100)}% ของที่เสียไปในบทหน้า`, cls: 'bg-sky-800 border-sky-500/50' },
-    { id: 'cut', title: gained ? 'ลดความเสี่ยง' : 'ตัดขาดทุน', desc: 'ย้ายพอร์ตทั้งหมดเข้าตราสารหนี้', detail: gained ? 'รักษามูลค่าปัจจุบัน แต่เสียโอกาสเติบโตของสินทรัพย์เดิม' : 'ไม่ฟื้นตัว แต่ปลอดภัยถ้ามีคลื่นตามมาอีก', cls: 'bg-rose-900 border-rose-500/50' },
+    { id: 'cut', title: gained ? 'ลดความเสี่ยง' : 'ตัดขาดทุน', desc: 'ขาย 70% เฉพาะสินทรัพย์ที่เสียหายไปตราสารหนี้', detail: gained ? 'ถ้าไม่มีสินทรัพย์ติดลบ พอร์ตจะไม่ถูกขาย' : 'ไม่ฟื้นตัว และส่วนที่ยังถืออยู่ยังเสี่ยงต่อคลื่นตาม', cls: 'bg-rose-900 border-rose-500/50' },
     {
       id: 'buy',
       title: gained ? 'เพิ่มการลงทุน' : 'ซื้อเพิ่มตอนถูก',
       desc: hasCash ? `ทุ่มเงินสดที่เหลือ ${money(state.cash)} ลงไปอีก` : 'ต้องมีเงินสดเหลือถึงจะทำได้',
-      detail: hasCash ? (gained ? 'เพิ่มเงินที่รับผลของตลาด — ถ้ามีคลื่นตามก็เสี่ยงมากขึ้น' : `ฟื้นแรง ×${(BALANCE.buyDipReboundMult * (style.buyDipMult ?? 1)).toFixed(1)} — แต่ถ้าร่วงต่อจะเจ็บหนักกว่าเดิม`) : 'คุณลงทุนไปหมดแล้วตั้งแต่ต้นบท',
+      detail: hasCash ? (gained ? 'เพิ่มเงินที่รับผลของตลาด — ถ้ามีคลื่นตามก็เสี่ยงมากขึ้น' : `ฟื้น ${Math.round(buyRecoveryPct * 100)}% ของที่เสีย${style.id === 'vi' && !qualifiesForBuyBonus ? ' — เงินสดยังไม่ถึง 15% จึงไม่ได้โบนัส VI' : ''}`) : 'คุณลงทุนไปหมดแล้วตั้งแต่ต้นบท',
       cls: 'bg-amber-900 border-amber-500/50',
       disabled: !hasCash,
     },
@@ -192,7 +201,10 @@ function BehaviorStage({ state, onChoose }) {
               key={o.id}
               type="button"
               disabled={o.disabled || !!confirmed}
-              onClick={() => setPending(o.id)}
+              onClick={() => {
+                setPending(o.id)
+                if (o.id !== 'buy') setBuyToolId(null)
+              }}
               className={`pixel-frame border p-2 text-left transition sm:p-3 ${
                 o.disabled
                   ? 'cursor-not-allowed border-slate-700 bg-slate-900 opacity-45'
@@ -215,15 +227,37 @@ function BehaviorStage({ state, onChoose }) {
       </div>
 
       {pending && !confirmed && (
-        <div className="pixel-frame mx-auto mt-3 flex max-w-md flex-col items-center justify-between gap-2 border border-amber-500/50 bg-amber-950/40 p-2 sm:flex-row">
-          <span className="text-[10px] text-amber-100 sm:text-xs">มั่นใจกับ "{options.find((o) => o.id === pending)?.title}" ไหม?</span>
-          <div className="flex shrink-0 gap-1.5">
-            <button type="button" onClick={() => setPending(null)} className="pixel-btn bg-slate-600 px-2.5 py-1 text-[10px] font-bold text-white sm:text-xs">
+        <div className="pixel-frame mx-auto mt-3 max-w-xl border border-amber-500/50 bg-amber-950/40 p-2">
+          {pending === 'buy' && (
+            <div className="mb-2">
+              <div className="text-[10px] font-bold text-amber-100 sm:text-xs">เลือกสินทรัพย์ที่จะซื้อด้วยเงินสด {money(state.cash)}</div>
+              <div className="mt-1 grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+                {getTools().map((tool) => {
+                  const eventReturn = state.shock?.assetReturns?.[tool.id] ?? 0
+                  const selected = buyToolId === tool.id
+                  return <button
+                    key={tool.id}
+                    type="button"
+                    onClick={() => setBuyToolId(tool.id)}
+                    className={`pixel-chip border px-2 py-1.5 text-left text-[9px] sm:text-xs ${selected ? 'border-amber-300 bg-amber-700/70 outline outline-1 outline-amber-200' : 'border-slate-600 bg-slate-900/80'}`}
+                  >
+                    <b className="block text-white">{tool.name}</b>
+                    <span className={eventReturn < 0 ? 'text-rose-300' : eventReturn > 0 ? 'text-emerald-300' : 'text-white/60'}>รอบนี้ {pct(eventReturn)}</span>
+                  </button>
+                })}
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col items-center justify-between gap-2 sm:flex-row">
+            <span className="text-[10px] text-amber-100 sm:text-xs">{pending === 'buy' && !buyToolId ? 'เลือกสินทรัพย์ก่อนยืนยัน' : `มั่นใจกับ “${options.find((o) => o.id === pending)?.title}” ไหม?`}</span>
+            <div className="flex shrink-0 gap-1.5">
+            <button type="button" onClick={() => { setPending(null); setBuyToolId(null) }} className="pixel-btn bg-slate-600 px-2.5 py-1 text-[10px] font-bold text-white sm:text-xs">
               ยกเลิก
             </button>
-            <button type="button" onClick={() => onChoose(pending)} className="pixel-btn bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-emerald-950 sm:text-xs">
+            <button type="button" disabled={pending === 'buy' && !buyToolId} onClick={() => onChoose(pending, buyToolId)} className="pixel-btn bg-emerald-500 px-2.5 py-1 text-[10px] font-bold text-emerald-950 disabled:cursor-not-allowed disabled:opacity-40 sm:text-xs">
               ยืนยันการเลือก
             </button>
+            </div>
           </div>
         </div>
       )}
@@ -277,7 +311,7 @@ function ImpactTable({ rows, cash, gained }) {
           <span className={lead.change < 0 ? 'text-rose-300' : 'text-emerald-300'}>{leadSign}{money(Math.abs(lead.change))}</span>
         </div>
       )}
-      <div className="mt-1 text-[10px] text-white/55 sm:text-xs">{gained ? 'สินทรัพย์ไหนช่วยพอร์ตในรอบนี้' : 'สินทรัพย์ไหนได้รับผลกระทบในรอบนี้'}</div>
+      <div className="mt-1 text-[10px] text-white/55 sm:text-xs">ผลของเหตุการณ์ต่อสินทรัพย์ที่คุณถือ · ยังไม่รวมการซื้อเพิ่ม การฟื้นตัว และค่าธรรมเนียม</div>
 
       <div className="mt-1 flex flex-col gap-[3px]">
         {rows.map((r) => {
@@ -319,22 +353,45 @@ function ImpactTable({ rows, cash, gained }) {
   )
 }
 
+function BehaviorEffectSummary({ effect }) {
+  if (!effect) return null
+  const tool = effect.toolId ? getTool(effect.toolId) : null
+  const title = effect.choice === 'buy' ? 'ซื้อเพิ่มตอนราคาถูก' : effect.choice === 'cut' ? 'ตัดขาดทุน' : 'ถือต่อ'
+  return (
+    <div className="pixel-frame mt-2 border border-sky-500/45 bg-sky-950/35 p-2 text-[10px] sm:text-xs">
+      <div className="font-bold text-sky-200">ผลจากการตัดสินใจ: {title}</div>
+      <div className="mt-1 grid gap-1 text-left sm:grid-cols-2">
+        {effect.choice === 'buy' && <>
+          <div>สินทรัพย์ที่ซื้อ <b className="text-white">{tool?.name ?? '—'}</b></div>
+          <div>เงินสดที่นำไปลงทุน <b className="text-sky-200">{money(effect.cashInvested)}</b></div>
+        </>}
+        {effect.choice === 'cut' && <div>มูลค่าที่โยกเข้าตราสารหนี้ <b className="text-sky-200">{money(effect.amountRebalanced)}</b></div>}
+        {effect.baseRecovery > 0 && <div>การฟื้นตัวพื้นฐานปลายบท <b className="text-emerald-300">+{money(effect.baseRecovery)}</b></div>}
+        {effect.abilityRecoveryBonus > 0 && <div>โบนัสความสามารถ <b className="text-violet-300">+{money(effect.abilityRecoveryBonus)}</b></div>}
+        {effect.totalRecovery > 0 && <div>การฟื้นตัวรวมปลายบท <b className="text-emerald-200">+{money(effect.totalRecovery)}</b></div>}
+        {effect.fee > 0 && <div>ค่าธรรมเนียม <b className="text-rose-300">-{money(effect.fee)}</b></div>}
+        <div>{effect.avoidsAftershock ? '✓ ป้องกันคลื่นตาม' : 'ยังมีโอกาสได้รับผลจากคลื่นตาม'}</div>
+      </div>
+      {effect.cashInvested > 0 && <div className="mt-1 text-white/50">เงินลงทุนเพิ่มคือการย้ายเงินสดเข้าพอร์ต ไม่ใช่กำไรจากตลาด</div>}
+    </div>
+  )
+}
+
 // สเตจ 5 — สรุปเฉพาะตัว: อธิบายด้วยตัวเลขจริงว่าทำไมผลถึงออกมาแบบนี้
 function DebriefStage({ state, event }) {
   const { shock } = state
   const style = currentStyle(state)
 
-  // เทียบก่อน/หลังเหตุการณ์รายสินทรัพย์ — ใช้ positionsBeforeShock ที่เอนจินเก็บไว้ตอน resolveShock
+  // ใช้ ledger จากเอนจินโดยตรง ห้ามเทียบกับ positions ปัจจุบัน เพราะหลังเลือก buy/cut
+  // พอร์ตถูกย้ายแล้วและจะทำให้เงินลงทุนใหม่ดูเหมือนกำไรจากตลาด
   const before = state.positionsBeforeShock ?? {}
   const diversification = 1 - concentration(before)
   const investedBefore = Object.values(before).reduce((sum, amount) => sum + amount, 0)
   const cashOnly = investedBefore <= 0 && state.cash > 0
-  const impacts = Object.keys(before)
-    .filter((id) => before[id] > 0.5)
-    .map((id) => {
-      const change = (state.positions[id] ?? 0) - before[id]
-      return { tool: getTool(id), change, pct: change / before[id] }
-    })
+  const impacts = (shock?.impacts ?? [])
+    .filter((impact) => impact.before > 0.5)
+    .map((impact) => ({ tool: getTool(impact.toolId), change: impact.change, pct: impact.returnPct }))
+    .filter((impact) => impact.tool)
 
   const totalChange = impacts.reduce((s, r) => s + r.change, 0)
   const gained = totalChange >= 0
@@ -347,26 +404,30 @@ function DebriefStage({ state, event }) {
     <div className="mx-auto w-full max-w-2xl">
       <div className="text-center text-sm font-bold sm:text-lg">เงินเปลี่ยนเพราะอะไร?</div>
 
-      <div className="pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
+      <div className="debrief-overview pixel-frame mt-2 border border-slate-700 bg-slate-900/70 p-2 text-[10px] leading-relaxed sm:p-3 sm:text-sm">
         <div className={`pixel-frame border p-1.5 sm:p-2 ${TONE_CLS[shock.portfolioReturn >= 0 ? 'good' : 'bad']}`}>
           ผลรวมของพอร์ตจาก {event.name}: <b>{pct(shock.portfolioReturn)}</b>
         </div>
         <EventReturnMatrix event={event} shock={shock} />
         {cashOnly ? (
-          <div className="pixel-frame mt-1.5 border border-slate-500/60 bg-slate-800/70 p-1.5 text-slate-200 sm:p-2">
-            ถือเงินสดทั้งหมด — <b>ยังไม่มีการกระจายการลงทุน</b> เงินสดไม่โดนแรงกระแทกตลาด แต่กำลังซื้ออาจลดลงจากเงินเฟ้อ
+          <div className="debrief-tip pixel-frame mt-1.5 border border-slate-500/60 bg-slate-800/70 p-1.5 text-slate-200 sm:p-2">
+            <span className="debrief-tip__icon" aria-hidden="true">💡</span>
+            <p><b>ถือเงินสดทั้งหมด</b> — เงินไม่โดนตลาด แต่กำลังซื้ออาจลดลง</p>
           </div>
         ) : (
-          <div className={`pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
-            กระจายตัว <b>{Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}
+            <div className={`debrief-tip debrief-diversification pixel-frame mt-1.5 border p-1.5 sm:p-2 ${TONE_CLS[diversificationTone(diversification)]}`}>
+            <span className="debrief-tip__icon" aria-hidden="true">💡</span>
+            <p><b>การกระจายตัว {Math.round(diversification * 100)}%</b> — {diversificationNote(diversification)}</p>
           </div>
         )}
 
         {impacts.length > 0 && (
-          <ImpactTable rows={impacts} cash={state.cash} gained={gained} />
+          <ImpactTable rows={impacts} cash={shock?.cashBefore ?? state.cash} gained={gained} />
         )}
 
-        {state.lastFee > 0.5 && (
+        <BehaviorEffectSummary effect={state.behaviorEffect} />
+
+        {state.lastFee > 0.5 && !(state.behaviorEffect?.fee > 0) && (
           <div className="mt-1.5 text-rose-300/90">ค่าธรรมเนียม -{money(state.lastFee)} · ต้นทุนจากการปรับพอร์ตของ{style.name}</div>
         )}
 
@@ -374,16 +435,11 @@ function DebriefStage({ state, event }) {
           <div className="mt-1.5 text-rose-300/90">มิจฉาชีพ -{money(state.scam.lost)} · สูญเสียจากการโอนเงิน ไม่ใช่ผลจากตลาด</div>
         )}
 
-        {state.behavior && (
-          <div className="mt-1.5 text-sky-200/90">
-            การตัดสินใจของคุณ: {state.behavior === 'hold' ? 'ถือต่อและรอดูการฟื้นตัว' : state.behavior === 'cut' ? 'ย้ายไปตราสารหนี้เพื่อลดแรงกระแทกถัดไป' : 'ใช้เงินสดซื้อเพิ่ม ทำให้ผลรอบถัดไปแรงขึ้น'}
-          </div>
-        )}
-
       </div>
 
-      <div className="pixel-chip mt-2 bg-emerald-950/60 p-2 text-[10px] leading-relaxed text-emerald-100/90 sm:text-xs">
-        {event.summary ?? lead?.tool.lesson ?? event.description}
+      <div className="debrief-tip pixel-chip mt-2 bg-emerald-950/60 p-2 text-[10px] leading-relaxed text-emerald-100/90 sm:text-xs">
+        <span className="debrief-tip__icon" aria-hidden="true">💡</span>
+        <p>{event.summary ?? lead?.tool.lesson ?? event.description}</p>
       </div>
 
       {(state.chapterAbility.triggered || state.chapterAbility.cost > 0) && (
@@ -408,24 +464,24 @@ function ScamOffer({ scam, onAnswer }) {
   return (
     // ไม่ส่ง onClose = กด Esc หรือคลิกฉากหลังหนีไม่ได้ ต้องเลือก "โอนเลย" หรือ "ปฏิเสธ" เท่านั้น
     // ตั้งใจให้เป็นแบบนี้ — ในโลกจริงมิจฉาชีพก็บีบให้ตัดสินใจตรงนั้น การกดหนีได้จะทำให้บทเรียนหาย
-    <Modal label="มีคนทักมาหาคุณ — ข้อเสนอการลงทุน" panelClassName="pixel-frame max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
+    <Modal label="มีคนทักมาหาคุณ — ข้อเสนอการลงทุน" panelClassName="scam-offer pixel-frame max-w-md border border-amber-500/60 bg-gradient-to-b from-amber-950 to-slate-950 p-3 sm:p-5">
       <div>
         <div className="w-full text-center">
-          <div className="text-sm font-bold text-amber-200 sm:text-lg">มีคนทักมาหาคุณ</div>
+          <div className="scam-offer__title text-sm font-bold text-amber-200 sm:text-lg">มีคนทักมาหาคุณ</div>
         </div>
-        <div className="pixel-chip mt-2 bg-black/50 p-2 text-[10px] leading-relaxed text-white/85 sm:text-sm">
+        <div className="scam-offer__message pixel-chip mt-2 bg-black/50 p-2 text-[10px] leading-relaxed text-white/85 sm:text-sm">
           “สวัสดีครับ ผมเป็นที่ปรึกษาการลงทุนมืออาชีพ เห็นพอร์ตคุณแล้วน่าสนใจมาก<br />
           ผมมีกองทุนพิเศษที่ <b className="text-amber-300">การันตีผลตอบแทน {Math.round(scam.promisedReturnPct * 100)}%</b> ภายใน 10 ปี ไม่มีความเสี่ยงเลยครับ<br />
           แต่รับเพิ่มแค่วันนี้วันเดียว <b className="text-amber-300">ต้องตัดสินใจตอนนี้เลย</b> พรุ่งนี้ปิดรับแล้วครับ”
         </div>
-        <div className="mt-2 text-center text-[10px] text-white/55 sm:text-xs">
+        <div className="scam-offer__amount mt-2 text-center text-[10px] text-white/55 sm:text-xs">
           เขาขอให้คุณโอน <b className="text-amber-200">{money(scam.offerAmount)}</b>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => onAnswer(true)} className="pixel-btn bg-amber-600 py-2 text-xs font-bold text-amber-950 sm:text-sm">
+          <button type="button" onClick={() => onAnswer(true)} className="scam-offer__button pixel-btn bg-amber-600 py-2 text-xs font-bold text-amber-950 sm:text-sm">
             โอนเลย
           </button>
-          <button type="button" onClick={() => onAnswer(false)} className="pixel-btn bg-slate-600 py-2 text-xs font-bold text-white sm:text-sm">
+          <button type="button" onClick={() => onAnswer(false)} className="scam-offer__button pixel-btn bg-slate-600 py-2 text-xs font-bold text-white sm:text-sm">
             ปฏิเสธ
           </button>
         </div>
@@ -437,24 +493,24 @@ function ScamOffer({ scam, onAnswer }) {
 function AdjustmentPrompt({ stageKey, style, onChoice }) {
   const isSignal = stageKey === 'signal'
   return (
-    <Modal label="ความสามารถปรับพอร์ต" panelClassName="pixel-frame max-w-md border border-sky-500/60 bg-gradient-to-b from-sky-950 to-slate-950 p-3 sm:p-5">
+    <Modal label="ความสามารถปรับพอร์ต" panelClassName="adjustment-prompt pixel-frame max-w-md border border-sky-500/60 bg-gradient-to-b from-sky-950 to-slate-950 p-3 sm:p-5">
       <div className="text-center">
         <CharacterToken style={style} state="idle" className="mx-auto h-16 w-16" label={false} />
-        <div className="mt-2 text-sm font-bold text-sky-200 sm:text-lg">ความสามารถของ{style.name}พร้อมใช้งาน</div>
-        <p className="mt-2 text-[10px] leading-relaxed text-white/75 sm:text-sm">
+        <div className="adjustment-prompt__title mt-2 text-sm font-bold text-sky-200 sm:text-lg">ความสามารถของ{style.name}พร้อมใช้งาน</div>
+        <p className={`adjustment-prompt__message ${isSignal ? 'adjustment-prompt__message--signal' : ''} mt-2 text-[10px] leading-relaxed text-white/75 sm:text-sm`}>
           {isSignal
-            ? 'พบสัญญาณเตือนแล้ว คุณอยากปรับพอร์ตเพื่อเตรียมรับมือไหม? การปรับของ Trader มีค่าธรรมเนียม 2% ของเงินที่ย้าย'
-            : `รู้เหตุการณ์แล้ว คุณอยากปรับพอร์ตเพื่อรับมือไหม?${style.id === 'trader' ? ' การปรับมีค่าธรรมเนียม 2% ของเงินที่ย้าย' : ' ครั้งนี้ปรับได้ฟรี 1 ครั้งในบทนี้'}`}
+            ? 'พบสัญญาณเตือนแล้ว คุณอยากปรับพอร์ตเพื่อเตรียมรับมือไหม? Trader เสียค่าธรรมเนียมครั้งแรกของบท 1% และครั้งต่อไป 2% ของเงินที่ย้าย'
+            : `รู้เหตุการณ์แล้ว คุณอยากปรับพอร์ตเพื่อรับมือไหม?${style.id === 'trader' ? ' Trader เสียค่าธรรมเนียมครั้งแรกของบท 1% และครั้งต่อไป 2%' : ' ครั้งนี้ปรับได้ฟรี 1 ครั้งในบทนี้'}`}
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => onChoice('skip')} className="pixel-btn bg-slate-600 px-2 py-2 text-xs font-bold text-white sm:text-sm">
+          <button type="button" onClick={() => onChoice('skip')} className="adjustment-prompt__button pixel-btn bg-slate-600 px-2 py-2 text-xs font-bold text-white sm:text-sm">
             {isSignal ? 'รอดูก่อน' : 'ใช้พอร์ตเดิม'}
           </button>
-          <button type="button" onClick={() => onChoice('adjust')} className="pixel-btn bg-sky-500 px-2 py-2 text-xs font-bold text-sky-950 sm:text-sm">
+          <button type="button" onClick={() => onChoice('adjust')} className="adjustment-prompt__button pixel-btn bg-sky-500 px-2 py-2 text-xs font-bold text-sky-950 sm:text-sm">
             ปรับพอร์ต
           </button>
         </div>
-        <p className="mt-2 text-[9px] text-white/45 sm:text-[10px]">เลือกใช้พอร์ตเดิมได้โดยไม่มีบทลงโทษ และปุ่มปรับพอร์ตปกติยังคงอยู่</p>
+        <p className="adjustment-prompt__footnote mt-2 text-[9px] text-white/45 sm:text-[10px]">เลือกใช้พอร์ตเดิมได้โดยไม่มีบทลงโทษ และปุ่มปรับพอร์ตปกติยังคงอยู่</p>
       </div>
     </Modal>
   )
@@ -507,7 +563,7 @@ export default function StageScreen({ state, command, commandError = null, onDis
             {stage.key === 'signal' && <SignalStage event={event} />}
             {stage.key === 'reveal' && <RevealStage event={event} />}
             {stage.key === 'shock' && <ShockStage state={state} event={event} />}
-            {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice) => command({ type: 'CHOOSE_BEHAVIOR', choice })} />}
+            {stage.key === 'behavior' && <BehaviorStage state={state} onChoose={(choice, toolId) => command({ type: 'CHOOSE_BEHAVIOR', choice, ...(toolId ? { toolId } : {}) })} />}
             {stage.key === 'debrief' && <DebriefStage state={state} event={event} />}
           </div>
         </div>

@@ -10,6 +10,20 @@ function bandFor(multiple) {
   return BALANCE.outcomeBands.find((b) => multiple >= b.minMultiple) ?? BALANCE.outcomeBands[BALANCE.outcomeBands.length - 1]
 }
 
+function benchmarkBandFor(ratio) {
+  return BALANCE.benchmarkBands.find((b) => ratio >= b.minRatio) ?? BALANCE.benchmarkBands[BALANCE.benchmarkBands.length - 1]
+}
+
+// เงินแต่ละก้อนเข้าคนละช่วงเวลา จึงต้องมีเวลาทบต้นไม่เท่ากัน
+// บทแรกโต 4 ช่วง บทสุดท้ายโต 1 ช่วง เหมือนลำดับการเดินเงินจริงใน reducer
+export function benchmarkForIncomeSchedule(incomeSchedule) {
+  const periods = incomeSchedule.length
+  return incomeSchedule.reduce(
+    (sum, amount, index) => sum + amount * BALANCE.benchmarkGrowthMult ** (periods - index),
+    0,
+  )
+}
+
 // สรุปผลจาก Matrix เป็นภาษาคน ใช้ซ้ำทั้ง timeline และรายงานจบเกม
 export function prepLabel(eventReturn) {
   const score = Math.max(0, Math.min(1, (eventReturn + 0.2) / 0.35))
@@ -32,9 +46,9 @@ const BEHAVIOR_LABEL = {
 export function buildReport(state) {
   const finalValue = Object.values(state.positions).reduce((a, b) => a + b, 0) + state.cash
   const contributed = state.incomeSchedule.reduce((sum, amount) => sum + amount, 0)
-  const benchmark = BALANCE.benchmarkValue
+  const benchmark = benchmarkForIncomeSchedule(state.incomeSchedule)
   const multiple = contributed > 0 ? finalValue / contributed : 0
-  const ratio = multiple
+  const benchmarkRatio = benchmark > 0 ? finalValue / benchmark : 0
   const isRuined = multiple < 0.2
 
   const chapters = state.history.map((h) => {
@@ -60,7 +74,10 @@ export function buildReport(state) {
     finalValue,
     contributed,
     benchmark,
-    ratio,
+    // คง ratio เดิมไว้เพื่อไม่เปลี่ยนความหมายของข้อมูล analytics ย้อนหลัง
+    ratio: multiple,
+    benchmarkRatio,
+    benchmarkBand: benchmarkBandFor(benchmarkRatio),
     isRuined,
     band: bandFor(multiple),
     multiple,

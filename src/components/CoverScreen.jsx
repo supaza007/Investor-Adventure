@@ -67,38 +67,48 @@ export default function CoverScreen({ onPlay, onContinue = null, saveError = nul
           </div>}
 
           <form onSubmit={start} className="mt-3 flex w-[min(90vw,22rem)] flex-col items-stretch gap-2 text-left">
-          <label className="text-xs font-bold text-white/85" htmlFor="student-name">ชื่อผู้เล่น</label>
+          <label
+            className="text-sm font-semibold leading-normal tracking-[0.03em] text-white/80"
+            htmlFor="student-name"
+            style={{ fontFamily: "Mali, var(--font-game)" }}
+          >ชื่อผู้เล่น</label>
           <input
             id="student-name"
             value={studentName}
             onChange={(event) => { setStudentName(event.target.value); setInputError('') }}
-            className="pixel-chip min-h-11 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
+            className="pixel-chip min-h-11 bg-slate-950/90 px-3 py-2 text-[10px] leading-normal text-white outline-none placeholder:text-white/55"
+            style={{ fontFamily: "Mali, var(--font-game)" }}
             placeholder="กรอกชื่อหรือนามแฝง"
             maxLength={80}
             autoComplete="off"
           />
-          <label className="text-xs font-bold text-white/85" htmlFor="class-room">ห้องเรียน</label>
+          <label
+            className="text-sm font-semibold leading-normal tracking-[0.03em] text-white/80"
+            htmlFor="class-room"
+            style={{ fontFamily: "Mali, var(--font-game)" }}
+          >ห้องเรียน</label>
           <input
             id="class-room"
             value={classRoom}
             onChange={(event) => { setClassRoom(event.target.value); setInputError('') }}
-            className="pixel-chip min-h-11 bg-slate-950/80 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35"
+            className="pixel-chip min-h-11 bg-slate-950/90 px-3 py-2 text-[10px] leading-normal text-white outline-none placeholder:text-white/55"
+            style={{ fontFamily: "Mali, var(--font-game)" }}
             placeholder="เช่น ม.6/3"
             maxLength={30}
             autoComplete="off"
           />
-          {inputError && <p role="alert" className="text-xs text-rose-200">{inputError}</p>}
+          {inputError && <p role="alert" className="text-[8px] leading-relaxed text-rose-200" style={{ fontFamily: "Mali, var(--font-game)" }}>{inputError}</p>}
           <button type="submit" aria-label="เริ่มเกม" className="cover-play-art pixel-btn play-pulse mt-1 self-center">
             <img src={playButton} alt="" className="cover-start-image block" draggable="false" />
             <span className="sr-only">START</span>
           </button>
           </form>
 
-          {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mt-3 bg-slate-700 px-8 py-2 text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
+          {onContinue && <button type="button" onClick={onContinue} className="pixel-btn mx-auto mt-3 block w-fit bg-slate-700 px-8 py-2 text-center text-sm font-bold text-white">เล่นต่อจากเครื่องนี้</button>}
 
           {saveError && <p role="alert" className="mt-3 max-w-lg bg-rose-950/90 p-2 text-xs text-rose-100">เปิดข้อมูลที่บันทึกไว้ไม่ได้ ({saveError}) เกมใหม่ยังเล่นได้ตามปกติ</p>}
 
-          <p className="mt-3 text-[10px] text-white/50 sm:mt-4 sm:text-xs">กดปุ่ม START เพื่อเริ่มการผจญภัย</p>
+          <p className="mt-3 w-full text-center text-[8px] leading-relaxed text-white/70 sm:mt-4" style={{ fontFamily: "Mali, var(--font-game)" }}>กดปุ่ม START เพื่อเริ่มการผจญภัย</p>
         </div>
       </div>
     </div>

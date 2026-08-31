@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource/mali/500.css";
+@import "@fontsource/mali/600.css";
 
 /* ================= PIXEL ART THEME ================= */
 @font-face {
@@ -26,7 +28,7 @@ html {
 
 body {
   /* ฟอนต์คมสำหรับไทย + โมโนสเปซสำรอง (ฟอนต์พิกเซลจริงไม่รองรับไทย) */
-  font-family: var(--font-game);
+  font-family: "Mali", var(--font-game);
   background-color: #0b0c15;
   /* พื้นหลังจุด dithered แบบเกมเรโทร */
   background-image: radial-gradient(rgba(130, 130, 210, 0.08) 1px, transparent 1px);
@@ -108,6 +110,7 @@ body::after {
 
 /* ================= FRIENDLY RISK RESULT ================= */
 .risk-result-screen {
+  font-family: "Mali", var(--font-game);
   min-height: 100dvh;
   display: grid;
   place-items: center;
@@ -241,7 +244,7 @@ body::after {
 
 .risk-result-assets__copy { display: grid; min-width: 0; flex: 1; line-height: 1.2; }
 .risk-result-assets__copy b { font-size: 0.86rem; }
-.risk-result-assets__copy small { margin-top: 0.18rem; overflow-wrap: anywhere; color: rgba(255, 255, 255, 0.55); font-size: 0.62rem; }
+.risk-result-assets__copy small { margin-top: 0.18rem; overflow-wrap: anywhere; color: rgba(255, 255, 255, 0.62); font-size: 0.68rem; line-height: 1.3; }
 .risk-result-assets li > strong { margin-left: 0.5rem; color: var(--risk-result-asset-color); font-size: 0.95rem; }
 
 .risk-result-benefits {
@@ -273,7 +276,7 @@ body::after {
   background: linear-gradient(#24d39e, #0aa979);
   box-shadow: inset 0 3px rgba(255, 255, 255, 0.22), 4px 4px 0 #020907;
   color: #04251c;
-  font: 900 1rem var(--font-game);
+  font: 900 1rem "Mali", var(--font-game);
 }
 
 .risk-result-continue:not(:disabled):hover { filter: brightness(1.1); }
@@ -284,9 +287,25 @@ body::after {
   margin: -0.45rem 1rem 1rem;
   color: rgba(255, 255, 255, 0.4);
   text-align: center;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   line-height: 1.4;
 }
+
+/* สร้างลำดับสายตา: หัวข้อและผลลัพธ์หลักเด่นกว่าองค์ประกอบรอง */
+.risk-result-card__topline span { font-size: 0.9rem; }
+.risk-result-card__topline span,
+.risk-result-card__intro h1,
+.risk-result-continue { font-family: "Mali", var(--font-game); }
+.risk-result-card__topline small { color: rgba(119, 218, 190, 0.72); }
+.risk-result-donut { box-shadow: 0 0 0 2px #bd933d, 3px 3px 0 #030812; }
+.risk-result-card__intro h1 { font-size: clamp(1.15rem, 5vw, 1.45rem); }
+.risk-result-card__intro h1 strong { color: #f1c75f; }
+.risk-result-card__intro h1 + p { color: rgba(255, 248, 221, 0.58); }
+.risk-result-card__intro > span { border-color: rgba(255, 209, 91, 0.35); color: #e7cb86; background: rgba(111, 70, 20, 0.3); }
+.risk-result-assets li { border-color: #182b40; background: linear-gradient(90deg, rgba(13, 34, 56, 0.82), rgba(16, 27, 44, 0.88)); }
+.risk-result-assets__copy b { font-size: 0.8rem; }
+.risk-result-assets li > strong { font-size: 0.86rem; }
+.risk-result-benefits span { border-color: #334d61; color: #78baa8; background: #0b1d2f; }
 
 @media (max-width: 390px), (max-height: 760px) {
   .risk-result-screen { align-items: start; padding-top: max(0.5rem, env(safe-area-inset-top)); }
@@ -450,6 +469,36 @@ button:focus-visible {
   font-weight: 800;
 }
 
+/* หน้ายินยอม: ให้หัวข้อเด่น และลดน้ำหนักของรายละเอียดรอง */
+.consent-screen > div > h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.consent-screen .pixel-frame > p:first-child {
+  color: #f5df9f;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.consent-screen .pixel-frame > label {
+  color: rgba(245, 240, 213, 0.86);
+  font-size: 0.84rem;
+  font-weight: 500;
+}
+.consent-screen .pixel-frame > p.text-xs {
+  color: rgba(217, 228, 241, 0.62);
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+.consent-screen .pixel-frame > p.text-\[10px\] {
+  color: rgba(217, 228, 241, 0.38);
+  font-size: 0.58rem;
+  font-weight: 400;
+}
+.consent-screen .pixel-btn {
+  font-weight: 600;
+  box-shadow: inset 0 2px rgba(255, 255, 255, 0.12), 3px 3px 0 rgba(0, 0, 0, 0.55);
+}
+
 .consent-actions__primary {
   background: #00c58a;
   color: #031b18;
@@ -545,7 +594,7 @@ button:focus-visible {
 .cover-title {
   position: relative;
   display: inline-block;
-  font-family: var(--font-game);
+  font-family: "Mali", var(--font-game);
   font-weight: 900;
   font-style: italic;
   letter-spacing: 0.01em;
@@ -717,6 +766,7 @@ button:focus-visible {
   height: 100dvh;
   min-height: 0 !important;
   overflow: hidden !important;
+  font-family: "Mali", var(--font-game);
   background-position: center top;
   background-repeat: no-repeat;
   background-size: cover;
@@ -1084,6 +1134,49 @@ button:focus-visible {
   }
 }
 
+.pre-assessment-screen .assessment-answer-row__text {
+  font-size: 12px !important;
+  font-weight: 500;
+  line-height: 1.1 !important;
+  transform: translateX(6px);
+  text-shadow: 0 1px 0 rgba(255, 247, 218, 0.75);
+}
+
+.post-assessment-screen .assessment-answer-row__text {
+  font-size: 12px !important;
+}
+
+.pre-assessment-screen .assessment-question-legend + div > .assessment-answer-row:first-child .assessment-answer-row__text {
+  transform: translateX(10px);
+}
+
+.pre-assessment-screen .assessment-scroll-label--disclaimer {
+  font-size: 12px;
+}
+
+.pre-assessment-screen .assessment-question-legend {
+  font-size: 14px;
+}
+
+.pre-assessment-screen .assessment-answer-row {
+  padding-right: clamp(2.5rem, 9%, 4.25rem);
+  padding-left: clamp(3.15rem, 13.5%, 4.75rem);
+}
+
+@media (max-width: 640px) {
+  /* มือถือ: ใช้กรอบช้อยส์ขนาดเดียวกัน และคืนพื้นที่ให้ข้อความยาวอ่านจบในกรอบ */
+  .pre-assessment-screen .assessment-answer-row {
+    height: 6.4rem;
+    min-height: 6.4rem;
+    padding-right: 1.875rem;
+    padding-left: 2.625rem;
+  }
+
+  .pre-assessment-screen .assessment-answer-row__text {
+    font-size: 11px !important;
+  }
+}
+
 .cover-play-art {
   border: 0;
   background: transparent;
@@ -1147,7 +1240,7 @@ button:focus-visible {
 .style-select-header > p:last-child {
   max-width: 42rem;
   margin-inline: auto;
-  color: #fff7d0;
+  color: #a8f0d7;
   font-size: clamp(0.72rem, 0.65rem + 0.25vw, 0.9rem);
   line-height: 1.45;
   text-shadow: 1px 1px 0 rgba(2, 10, 20, 0.95), 0 0 4px rgba(2, 10, 20, 0.85);
@@ -1160,6 +1253,16 @@ button:focus-visible {
 
 .style-select-compare .pixel-frame[aria-pressed="true"] {
   filter: brightness(1.12) saturate(1.14);
+}
+
+/* การ์ดทั้ง 4 ใบต้องแสดงชื่อเป็นคำเต็ม ไม่แตกคำอังกฤษเป็นตัวอักษรเมื่อจอแคบ */
+.style-select-compare__name {
+  min-width: 0;
+  font-size: clamp(0.5rem, 2.1vw, 0.6875rem);
+  line-height: 1.15;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
 }
 
 .style-select-details {
@@ -1230,11 +1333,11 @@ button:focus-visible {
   align-self: center;
   align-items: center;
   justify-content: center;
-  width: min(50%, 20rem);
+  width: min(72%, 25rem);
   min-width: 0;
-  min-height: 2.75rem;
+  min-height: 3.5rem;
   margin-bottom: 0.7rem;
-  padding: 0.45rem 0.75rem;
+  padding: 0.65rem 1.2rem;
   border: 2px solid rgba(255, 215, 121, 0.55);
   background-color: transparent !important;
   box-shadow: none;
@@ -1245,6 +1348,136 @@ button:focus-visible {
   line-height: 1;
   text-align: center;
   text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7);
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.75));
+}
+
+.style-select-name + div {
+  font-size: 8px !important;
+}
+
+.style-detail-modal__title { font-size: 1.15rem; font-weight: 700; }
+.style-detail-modal > div > p { color: rgba(255, 255, 255, 0.7); font-size: 0.82rem; font-weight: 400; line-height: 1.45; }
+.style-detail-modal__section-label { color: rgba(255, 255, 255, 0.5); font-size: 0.62rem; font-weight: 500; }
+.style-detail-modal .pixel-chip { font-weight: 400; }
+.style-detail-modal .pixel-btn { font-weight: 600; }
+
+/* ตารางผลตอบแทน: ชื่อช้อยส์ต้องเด่นที่สุด ส่วนผลลัพธ์เป็นข้อมูลรอง */
+.event-return-matrix__name { color: rgba(232, 242, 255, 0.92) !important; font-size: clamp(1rem, 0.9rem + 0.5vw, 1.15rem); font-weight: 800; line-height: 1.2; }
+.event-return-matrix__final { margin-top: 0.25rem; color: inherit; font-size: clamp(0.65rem, 0.62rem + 0.2vw, 0.78rem); font-weight: 700; line-height: 1.2; }
+.event-return-matrix__reason { min-height: 2.7em; margin-top: 0.25rem; overflow-wrap: anywhere; color: rgba(220, 232, 245, 0.68) !important; font-size: 0.58rem; font-weight: 400; line-height: 1.35; }
+.reveal-stage__portrait,
+.shock-stage__portrait { width: 9.5rem !important; height: 9.5rem !important; }
+.debrief-overview { display: grid; gap: 0.5rem; }
+.debrief-tip { display: grid; grid-template-columns: 1.35rem minmax(0, 1fr); align-items: start; gap: 0.45rem; }
+.debrief-tip__icon { display: grid; width: 1.35rem; height: 1.35rem; place-items: center; border: 1px solid rgba(255, 216, 114, 0.7); background: rgba(86, 60, 12, 0.55); font-size: 0.78rem; line-height: 1; }
+.debrief-tip p { margin: 0; }
+.debrief-diversification { color: rgba(168, 240, 215, 0.9) !important; font-size: 0.72rem; font-weight: 500; }
+.signal-stage > p { font-size: 12px !important; }
+.signal-stage { padding-top: 0.45rem; }
+.signal-stage__title { margin-top: 0.7rem !important; font-size: 15px !important; line-height: 1.3; }
+.signal-stage__hint { margin-top: 0.8rem !important; font-size: 13px !important; line-height: 1.55 !important; }
+.signal-stage__note { margin-top: 0.8rem !important; font-size: 10px !important; line-height: 1.5; }
+.reveal-stage { padding: 0.35rem 0.6rem; }
+.reveal-stage__title { margin-top: 0.45rem !important; font-size: 20px !important; line-height: 1.2; }
+.reveal-stage__tag { margin-top: 0.65rem !important; padding: 0.3rem 0.6rem; font-size: 11px !important; font-weight: 500; }
+.reveal-stage__description { margin-top: 0.85rem !important; font-size: 14px !important; line-height: 1.55 !important; font-weight: 400; text-align: left; }
+.reveal-stage__note { margin-top: 0.8rem !important; color: rgba(220, 232, 245, 0.58) !important; font-size: 11px !important; line-height: 1.45; }
+.reveal-stage__disclaimer { margin-top: 0.45rem !important; color: rgba(255, 226, 154, 0.62) !important; font-size: 10px !important; line-height: 1.45 !important; }
+.adjustment-prompt__title { margin-top: 0.7rem !important; font-size: 16px; line-height: 1.25; font-weight: 600; }
+.adjustment-prompt__message { margin-top: 0.85rem !important; font-size: 14px; line-height: 1.5; font-weight: 400; }
+.adjustment-prompt__message--signal { font-size: 13px; }
+.adjustment-prompt__button { font-size: 15px !important; font-weight: 600; }
+.adjustment-prompt__footnote { font-size: 11px !important; font-weight: 400; }
+.scam-offer__title { font-size: 17px; font-weight: 600; line-height: 1.25; }
+.scam-offer__message { margin-top: 0.8rem !important; font-size: 13px; font-weight: 400; line-height: 1.55; }
+.scam-offer__message b { color: #ffd15b; font-weight: 600; }
+.scam-offer__amount { margin-top: 0.9rem !important; font-size: 12px; font-weight: 400; }
+.scam-offer__amount b { font-size: 16px; font-weight: 600; }
+.scam-offer__button { font-size: 14px !important; font-weight: 600; }
+
+/* หน้ารายงานจบเกม: หน้าหลักอ่านเฉพาะใจความ รายละเอียดซ่อนไว้หลังปุ่ม i ของแต่ละบท */
+.report-chapter-row__info {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid #f3c65c;
+  border-radius: 999px;
+  background: #163850;
+  color: #fff0af;
+  font-family: "Mali", var(--font-game);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+}
+.report-chapter-row__info:hover,
+.report-chapter-row__info:focus-visible { background: #23709a; color: #fff; }
+.report-highlights { margin-top: 0.7rem; }
+.report-highlights__pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.report-outcome { min-width: 0; border: 1px solid rgba(57, 204, 157, 0.5); background: rgba(4, 57, 46, 0.5); padding: 0.55rem; }
+.report-outcome--worst { border-color: rgba(255, 115, 137, 0.55); background: rgba(81, 13, 31, 0.5); }
+.report-outcome--least { border-color: rgba(255, 193, 73, 0.55); background: rgba(86, 53, 11, 0.5); }
+.report-outcome > span { display: block; color: #7cebc5; font-size: 0.68rem; font-weight: 600; }
+.report-outcome--worst > span { color: #ffa8b5; }
+.report-outcome--least > span { color: #ffe08a; }
+.report-outcome > b { display: block; margin-top: 0.16rem; overflow: hidden; color: #f2f8fa; font-size: 0.72rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.report-outcome > small { display: block; margin-top: 0.12rem; overflow: hidden; color: rgba(229, 247, 241, 0.66); font-size: 0.62rem; text-overflow: ellipsis; white-space: nowrap; }
+.report-outcome > strong { display: block; margin-top: 0.28rem; color: #54e6b2; font-size: 1rem; font-weight: 600; }
+.report-outcome--worst > strong { color: #ff8fa0; }
+.report-outcome--least > strong { color: #ffd871; }
+.report-scam-alert { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 0.45rem; align-items: center; margin-top: 0.5rem; border: 1px solid rgba(91, 214, 178, 0.48); background: rgba(9, 64, 56, 0.48); padding: 0.45rem 0.55rem; }
+.report-scam-alert--victim { border-color: rgba(243, 187, 72, 0.68); background: rgba(76, 38, 6, 0.66); }
+.report-scam-alert > span { display: grid; width: 1.45rem; height: 1.45rem; place-items: center; border: 1px solid #75edc4; color: #8cf4d0; font-weight: 700; }
+.report-scam-alert--victim > span { border-color: #ffcf57; color: #ffdf7b; }
+.report-scam-alert b { display: block; color: #8ff1ce; font-size: 0.75rem; font-weight: 600; }
+.report-scam-alert--victim b { color: #ffdb6e; }
+.report-scam-alert small { display: block; margin-top: 0.08rem; color: rgba(238, 247, 245, 0.7); font-size: 0.62rem; line-height: 1.35; }
+.report-readiness__toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+.report-readiness__toggle button { border: 1px solid rgba(109, 163, 191, 0.52); background: rgba(15, 43, 62, 0.88); padding: 0.38rem 0.45rem; color: rgba(218, 238, 246, 0.78); font-family: "Mali", var(--font-game); font-size: 0.68rem; font-weight: 600; }
+.report-readiness__toggle button[aria-pressed="true"] { border-color: rgba(80, 230, 187, 0.78); background: rgba(12, 85, 70, 0.82); color: #d9fff1; }
+.report-readiness__bars { display: grid; gap: 0.7rem; }
+.report-readiness__bar > div:first-child { display: flex; align-items: baseline; justify-content: space-between; gap: 0.7rem; }
+.report-readiness__bar span { color: #e0ecf1; font-size: 0.72rem; font-weight: 600; }
+.report-readiness__bar b { color: #ffda70; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.report-readiness__track { height: 0.48rem; margin-top: 0.25rem; overflow: hidden; background: #192d40; }
+.report-readiness__track > div { height: 100%; background: linear-gradient(90deg, #18b99a, #69efc5); }
+.report-readiness__bar small { display: block; margin-top: 0.22rem; color: rgba(214, 231, 239, 0.56); font-size: 0.62rem; line-height: 1.3; }
+.report-trend-view { margin-top: 0.8rem; }
+.report-trend-view__chart { width: 100%; height: 9rem; overflow: visible; color: #65e8c2; background: repeating-linear-gradient(0deg, transparent 0 2rem, rgba(107, 147, 177, 0.12) 2.05rem), repeating-linear-gradient(90deg, transparent 0 25%, rgba(107, 147, 177, 0.12) 25.3%); }
+.report-trend-view__point { fill: #65e8c2; stroke: #123f38; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.report-trend-view__point--down { fill: #ff9aa8; stroke: #6f182a; }
+.report-trend-view__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.35rem; margin-top: 0.55rem; }
+.report-trend-view__steps button { border: 1px solid rgba(106, 161, 191, 0.46); background: rgba(15, 43, 62, 0.86); padding: 0.3rem; color: rgba(225, 240, 247, 0.75); font-family: "Mali", var(--font-game); font-size: 0.62rem; }
+.report-trend-view__steps button[aria-pressed="true"] { border-color: #65e8c2; color: #d8fff1; }
+.report-trend-view__detail { min-height: 2.3rem; margin-top: 0.5rem; border-left: 3px solid #65e8c2; background: rgba(13, 49, 66, 0.65); padding: 0.4rem 0.5rem; color: rgba(225, 240, 246, 0.86); font-size: 0.66rem; line-height: 1.35; }
+.report-learning__items { display: grid; gap: 0.55rem; }
+.report-learning__metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.report-learning__metrics > div { min-width: 0; border: 1px solid rgba(95, 155, 190, 0.45); background: rgba(11, 39, 57, 0.82); padding: 0.55rem; }
+.report-learning__metrics span { display: block; color: rgba(196, 221, 238, 0.68); font-size: 0.62rem; }
+.report-learning__metrics b { display: block; margin-top: 0.18rem; overflow: hidden; color: #ffda70; font-size: 0.86rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.report-learning__items > div { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr); gap: 0.45rem; align-items: start; }
+.report-learning__items span { display: grid; width: 1.15rem; height: 1.15rem; place-items: center; background: #155949; color: #b6ffe5; font-size: 0.68rem; font-weight: 700; }
+.report-learning__items p { margin: 0; color: rgba(227, 239, 246, 0.82); font-size: 0.68rem; line-height: 1.4; }
+.report-learning__items b { color: #fff; font-weight: 600; }
+.report-learning__items .report-learning__warning span { background: #6a4410; color: #ffe991; }
+.report-learning__details { color: rgba(203, 221, 232, 0.64); font-size: 0.62rem; }
+.report-learning__details summary { cursor: pointer; color: #a9c7ff; font-weight: 600; }
+.report-learning__details p { margin: 0.4rem 0 0; line-height: 1.45; }
+.report-chapter-modal__close { width: 1.8rem; height: 1.8rem; flex: 0 0 auto; border: 1px solid rgba(169, 197, 218, 0.7); background: rgba(19, 42, 59, 0.9); color: #fff; font-size: 1.15rem; line-height: 1; }
+.report-chapter-modal__summary { border-left: 3px solid #5bdcb7; background: rgba(9, 43, 55, 0.66); padding: 0.55rem 0.65rem; color: rgba(226, 240, 245, 0.88); font-size: 0.78rem; line-height: 1.45; }
+.report-chapter-modal__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; }
+.report-chapter-modal__facts > div { min-width: 0; background: rgba(7, 21, 33, 0.8); padding: 0.45rem; }
+.report-chapter-modal__facts dt { color: rgba(205, 224, 235, 0.6); font-size: 0.62rem; }
+.report-chapter-modal__facts dd { margin: 0.12rem 0 0; overflow: hidden; color: #eff7fb; font-size: 0.7rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.report-chapter-modal__returns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem; }
+.report-chapter-modal__returns > div { display: flex; justify-content: space-between; gap: 0.35rem; border: 1px solid rgba(75, 117, 142, 0.36); background: rgba(11, 31, 45, 0.8); padding: 0.38rem 0.45rem; color: rgba(224, 238, 245, 0.75); font-size: 0.65rem; }
+.report-chapter-modal__returns b { font-weight: 600; white-space: nowrap; }
+@media (max-width: 380px) {
+  .report-outcome { padding: 0.45rem; }
+  .report-outcome > b { font-size: 0.66rem; }
+  .report-outcome > strong { font-size: 0.9rem; }
+  .report-chapter-modal__facts, .report-chapter-modal__returns { grid-template-columns: 1fr; }
 }
 
 .style-select-hero-nav {
@@ -1291,22 +1524,18 @@ button:focus-visible {
 
 .style-select-profile__label {
   color: #f5d779;
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-}
-
-.style-select-profile__tagline {
-  margin: 0.35rem 0 0;
-  color: #fff7dc;
-  font-size: clamp(0.72rem, 0.66rem + 0.25vw, 0.9rem);
-  line-height: 1.55;
-  text-shadow: 1px 1px 0 rgba(1, 8, 16, 0.9);
 }
 
 .style-select-profile .style-select-pros-cons > div {
   min-height: 2.2rem;
   font-size: clamp(0.72rem, 0.66rem + 0.25vw, 0.88rem);
+}
+
+.style-select-profile .style-select-pros-cons > div:nth-child(2) {
+  font-size: 0.68rem;
 }
 
 .style-select-profile__adjust {
@@ -1323,10 +1552,25 @@ button:focus-visible {
 
 .style-select-persona {
   max-width: 34rem;
+  margin-top: 0.35rem;
   color: #fff8e4;
   font-size: clamp(0.78rem, 0.7rem + 0.3vw, 1rem);
   padding: 0.3rem 0.45rem;
   background: rgba(2, 12, 24, 0.62);
+  text-shadow: 1px 1px 0 rgba(1, 8, 16, 0.95);
+}
+
+.style-select-tagline {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid rgba(255, 218, 122, 0.6);
+  background: rgba(39, 31, 19, 0.78);
+  color: #ffe39a;
+  font-size: clamp(0.6rem, 0.56rem + 0.2vw, 0.76rem);
+  font-weight: 700;
+  line-height: 1.3;
   text-shadow: 1px 1px 0 rgba(1, 8, 16, 0.95);
 }
 
@@ -1364,10 +1608,28 @@ button:focus-visible {
 }
 
 .style-select-info {
-  color: #f4f8ff;
-  background: rgba(1, 10, 21, 0.68);
-  line-height: 1.5;
-  text-shadow: 1px 1px 0 rgba(1, 8, 16, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 2px solid #ffe39a;
+  background: linear-gradient(180deg, #f6d778, #bd7e2c);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 3px 3px 0 rgba(1, 8, 16, 0.82);
+  color: #182534;
+  font-size: clamp(0.76rem, 0.68rem + 0.25vw, 0.92rem);
+  font-weight: 800;
+  line-height: 1.25;
+  text-shadow: 1px 1px 0 rgba(255, 247, 214, 0.55);
+}
+
+.style-select-info > span:first-child {
+  font-size: 1.1em;
+}
+
+.style-select-info > span:last-child {
+  white-space: nowrap;
 }
 
 .style-select-actions .pixel-btn {
@@ -1579,7 +1841,7 @@ button:focus-visible {
 /* Text scale 120% สำหรับหน้าผลลัพธ์ — จำกัดไว้ในหน้านี้และกำหนด line-height/การตัดคำ
    เพื่อให้ข้อความใหญ่ขึ้นโดยไม่ดันกรอบหรือปุ่มล้นบนมือถือ */
 .stage-screen .life-questbar__heading {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   line-height: 1.25;
 }
 
@@ -1627,7 +1889,7 @@ button:focus-visible {
   }
 
   .stage-screen .life-questbar__heading {
-    font-size: 0.7rem;
+    font-size: 0.76rem;
   }
 
   .stage-screen .cozy-hud {
@@ -1776,7 +2038,7 @@ button:focus-visible {
   background: linear-gradient(#29daa3, #08a976);
   box-shadow: inset 0 3px rgba(255, 255, 255, 0.2), 4px 4px 0 rgba(0, 0, 0, 0.65);
   color: #03261b;
-  font: 900 1rem var(--font-game);
+  font: 900 1rem "Mali", var(--font-game);
 }
 
 .chapter-prototype__start > span { font-size: 24px; line-height: 1; }
@@ -1886,6 +2148,16 @@ button:focus-visible {
 .chapter-prototype-switcher button { min-height: 2.65rem; border: 1px solid #806a28; background: #14263d; color: #ffe06e; font-size: 1.35rem; }
 .chapter-prototype-switcher span { overflow: hidden; padding: 0 0.45rem; color: #fff2c8; text-align: center; text-overflow: ellipsis; white-space: nowrap; font-size: 0.68rem; }
 .chapter-prototype-switcher b { color: #ffd54f; }
+
+/* ขนาดตัวอักษรหน้าขึ้นบทให้พอดีกับกรอบบนมือถือ */
+.chapter-prototype--portal .chapter-prototype__completed { font-size: 15px !important; }
+.chapter-prototype--portal .chapter-prototype__age { color: rgba(200, 255, 240, 0.86); font-size: 17px !important; }
+.chapter-prototype--portal h1 { margin-top: 1.05rem !important; font-size: clamp(40px, 11vw, 58px) !important; }
+.chapter-prototype--portal .chapter-prototype__story { margin-top: 0.85rem !important; font-size: 15px !important; font-weight: 500; line-height: 1.55 !important; padding-block: 0.55rem !important; text-align: center; }
+.chapter-prototype--portal .chapter-prototype__reward span { font-size: 13px !important; font-weight: 500; }
+.chapter-prototype--portal .chapter-prototype__reward strong { font-size: 34px !important; }
+.chapter-prototype--portal .chapter-prototype__reward small { font-size: 13px !important; }
+.chapter-prototype--portal .chapter-prototype__start { font-size: 20px !important; }
 
 @media (max-width: 390px), (max-height: 720px) {
   .chapter-prototype-screen { align-items: start; padding-top: 0.45rem; }

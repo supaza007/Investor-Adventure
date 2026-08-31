@@ -43,7 +43,7 @@ function gaussian(rng) {
 // เติบโตข้ามบท (1 บท ≈ 10 ปี) — การทบต้นเงียบๆ ที่ให้รางวัลการถือ (ดีไซน์ข้อ 3)
 // returnMult มาจากสไตล์นักลงทุน: ระยะยาว 1.10 / ตัวอื่น 1.0
 //
-// ส่ง rng เข้ามา = ผลตอบแทนสุ่มแบบ lognormal รอบค่ากลาง (ใช้ตอนเล่นจริง)
+// ส่ง rng เข้ามา = ผลตอบแทนสุ่มแบบ lognormal ที่ปรับ mean correction แล้ว (ใช้ตอนเล่นจริง)
 // ไม่ส่ง = ได้ค่ากลางเป๊ะๆ (ใช้ตอนคำนวณเกณฑ์อ้างอิงและตอนเทสต์)
 //
 // ความผันผวนเป็นของตลาด ไม่ใช่ของสไตล์ → returnMult คูณเฉพาะค่ากลาง ไม่ไปแตะ vol
@@ -60,7 +60,11 @@ export function applyGrowthWithDetails(positions, returnMult = 1, rng = null) {
     const tool = getTool(toolId)
     if (!tool) continue
     const median = 1 + (tool.growthMult - 1) * returnMult
-    const marketNoise = rng ? Math.exp(tool.growthVol * gaussian(rng)) : 1
+    // -0.5σ² ทำให้ E[marketNoise] = 1: ความผันผวนเพิ่มความไม่แน่นอน
+    // แต่ไม่สร้างผลตอบแทนเฉลี่ยส่วนเกินขึ้นมาเอง
+    const marketNoise = rng
+      ? Math.exp(tool.growthVol * gaussian(rng) - 0.5 * tool.growthVol ** 2)
+      : 1
     const mult = median * marketNoise
     const baselineMult = tool.growthMult * marketNoise
     next[toolId] = Math.max(0, amount * mult)

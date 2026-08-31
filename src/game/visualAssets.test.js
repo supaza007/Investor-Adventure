@@ -222,6 +222,44 @@ test('friendly risk result renders every profile as a responsive loadout', async
   assert.match(css, /@media \(max-width: 390px\), \(max-height: 760px\)/)
 })
 
+test('consent hides implementation-only version text and character cards stay readable while scrolling', async () => {
+  const learningScreens = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
+  const styleSelect = await readFile(fileURLToPath(new URL('../components/StyleSelect.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+
+  assert.doesNotMatch(learningScreens, /Consent version:/)
+  assert.doesNotMatch(learningScreens, /CONSENT_VERSION/)
+  assert.match(styleSelect, /style-select-compare__name/)
+  assert.match(styleSelect, /const SHORT_TAGLINE =/)
+  assert.match(styleSelect, /style-select-tagline/)
+  assert.match(styleSelect, /ดูรายละเอียดตัวละคร/)
+  assert.doesNotMatch(styleSelect, /style-select-profile__tagline/)
+  assert.match(styleSelect, /backgroundAttachment:\s*'local, local'/)
+  assert.match(styleSelect, /style-select-screen flex min-h-\[100dvh\] flex-col overflow-y-auto/)
+  assert.match(styleSelect, /style-select-details pixel-frame flex flex-col overflow-visible/)
+  assert.doesNotMatch(styleSelect, /style-select-details[^"`]*overflow-y-auto/)
+  assert.match(css, /\.style-select-compare__name\s*\{[\s\S]*?overflow-wrap:\s*normal[\s\S]*?word-break:\s*normal[\s\S]*?text-wrap:\s*balance/)
+  assert.match(css, /\.style-select-info\s*\{[\s\S]*?background:\s*linear-gradient[\s\S]*?font-weight:\s*800/)
+})
+
+test('stage return cards prioritize the asset choice over its final result', async () => {
+  const stageScreen = await readFile(fileURLToPath(new URL('../components/StageScreen.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+
+  assert.doesNotMatch(stageScreen, /event-return-matrix__details/)
+  assert.doesNotMatch(stageScreen, /เหตุการณ์\s*\{pct/)
+  assert.doesNotMatch(stageScreen, /event-return-matrix__reason line-clamp-1/)
+  assert.match(stageScreen, /function impactSummary/)
+  assert.doesNotMatch(stageScreen, /การตัดสินใจของคุณ/)
+  assert.match(stageScreen, /debrief-tip__icon/)
+  assert.match(css, /\.event-return-matrix__name\s*\{[\s\S]*?font-size:\s*clamp\(1rem/)
+  assert.match(css, /\.event-return-matrix__final\s*\{[\s\S]*?font-size:\s*clamp\(0\.65rem/)
+  assert.match(css, /\.event-return-matrix__reason\s*\{[\s\S]*?overflow-wrap:\s*anywhere/)
+  assert.match(stageScreen, /reveal-stage__title[\s\S]*?reveal-stage__portrait/)
+  assert.match(stageScreen, /shock-stage__portrait/)
+  assert.match(css, /\.debrief-tip\s*\{[\s\S]*?grid-template-columns:\s*1\.35rem/)
+})
+
 test('pre-assessment visual chrome remains mounted', async () => {
   const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
   for (const asset of ['preAssessmentBackground', 'preAssessmentDisclaimer', 'preAssessmentEyebrow', 'preAssessmentQuestionBadge', 'preAssessmentTitle']) {
@@ -276,4 +314,12 @@ test('animated SVGs contain a visible PNG fallback frame', async () => {
     const svg = await readFile(fileURLToPath(new URL(asset, import.meta.url)), 'utf8')
     assert.ok(svg.includes('href="data:image/png;base64,'), asset)
   }
+})
+
+test('debrief uses the immutable shock ledger and separates buy-dip cash from market return', async () => {
+  const stageScreen = await readFile(fileURLToPath(new URL('../components/StageScreen.jsx', import.meta.url)), 'utf8')
+  assert.match(stageScreen, /shock\?\.impacts/)
+  assert.match(stageScreen, /BehaviorEffectSummary/)
+  assert.match(stageScreen, /เงินลงทุนเพิ่มคือการย้ายเงินสดเข้าพอร์ต ไม่ใช่กำไรจากตลาด/)
+  assert.doesNotMatch(stageScreen, /\(state\.positions\[id\] \?\? 0\) - before\[id\]/)
 })

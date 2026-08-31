@@ -38,7 +38,7 @@ function playFullRun(weights = BALANCED, { styleId = 'medium', seed = 12345, beh
       s = gameReducer(s, { type: 'ANSWER_SCAM', accept: false })
     }
     if (stage.key === 'behavior' && !s.behavior) {
-      s = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: behavior })
+      s = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: behavior, ...(behavior === 'buy' ? { toolId: 'fund' } : {}) })
     }
     s = gameReducer(s, { type: 'NEXT_STAGE' })
   }
@@ -93,7 +93,7 @@ describe('การเดินเรื่องของเกม', () => {
   test('เกษียณแล้วไม่มีเงินเดือนเข้าอีก — ยอดสุดท้ายมาจากพอร์ตล้วน', () => {
     const { report, incomeSchedule } = playFullRun(BALANCED, { seed: 8 })
     assert.equal(report.contributed, incomeSchedule.reduce((sum, amount) => sum + amount, 0))
-    assert.ok(report.contributed >= 34000 && report.contributed <= 44000)
+    assert.ok(report.contributed >= 24000 && report.contributed <= 40000)
   })
 
   test('reducer เป็น pure — เล่น seed เดิมได้ผลเดิมเป๊ะ', () => {
@@ -169,25 +169,38 @@ describe('จุดตัดสินใจพฤติกรรม (สเต�
     s = gameReducer(s, { type: 'CONFIRM_ALLOCATION' })
     while (currentStage(s).key !== 'behavior') s = gameReducer(s, { type: 'NEXT_STAGE' })
     if (s.scam?.accepted === null) s = gameReducer(s, { type: 'ANSWER_SCAM', accept: false })
-    return gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice })
+    return gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice, ...(choice === 'buy' ? { toolId: 'stock' } : {}) })
   }
 
-  test('ตัดขาดทุน = ย้ายไปตราสารหนี้ทั้งหมด และกันคลื่นตามได้', () => {
-    const s = toBehavior('cut')
-    assert.deepEqual(Object.keys(s.positions), ['bond'])
-    assert.equal(s.immuneToAftershock, true)
+  test('ตัดขาดทุน = ขาย 70% ของสินทรัพย์ที่เสียหายไปตราสารหนี้ โดยไม่ขายทั้งพอร์ต', () => {
+    const before = {
+      ...createInitialState(7),
+      phase: 'stage',
+      styleId: 'medium',
+      stageIndex: BALANCE.stages.findIndex((stage) => stage.key === 'behavior'),
+      positions: { fund: 400, stock: 600 },
+      cash: 0,
+      valueBeforeShock: 1200,
+      shock: { impacts: [
+        { toolId: 'fund', before: 400, after: 400, change: 0 },
+        { toolId: 'stock', before: 800, after: 600, change: -200 },
+      ] },
+      chapterAbility: { abilityId: 'medium', triggered: false, bonus: 0, cost: 0, recoveryBonus: 0, growthBonus: 0, adjustmentCount: 0, promptChoices: {} },
+    }
+    const s = gameReducer(before, { type: 'CHOOSE_BEHAVIOR', choice: 'cut' })
+    assert.equal(s.positions.fund, 400)
+    assert.ok(Math.abs(s.positions.stock - 180) < 1e-9)
+    assert.ok(Math.abs(s.positions.bond - 420) < 1e-9)
+    assert.equal(s.immuneToAftershock, false)
     assert.equal(s.reboundOwed, 0)
   })
 
-  test('ซื้อเพิ่ม = เทเงินสดลงพอร์ตจนหมด และได้ฟื้นตัวมากกว่าถือต่อ', () => {
+  test('ซื้อเพิ่ม = เทเงินสดลงสินทรัพย์ที่เลือกจนหมดและบันทึก breakdown', () => {
     const buy = toBehavior('buy')
-    const hold = toBehavior('hold')
     assert.equal(buy.cash, 0)
-    assert.ok(buy.reboundOwed > hold.reboundOwed, 'ซื้อเพิ่มต้องฟื้นแรงกว่าถือเฉยๆ')
-  })
-
-  test('VI ได้โบนัสซื้อเพิ่มมากกว่าสไตล์อื่นจริง', () => {
-    assert.ok(toBehavior('buy', 'vi').reboundOwed > toBehavior('buy', 'medium').reboundOwed)
+    assert.equal(buy.behaviorEffect.toolId, 'stock')
+    assert.equal(buy.behaviorEffect.cashInvested, 3000)
+    assert.equal(buy.positions.stock - buy.behaviorEffect.cashInvested, buy.shock.impacts.find((impact) => impact.toolId === 'stock').after)
   })
 
   test('เลือกซ้ำไม่ได้ (กันกดรัวจนได้โบนัสหลายเด้ง)', () => {
@@ -496,23 +509,37 @@ describe('ความสามารถตัวละคร', () => {
     },
   })
 
-  test('นักลงทุนระยะยาวได้ฟื้นเพิ่ม 20% เมื่อเลือกถือต่อ', () => {
+  test('นักลงทุนระยะยาวใช้การฟื้น 20% เท่ากันและเก็บโบนัสไว้ที่การทบต้น', () => {
     const medium = gameReducer(behaviorState('medium'), { type: 'CHOOSE_BEHAVIOR', choice: 'hold' })
     const longterm = gameReducer(behaviorState('longterm'), { type: 'CHOOSE_BEHAVIOR', choice: 'hold' })
-    assert.ok(Math.abs(longterm.reboundOwed - medium.reboundOwed * 1.2) < 1e-9)
-    assert.ok(longterm.chapterAbility.recoveryBonus > 0)
+    assert.equal(longterm.reboundOwed, medium.reboundOwed)
+    assert.equal(longterm.chapterAbility.recoveryBonus, 0)
+  })
+
+  test('สูตรฟื้นตัวใหม่: ถือ 20% · ซื้อ 50% · VI ซื้อ 100% ของที่เสีย', () => {
+    const hold = gameReducer(behaviorState('medium'), { type: 'CHOOSE_BEHAVIOR', choice: 'hold' })
+    const buy = gameReducer(behaviorState('medium'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
+    const viBuy = gameReducer(behaviorState('vi'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
+    assert.equal(hold.reboundOwed, 40)
+    assert.equal(buy.reboundOwed, 100)
+    assert.equal(viBuy.reboundOwed, 200)
   })
 
   test('VI ได้โบนัสฟื้นตัวจากการซื้อช่วงราคาลดลงเพิ่ม 50% และต้องมีเงินสด', () => {
-    const medium = gameReducer(behaviorState('medium'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy' })
-    const vi = gameReducer(behaviorState('vi'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy' })
-    assert.ok(Math.abs(vi.reboundOwed - medium.reboundOwed * 1.5) < 1e-9)
+    const medium = gameReducer(behaviorState('medium'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
+    const vi = gameReducer(behaviorState('vi'), { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
+    assert.ok(Math.abs(vi.reboundOwed - medium.reboundOwed * 2) < 1e-9)
     assert.ok(vi.chapterAbility.recoveryBonus > 0)
 
     const noCash = { ...behaviorState('vi'), cash: 0, positions: { stock: 800 } }
-    const rejected = gameReducer(noCash, { type: 'CHOOSE_BEHAVIOR', choice: 'buy' })
+    const rejected = gameReducer(noCash, { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
     assert.equal(rejected.behavior, null)
     assert.match(rejected.validationError, /เงินสด/)
+
+    const lowCash = { ...behaviorState('vi'), cash: 80, positions: { stock: 720 } }
+    const withoutBonus = gameReducer(lowCash, { type: 'CHOOSE_BEHAVIOR', choice: 'buy', toolId: 'stock' })
+    assert.equal(withoutBonus.reboundOwed, 100)
+    assert.equal(withoutBonus.behaviorEffect.qualifiesForStyleBonus, false)
   })
 
   test('นักลงทุนระยะกลางปรับหลังรู้เหตุการณ์ได้ฟรีเพียงหนึ่งครั้งต่อบท', () => {

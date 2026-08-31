@@ -75,6 +75,13 @@ describe('คณิตศาสตร์พอร์ต', () => {
     const grown = applyGrowth({ bond: 100 }, 1.15)
     assert.ok(Math.abs(grown.bond - 123) < 1e-9)
   })
+
+  test('lognormal หัก mean correction เพื่อไม่ให้ความผันผวนสร้างผลตอบแทนเฉลี่ยฟรี', () => {
+    const values = [Math.exp(-0.5), 0] // Box-Muller สร้าง z = 1
+    const grown = applyGrowth({ stock: 100 }, 1, () => values.shift())
+    const expected = 100 * 1.8 * Math.exp(0.4 - 0.5 * 0.4 ** 2)
+    assert.ok(Math.abs(grown.stock - expected) < 1e-9)
+  })
 })
 
 describe('Fixed Event Return Matrix', () => {
@@ -97,16 +104,16 @@ describe('Fixed Event Return Matrix', () => {
     }
   })
 
-  test('บท 1 ลดด้านลบ 5 จุดเปอร์เซ็นต์โดยไม่เปลี่ยนขาดทุนเป็นกำไร', () => {
-    const result = applyAgeModifiers({ bond: -0.1, fund: -0.02, stock: 0.1 }, 0, [{ negativeRelief: 0.05 }])
+  test('บท 1 ลดด้านลบสูงสุด 15 จุดเปอร์เซ็นต์โดยไม่เปลี่ยนขาดทุนเป็นกำไร', () => {
+    const result = applyAgeModifiers({ bond: -0.2, fund: -0.02, stock: 0.1 }, 0, [{ negativeRelief: 0.15 }])
     assert.deepEqual(result.finalReturns, { bond: -0.05, fund: 0, stock: 0.1 })
   })
 
   test('บท 3 และ 4 ลงโทษหุ้น/คริปโตขาลง และเพิ่มผลบวกตราสารหนี้', () => {
-    const rules = [{}, {}, { riskyLossPenalty: 0.05, bondPositiveBonus: 0.05 }, { riskyLossPenalty: 0.1, bondPositiveBonus: 0.05 }]
+    const rules = [{}, {}, { riskyLossPenalty: 0.15, bondPositiveBonus: 0.1 }, { riskyLossPenalty: 0.3, bondPositiveBonus: 0.1 }]
     const base = { bond: 0.05, fund: -0.05, stock: -0.1, crypto: -0.2 }
-    assert.deepEqual(applyAgeModifiers(base, 2, rules).finalReturns, { bond: 0.1, fund: -0.05, stock: -0.15, crypto: -0.25 })
-    assert.deepEqual(applyAgeModifiers(base, 3, rules).finalReturns, { bond: 0.1, fund: -0.05, stock: -0.2, crypto: -0.3 })
+    assert.deepEqual(applyAgeModifiers(base, 2, rules).finalReturns, { bond: 0.15, fund: -0.05, stock: -0.25, crypto: -0.35 })
+    assert.deepEqual(applyAgeModifiers(base, 3, rules).finalReturns, { bond: 0.15, fund: -0.05, stock: -0.4, crypto: -0.5 })
   })
 
   test('คลื่นตามย้ำเฉพาะขาดทุนครึ่งหนึ่งและไม่แจกกำไรซ้ำ', () => {

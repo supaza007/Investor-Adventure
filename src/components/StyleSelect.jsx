@@ -85,6 +85,14 @@ const PANEL_BACKGROUND = {
   vi: viPanelBackground,
 }
 
+// ข้อความสั้นในแถวบุคลิก เพื่อบอกจุดเด่นทันทีโดยไม่ดันข้อมูลหลักในกรอบตัวละคร
+const SHORT_TAGLINE = {
+  medium: 'วางแผนใช้เงินให้ชัด',
+  longterm: 'ถือยาว ให้ดอกเบี้ยทบต้น',
+  trader: 'เทรดไว · คุมจังหวะ',
+  vi: 'ซื้อเมื่อราคามีส่วนเผื่อ',
+}
+
 // การ์ดเล็กในแถบเทียบ 4 สไตล์ด้านบน — ตัดเหลือแค่ภาพ+ชื่อ (FreqDots/กำไร% ย้ายลงไปในการ์ดหลัก
 // + modal แล้ว ไม่ต้องซ้ำที่นี่) ภาพต้องนิ่ง ไม่มี animation แย่งโฟกัสตอนเทียบตัวเลข
 // (medium.gif เป็นไฟล์ GIF เคลื่อนไหวในตัวเอง เล่นเองโดยเบราว์เซอร์ ไม่ผูกกับ CSS ใดๆ ที่นี่)
@@ -115,7 +123,7 @@ function CompareCard({ style, selected, onClick }) {
       {/* ชื่อไทยยาวกว่าการ์ดและไม่มีช่องว่างให้เบรก ต้องบังคับตัดบรรทัดเอง — ห้ามใช้ truncate
           เพราะ "นักลงทุนระยะกลาง"/"นักลงทุนระยะยาว" จะถูกตัดเหลือข้อความเดียวกันจนแยกไม่ออก
           การ์ดในกริดสูงเท่ากันอยู่แล้ว (align stretch) ชื่อ 2 บรรทัดจึงไม่ทำให้แถวเบี้ยว */}
-      <div className="w-full break-words text-[9px] font-bold leading-tight sm:text-[11px]">{style.name}</div>
+      <div className="style-select-compare__name w-full text-center font-bold">{style.name}</div>
     </button>
   )
 }
@@ -169,15 +177,15 @@ function StyleCompareBars({ values, selectedIndex }) {
 function StyleDetailModal({ style, allGainPct, selectedIndex, onClose }) {
   const gainPct = allGainPct[selectedIndex]
   return (
-    <Modal onClose={onClose} label={`รายละเอียด ${style.name}`} panelClassName={`pixel-frame max-w-lg border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}>
+    <Modal onClose={onClose} label={`รายละเอียด ${style.name}`} panelClassName={`style-detail-modal pixel-frame max-w-lg border bg-gradient-to-b from-slate-900 to-slate-950 p-4 sm:p-5 ${STYLE_GRAD[style.id]}`}>
       <div>
-        <div className="text-base font-bold sm:text-lg">{style.name}</div>
+        <div className="style-detail-modal__title text-base font-bold sm:text-lg">{style.name}</div>
         <p className="mt-1 text-[11px] text-white/70 sm:text-sm">{style.tagline}</p>
 
-        <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">กลไกปรับพอร์ต</div>
+        <div className="style-detail-modal__section-label mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">กลไกปรับพอร์ต</div>
         <div className="pixel-chip mt-1.5 bg-black/40 p-1.5 text-[10px] leading-snug text-white/80 sm:text-[11px]">{adjustLabel(style)}</div>
 
-        <div className="mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">ตัวเลขเทียบ 4 สไตล์</div>
+        <div className="style-detail-modal__section-label mt-3 text-[9px] font-bold uppercase tracking-wide text-white/45 sm:text-[11px]">ตัวเลขเทียบ 4 สไตล์</div>
         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
           <StatBox
             label="โบนัสส่วนการเติบโต"
@@ -235,7 +243,7 @@ export default function StyleSelect({ onSelect }) {
 
   return (
     <div
-      className="cozy-screen style-select-screen flex h-[100dvh] flex-col overflow-hidden text-white"
+      className="cozy-screen style-select-screen flex min-h-[100dvh] flex-col overflow-y-auto text-white"
       style={{
         backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.28) 0%, rgba(4, 16, 30, 0.54) 48%, rgba(3, 10, 18, 0.94) 100%), url(${chooseCharacterBackground})`,
         backgroundPosition: "center",
@@ -251,7 +259,7 @@ export default function StyleSelect({ onSelect }) {
           onClose={() => setShowDetail(false)}
         />
       )}
-      <div className="mx-auto flex w-full max-w-[108rem] flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4 sm:py-4">
+      <div className="mx-auto flex w-full max-w-[108rem] flex-col px-3 py-2 sm:px-4 sm:py-4">
         <header className="style-select-header mb-2 shrink-0 text-center">
           <p className="game-subtitle text-xs sm:text-base">คุณเป็นนักลงทุนแบบไหน?</p>
           <p className="mt-0.5 text-[10px] text-white/50 sm:text-xs">
@@ -266,10 +274,14 @@ export default function StyleSelect({ onSelect }) {
           ))}
         </div>
 
-        <div key={style.id} className="slide-in flex min-h-0 flex-1 flex-col gap-2">
+        <div key={style.id} className="slide-in flex flex-col gap-2">
           <div
-            className={`style-select-details pixel-frame flex min-h-0 flex-1 flex-col overflow-y-auto border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}
-            style={{ backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.18), rgba(3, 10, 18, 0.68)), url(${PANEL_BACKGROUND[style.id]})`, backgroundSize: '100% 100%' }}
+            className={`style-select-details pixel-frame flex flex-col overflow-visible border bg-gradient-to-b p-2.5 sm:p-4 ${STYLE_GRAD[style.id]}`}
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(4, 16, 30, 0.18), rgba(3, 10, 18, 0.68)), url(${PANEL_BACKGROUND[style.id]})`,
+              backgroundSize: '100% 100%',
+              backgroundAttachment: 'local, local',
+            }}
           >
             <div
               className="style-select-panel-title"
@@ -306,19 +318,21 @@ export default function StyleSelect({ onSelect }) {
               <button type="button" onClick={next} aria-label="ถัดไป" className="style-select-hero-arrow pixel-btn">▶</button>
             </div>
 
-            {/* 2. persona ซ้าย / จำนวนครั้งปรับพอร์ต+FreqDots ขวา แถวเดียวกัน */}
-            <div className="mt-2.5 flex items-start justify-between gap-2 sm:mt-3">
-              <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
-              <div className="style-select-frequency shrink-0 text-right">
-                <div className="style-select-frequency__label text-[8px] sm:text-[10px]">จังหวะปรับกลางบท</div>
-                <FreqDots n={style.canAdjustAt.filter((point) => point !== 'allocation').length} />
+            {/* 2. Tagline สั้นอยู่เหนือแถว persona / จังหวะปรับกลางบท */}
+            <div className="mt-2.5 sm:mt-3">
+              <span className="style-select-tagline">{SHORT_TAGLINE[style.id]}</span>
+              <div className="mt-1.5 flex items-start justify-between gap-2">
+                <p className="style-select-persona text-[11px] italic leading-snug text-white/70 sm:text-xs">{style.persona}</p>
+                <div className="style-select-frequency shrink-0 text-right">
+                  <div className="style-select-frequency__label text-[8px] sm:text-[10px]">จังหวะปรับกลางบท</div>
+                  <FreqDots n={style.canAdjustAt.filter((point) => point !== 'allocation').length} />
+                </div>
               </div>
             </div>
 
             {/* 3. กรอบข้อมูลตัวละคร — ตัวเลขกำไร/ป้องกันอยู่ใน modal รายละเอียดเท่านั้น */}
             <div className="style-select-profile pixel-frame mt-3">
               <div className="style-select-profile__label">ข้อมูลตัวละคร</div>
-              <p className="style-select-profile__tagline">{style.tagline}</p>
               <div className="style-select-pros-cons mt-2 space-y-1.5">
                 <div className="flex gap-1.5 border-l-[3px] border-emerald-400 bg-emerald-500/10 px-2 py-1.5">
                   <span className="shrink-0 text-emerald-300">✓</span>
@@ -336,16 +350,14 @@ export default function StyleSelect({ onSelect }) {
               </div>}
             </div>
 
-            {/* 4. ลิงก์เปิด modal รายละเอียดเพิ่มเติม */}
+            {/* 4. ปุ่มเปิด modal รายละเอียดเพิ่มเติม */}
             <button
               type="button"
               onClick={() => setShowDetail(true)}
-              className="style-select-info mt-2.5 shrink-0 border border-dashed border-white/25 px-2 py-1.5 text-left text-[10px] text-white/50 hover:border-white/40 hover:text-white/70 sm:mt-3 sm:text-[11px]"
+              className="style-select-info pixel-btn mt-2.5 shrink-0 px-3 py-2 sm:mt-3"
             >
-              ⓘ ดูรายละเอียดเพิ่มเติม
-              <span className="block text-[9px] text-white/55 sm:text-[10px]">
-                (tagline · โบนัสเติบโต/จังหวะปรับพอร์ต · กลไกปรับพอร์ต · บทเรียน)
-              </span>
+              <span aria-hidden="true">ⓘ</span>
+              <span>ดูรายละเอียดตัวละคร</span>
             </button>
           </div>
 

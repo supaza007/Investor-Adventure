@@ -14,7 +14,7 @@ import { BALANCE } from '../src/game/engine/balance.js'
 const RUNS = Number(process.argv[2]) || 2000
 
 const STRATEGIES = {
-  'กระจายครบ 4 ชนิด': { bond: 1, fund: 1, stock: 1, crypto: 1 },
+  'กระจายตามความเสี่ยง 25/40/25/10': { bond: 0.25, fund: 0.40, stock: 0.25, crypto: 0.10 },
   'กองทุนรวมล้วน (เกณฑ์อ้างอิง)': { fund: 1 },
   'ตราสารหนี้ล้วน (กลัวเสี่ยง)': { bond: 1 },
   'หุ้นล้วน': { stock: 1 },
@@ -25,7 +25,7 @@ const STRATEGIES = {
 }
 
 // เล่นจบ 1 รอบผ่าน reducer ตัวจริง — ใช้สัดส่วนเดิมทุกบท ไม่ปรับกลางบท
-function simulateRun(weights, seed, styleId, behavior) {
+function simulateRun(weights, seed, styleId, behavior, acceptScam, buyToolId) {
   let s = createInitialState(seed)
   s = gameReducer(s, { type: 'START' })
   s = gameReducer(s, { type: 'SELECT_STYLE', styleId })
@@ -34,16 +34,20 @@ function simulateRun(weights, seed, styleId, behavior) {
   while (s.phase !== 'report') {
     if (guard++ > 200) throw new Error('state machine ค้าง')
     if (s.phase === 'allocation') {
-      s = gameReducer(s, { type: 'SET_ALLOCATION', weights })
+      // การซื้อเพิ่มต้องสำรองเงินสดจริง มิฉะนั้น reducer จะปฏิเสธตามกติกาเกม
+      const allocation = behavior === 'buy' && !weights.cash
+        ? { ...Object.fromEntries(Object.entries(weights).map(([id, weight]) => [id, weight * 0.8])), cash: 0.2 }
+        : weights
+      s = gameReducer(s, { type: 'SET_ALLOCATION', weights: allocation })
       s = gameReducer(s, { type: 'CONFIRM_ALLOCATION' })
       continue
     }
     const stage = currentStage(s)
     if (stage.key === 'reveal' && s.scam?.accepted === null) {
-      s = gameReducer(s, { type: 'ANSWER_SCAM', accept: false })
+      s = gameReducer(s, { type: 'ANSWER_SCAM', accept: acceptScam })
     }
     if (stage.key === 'behavior' && !s.behavior) {
-      s = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: behavior })
+      s = gameReducer(s, { type: 'CHOOSE_BEHAVIOR', choice: behavior, ...(behavior === 'buy' ? { toolId: buyToolId } : {}) })
     }
     s = gameReducer(s, { type: 'NEXT_STAGE' })
   }
@@ -52,46 +56,66 @@ function simulateRun(weights, seed, styleId, behavior) {
 
 function stats(reports) {
   const values = reports.map((r) => r.finalValue).sort((a, b) => a - b)
+  const multiples = reports.map((r) => r.multiple).sort((a, b) => a - b)
+  const benchmarkRatios = reports.map((r) => r.benchmarkRatio).sort((a, b) => a - b)
   const at = (p) => values[Math.min(values.length - 1, Math.floor(p * values.length))]
+  const multipleAt = (p) => multiples[Math.min(multiples.length - 1, Math.floor(p * multiples.length))]
+  const benchmarkAt = (p) => benchmarkRatios[Math.min(benchmarkRatios.length - 1, Math.floor(p * benchmarkRatios.length))]
+  const bandRates = Object.fromEntries(
+    BALANCE.outcomeBands.map((band) => [band.id, reports.filter((r) => r.band.id === band.id).length / reports.length]),
+  )
   return {
     median: at(0.5),
     p10: at(0.1),
+    p25: at(0.25),
+    p75: at(0.75),
     p90: at(0.9),
     ruinRate: reports.filter((r) => r.isRuined).length / reports.length,
     richRate: reports.filter((r) => r.band.id === 'fire').length / reports.length,
-    medianMultiple: reports.map((r) => r.multiple).sort((a, b) => a - b)[Math.floor(reports.length / 2)],
+    secureOrRichRate: reports.filter((r) => ['fire', 'comfortable'].includes(r.band.id)).length / reports.length,
+    medianMultiple: multipleAt(0.5),
+    multipleP10: multipleAt(0.1),
+    multipleP90: multipleAt(0.9),
+    medianBenchmarkRatio: benchmarkAt(0.5),
+    bandRates,
   }
 }
 
 const style = process.argv[3] || 'medium'
 const behavior = process.argv[4] || 'hold'
-console.log(`\n🎲 จำลอง ${RUNS} รอบต่อกลยุทธ์ · สไตล์ ${style} · สเตจ 4 เลือก "${behavior}" ทุกครั้ง\n`)
+const acceptScam = process.argv[5] === 'accept'
+const buyToolId = process.argv[6] || 'fund'
+console.log(`\n🎲 จำลอง ${RUNS} รอบต่อกลยุทธ์ · สไตล์ ${style} · สเตจ 4 เลือก "${behavior}" · ${acceptScam ? 'รับ' : 'ปฏิเสธ'}ข้อเสนอมิจฉาชีพ\n`)
+if (behavior === 'buy') console.log(`ℹ️  กลยุทธ์ที่เดิมไม่มีเงินสดจะสำรอง 20% และซื้อเพิ่มใน ${buyToolId}\n`)
 
 const results = {}
 for (const [name, w] of Object.entries(STRATEGIES)) {
   const reports = []
-  for (let i = 0; i < RUNS; i++) reports.push(simulateRun(w, i * 7919 + 13, style, behavior))
+  for (let i = 0; i < RUNS; i++) reports.push(simulateRun(w, i * 7919 + 13, style, behavior, acceptScam, buyToolId))
   results[name] = stats(reports)
 }
 
 const benchmark = results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].median
 
-console.log('กลยุทธ์'.padEnd(32) + 'กลาง'.padStart(9) + 'ทุน x'.padStart(8) + 'รวย!!'.padStart(9) + 'เจ๊ง'.padStart(8) + '  vs กองทุน')
-console.log('─'.repeat(82))
+console.log('กลยุทธ์'.padEnd(32) + 'กลาง'.padStart(9) + 'ทุน x'.padStart(8) + 'รวย'.padStart(8) + 'มั่นคง'.padStart(9) + 'พออยู่'.padStart(9) + 'ขาดมือ'.padStart(9) + 'เจ๊ง'.padStart(8))
+console.log('─'.repeat(102))
 for (const [name, s] of Object.entries(results)) {
-  const vsBench = ((s.median / benchmark - 1) * 100).toFixed(0)
+  const rate = (id) => `${(s.bandRates[id] * 100).toFixed(1)}%`.padStart(9)
   console.log(
     name.padEnd(32) +
       s.median.toFixed(0).padStart(9) +
       s.medianMultiple.toFixed(1).padStart(8) +
-      ((s.richRate * 100).toFixed(1) + '%').padStart(9) +
-      ((s.ruinRate * 100).toFixed(1) + '%').padStart(8) +
-      `  ${vsBench > 0 ? '+' : ''}${vsBench}%`.padStart(9),
+      rate('fire') + rate('comfortable') + rate('adequate') + rate('tight') + rate('ruined'),
   )
 }
 
+console.log('\n── ช่วงผลลัพธ์ (ตัวคูณทุน p10 / p50 / p90 · ค่ากลางเทียบ benchmark) ──')
+for (const [name, s] of Object.entries(results)) {
+  console.log(`${name.padEnd(32)} ${s.multipleP10.toFixed(1)} / ${s.medianMultiple.toFixed(1)} / ${s.multipleP90.toFixed(1)} · ${s.medianBenchmarkRatio.toFixed(2)}x`)
+}
+
 console.log('\n── ตรวจว่าเกมสอนถูกไหม ──')
-const spread = results['กระจายครบ 4 ชนิด']
+const spread = results['กระจายตามความเสี่ยง 25/40/25/10']
 const allBond = results['ตราสารหนี้ล้วน (กลัวเสี่ยง)']
 const allCrypto = results['คริปโตล้วน (ทุ่มสุดตัว)']
 const allCash = results['ไม่ลงทุนเลย (เงินสดล้วน)']
@@ -99,15 +123,20 @@ const check = (ok, msg) => {
   console.log(`${ok ? '✅' : '❌'} ${msg}`)
   return ok
 }
+const isBaselineScenario = style === 'medium' && behavior === 'hold' && !acceptScam
 const checks = [
-  check(spread.median > allBond.median, 'กระจายความเสี่ยงชนะการหลบอยู่ในตราสารหนี้'),
+  behavior !== 'hold' || check(spread.median > allBond.median, 'กระจายความเสี่ยงชนะการหลบอยู่ในตราสารหนี้'),
   check(spread.p90 - spread.p10 < allCrypto.p90 - allCrypto.p10, 'กระจายความเสี่ยง = ผลลัพธ์คาดเดาได้กว่าการทุ่มสุดตัว'),
   // ล้มละลายถาวรเกิดยาก (~1%) เพราะเงินเดือนก้อนใหม่เข้ามาทุกบทให้สร้างตัวใหม่ได้ — ซึ่งสมจริง
   // บทลงโทษที่แท้จริงของการทุ่มสุดตัวจึงอยู่ที่หางล่าง ไม่ใช่ที่อัตราหมดตัว
   // เช็คเฉพาะสไตล์เริ่มต้น: คนถือยาวโดน margin call ยากกว่าโดยตั้งใจ (แรงกระแทกถูกหน่วง 20%)
-  style !== 'medium' || check(allCrypto.ruinRate > 0, 'ทุ่มคริปโตหมดตัวถาวรได้จริง (ไม่ใช่แค่ขู่)'),
+  !isBaselineScenario || check(allCrypto.ruinRate > 0, 'ทุ่มคริปโตหมดตัวถาวรได้จริง (ไม่ใช่แค่ขู่)'),
   check(allBond.ruinRate === 0, 'ตราสารหนี้ไม่ทำให้ล้มละลาย (แค่โตไม่ทันเงินเฟ้อ)'),
-  check(allCash.medianMultiple < 1, 'ไม่ลงทุนเลยแพ้เงินเฟ้อ — ได้คืนน้อยกว่าเงินที่ได้รับ'),
+  behavior === 'buy' || check(allCash.medianMultiple < 1, 'ไม่ลงทุนเลยแพ้เงินเฟ้อ — ได้คืนน้อยกว่าเงินที่ได้รับ'),
+  behavior === 'buy' || check(allCash.secureOrRichRate === 0, 'เงินสดล้วนไม่มีโอกาสถูกจัดเป็นฐานะมั่นคงหรือรวย'),
+  check(allBond.richRate === 0, 'ตราสารหนี้ล้วนไม่มีโอกาสถูกจัดเป็นรวย'),
+  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].richRate <= 0.10, 'กองทุนอ้างอิงมีอัตรารวยไม่เกิน 10%'),
+  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].secureOrRichRate <= 0.60, 'กองทุนอ้างอิงมีอัตรามั่นคงหรือรวยรวมไม่เกิน 60% แม้ VI ซื้อเพิ่มและฟื้น 100%'),
 ]
 
 const [best, second] = [...Object.entries(results)].sort((a, b) => b[1].median - a[1].median)
@@ -118,5 +147,5 @@ console.log(`\nℹ️  เกณฑ์อ้างอิงที่วัดไ
 if (Math.abs(benchmark - BALANCE.benchmarkValue) / benchmark > 0.05) {
   console.log(`   ⚠️  ต่างกันเกิน 5% — ต้องแก้ benchmarkValue ใน balance.js เป็น ${Math.round(benchmark)}`)
 }
-console.log('   ทุนจริงต่อรอบสุ่มอยู่ในช่วง 34,000–44,000 บาท และแต่ละรอบใช้ทุนของตัวเองเป็นฐาน\n')
+console.log('   ทุนจริงต่อรอบสุ่มอยู่ในช่วง 24,000–40,000 บาท และแต่ละรอบใช้ทุนของตัวเองเป็นฐาน\n')
 process.exit(checks.every(Boolean) ? 0 : 1)

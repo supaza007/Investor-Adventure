@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CONSENT_VERSION, PRE_QUESTIONS, POST_QUESTIONS, scoreAssessment } from '../game/learning.js'
+import { PRE_QUESTIONS, POST_QUESTIONS, scoreAssessment } from '../game/learning.js'
 import preAssessmentBackground from '../assets/ui/pre-assessment-background-user.webp'
 import preAssessmentDisclaimer from '../assets/ui/pre-assessment-disclaimer-user.webp'
 import preAssessmentEyebrow from '../assets/ui/pre-assessment-eyebrow-user.webp'
@@ -132,7 +132,6 @@ export function ConsentScreen({ onChoice }) {
       <p>ยินยอมให้สิทธ์ในการใช้ข้อมูลเพื่อประโยชน์ในการศึกษาหรือไม่</p>
       <label className="pixel-chip flex min-h-11 items-start gap-3 bg-slate-800 p-3"><input className="mt-1" type="checkbox" checked={telemetry} onChange={(e) => setTelemetry(e.target.checked)} /><span>ยินยอมให้เก็บชื่อหรือนามแฝง ห้องเรียน คำตอบแบบประเมิน และสถิติการเล่นเกมเพื่อประโยชน์ในการศึกษา</span></label>
       <p className="text-xs leading-relaxed text-white/65">ข้อมูลที่ส่งไปยังฐานข้อมูลประกอบด้วยชื่อหรือนามแฝง ห้องเรียน ตัวละครที่เลือก การจัดพอร์ต การตัดสินใจ ผลลัพธ์ และเวลาเล่น โดยไม่เก็บอีเมล รหัสผ่าน หรือข้อมูลติดต่อ</p>
-      <p className="text-[10px] text-white/45">Consent version: {CONSENT_VERSION}</p>
     </div>
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       <button
@@ -155,7 +154,7 @@ export function ConsentScreen({ onChoice }) {
 }
 
 export function PostAssessmentScreen({ onComplete, onSkip }) {
-  return <Shell eyebrow="หลังจบ 4 บท" title="ทบทวนสิ่งที่ได้เรียนรู้">
+  return <Shell eyebrow="หลังจบ 4 บท" title="ทบทวนสิ่งที่ได้เรียนรู้" className="post-assessment-screen">
     <p className="mt-2 text-sm text-white/70">ผลส่วนนี้แยกจากกำไร ขาดทุน และโชคในเกมโดยสิ้นเชิง</p>
     <Questions questions={POST_QUESTIONS} actionLabel="ส่งคำตอบและดูรายงาน" onSubmit={onComplete} onSkip={onSkip} />
   </Shell>

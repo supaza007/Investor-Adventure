@@ -6,9 +6,9 @@ export const BALANCE = {
   // 4 บทเล่นจริง + 1 หน้ารายงาน (ดีไซน์ข้อ 3 — พาดหัว "6 บท" ในเอกสารเขียนผิด)
   chapters: [
     { n: 1, ageFrom: 20, ageTo: 29, theme: 'เริ่มทำงาน ทุนน้อย เสี่ยงได้มาก', incomeOptions: [10000] },
-    { n: 2, ageFrom: 30, ageTo: 39, theme: 'ภาระเพิ่ม (ครอบครัว/บ้าน)', incomeOptions: [6000, 8000, 10000] },
-    { n: 3, ageFrom: 40, ageTo: 49, theme: 'รายได้พีค แต่เจอวิกฤตใหญ่ที่สุด', incomeOptions: [9000, 10000, 12000], bigCrisis: true },
-    { n: 4, ageFrom: 50, ageTo: 59, theme: 'ต้องเริ่มลดความเสี่ยงก่อนเกษียณ', incomeOptions: [9000, 10000, 12000] },
+    { n: 2, ageFrom: 30, ageTo: 39, theme: 'ภาระเพิ่ม (ครอบครัว/บ้าน)', incomeOptions: [3000, 5000, 8000] },
+    { n: 3, ageFrom: 40, ageTo: 49, theme: 'รายได้พีค แต่เจอวิกฤตใหญ่ที่สุด', incomeOptions: [5000, 6000, 10000], bigCrisis: true },
+    { n: 4, ageFrom: 50, ageTo: 59, theme: 'ต้องเริ่มลดความเสี่ยงก่อนเกษียณ', incomeOptions: [6000, 8000, 12000] },
   ],
   retireAge: 60,
 
@@ -33,15 +33,16 @@ export const BALANCE = {
 
   // ── ผลของช่วงวัยต่อ Event Matrix ───────────────────────────
   ageModifiers: [
-    { negativeRelief: 0.05 },
+    { negativeRelief: 0.15 },
     {},
-    { riskyLossPenalty: 0.05, bondPositiveBonus: 0.05 },
-    { riskyLossPenalty: 0.10, bondPositiveBonus: 0.05 },
+    { riskyLossPenalty: 0.15, bondPositiveBonus: 0.10 },
+    { riskyLossPenalty: 0.30, bondPositiveBonus: 0.10 },
   ],
 
   // ── จุดตัดสินใจพฤติกรรม สเตจ 4 ─────────────────────────────
-  reboundPct: 0.4, // "ถือต่อ" ฟื้น 40% ของที่เสียไป ในบทถัดไป
-  buyDipReboundMult: 2.0, // "ซื้อเพิ่ม" ฟื้น ×2 (VI ได้ ×1.5 ทับอีกชั้น = ×3)
+  reboundPct: 0.2, // "ถือต่อ" ฟื้น 20% ของที่เสียไป ในบทถัดไป
+  buyDipReboundMult: 2.5, // "ซื้อเพิ่ม" ฟื้น 50% ของที่เสีย (VI ×2 = ฟื้น 100%)
+  cutLossSellPct: 0.70, // ขายเฉพาะสินทรัพย์ที่โดนเหตุการณ์กดลง 70% และย้ายไปตราสารหนี้
   aftershockChance: 0.25, // คลื่นตามต้นบทถัดไป — ทำให้ "ตัดขาดทุน" ไม่ใช่ตัวเลือกผิดเสมอ
   aftershockSeverityMult: 0.5,
 
@@ -59,12 +60,20 @@ export const BALANCE = {
   // ⚠️ เลขนี้วัดมาจาก `node scripts/sim.mjs 5000` (ค่ากลางของกองทุนรวมล้วน) ไม่ใช่คำนวณสูตรตรงๆ
   // เพราะต้องรวมผลของแรงกระแทกและความผันผวนจริงด้วย ถ้าจูนตัวเลขในไฟล์นี้ ต้องรัน sim ใหม่แล้วอัปเดตที่นี่
   benchmarkToolId: 'fund',
-  benchmarkValue: 204172,
+  benchmarkValue: 142538, // ค่ากลางกองทุนรวมล้วนจาก simulation 10,000 รอบหลังใช้ mean-corrected lognormal
+  benchmarkGrowthMult: 1.75,
   outcomeBands: [
-    { id: 'fire', minMultiple: 8, label: 'รวย!!' },
-    { id: 'comfortable', minMultiple: 4, label: 'ฐานะมั่นคง' },
+    { id: 'fire', minMultiple: 12, label: 'รวย!!' },
+    { id: 'comfortable', minMultiple: 6, label: 'ฐานะมั่นคง' },
     { id: 'adequate', minMultiple: 1.5, label: 'พออยู่ได้' },
     { id: 'tight', minMultiple: 0.2, label: 'เงินขาดมือ' },
     { id: 'ruined', minMultiple: 0, label: 'เจ๊งกะโบ๊ง!' },
+  ],
+  benchmarkBands: [
+    { id: 'far_ahead', minRatio: 1.5, label: 'ชนะเกณฑ์อ้างอิงมาก' },
+    { id: 'ahead', minRatio: 1.05, label: 'ชนะเกณฑ์อ้างอิง' },
+    { id: 'near', minRatio: 0.95, label: 'ใกล้เคียงเกณฑ์อ้างอิง' },
+    { id: 'behind', minRatio: 0.5, label: 'ต่ำกว่าเกณฑ์อ้างอิง' },
+    { id: 'far_behind', minRatio: 0, label: 'ต่ำกว่าเกณฑ์อ้างอิงมาก' },
   ],
 }
