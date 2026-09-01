@@ -362,6 +362,16 @@ describe('รายงานเกษียณ', () => {
     assert.ok(report.chapters.every((chapter) => chapter.cashOnly))
     assert.ok(report.chapters.every((chapter) => chapter.prep.score === null))
     assert.ok(report.chapters.every((chapter) => chapter.prep.text.includes('ยังไม่มีการกระจายการลงทุน')))
+    assert.equal(report.eventReward, 0)
+    assert.equal(report.consistencyReward, 0)
+  })
+
+  test('โบนัสชนะเหตุการณ์ให้เฉพาะพอร์ตลงทุนและโบนัสความสม่ำเสมอจ่ายครั้งเดียว', () => {
+    const { report } = playFullRun({ fund: 1 }, { seed: 23 })
+    assert.equal(report.eventWinCount, report.chapters.filter((chapter) => chapter.shockPct >= 0).length)
+    assert.equal(report.eventReward, report.chapters.reduce((sum, chapter) => sum + chapter.eventReward, 0))
+    assert.equal(report.consistencyReward, report.chapters.reduce((sum, chapter) => sum + chapter.consistencyReward, 0))
+    assert.ok(report.chapters.filter((chapter) => chapter.consistencyReward > 0).length <= 1)
   })
 })
 

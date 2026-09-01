@@ -46,6 +46,19 @@ export const BALANCE = {
   aftershockChance: 0.25, // คลื่นตามต้นบทถัดไป — ทำให้ "ตัดขาดทุน" ไม่ใช่ตัวเลือกผิดเสมอ
   aftershockSeverityMult: 0.5,
 
+  // รางวัลการจัดพอร์ตให้รับมือเหตุการณ์ได้ดี — คิดจากผลกระทบทันทีของ Matrix
+  // ใช้กับเงินลงทุนที่ยังเหลือเท่านั้น เงินสดล้วนและพอร์ตหมดตัวไม่ได้รับโบนัส
+  eventWinRewardBands: [
+    { minReturn: 0.10, rewardPct: 0.06 },
+    { minReturn: 0.05, rewardPct: 0.04 },
+    { minReturn: 0, rewardPct: 0.02 },
+  ],
+  consistencyRewardBands: [
+    { minWins: 4, rewardPct: 0.20 },
+    { minWins: 3, rewardPct: 0.10 },
+    { minWins: 2, rewardPct: 0.05 },
+  ],
+
   // ── Scammer (ดีไซน์ข้อ 8 — กลไกพิเศษ) ─────────────────────
   scam: {
     promisedReturnPct: 0.3, // "การันตี 30% ภายในบทเดียว" — ธงแดงคือคำว่าการันตี ไม่ใช่ตัวเลข
@@ -60,8 +73,8 @@ export const BALANCE = {
   // ⚠️ เลขนี้วัดมาจาก `node scripts/sim.mjs 5000` (ค่ากลางของกองทุนรวมล้วน) ไม่ใช่คำนวณสูตรตรงๆ
   // เพราะต้องรวมผลของแรงกระแทกและความผันผวนจริงด้วย ถ้าจูนตัวเลขในไฟล์นี้ ต้องรัน sim ใหม่แล้วอัปเดตที่นี่
   benchmarkToolId: 'fund',
-  benchmarkValue: 142538, // ค่ากลางกองทุนรวมล้วนจาก simulation 10,000 รอบหลังใช้ mean-corrected lognormal
-  benchmarkGrowthMult: 1.75,
+  benchmarkValue: 97022, // ค่ากลางกองทุนรวมล้วนจาก simulation หลังเพิ่มรางวัลการรับมือเหตุการณ์
+  benchmarkGrowthMult: 1.48,
   outcomeBands: [
     { id: 'fire', minMultiple: 4, label: 'รวย!!' },
     { id: 'comfortable', minMultiple: 3, label: 'ฐานะมั่นคง' },

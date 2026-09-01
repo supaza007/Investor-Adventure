@@ -29,22 +29,22 @@ function sample(weights, runs = 2000) {
   return Array.from({ length: runs }, (_, index) => play(weights, index * 7919 + 13))
 }
 
-test('กองทุนอ้างอิงอยู่ในช่วงฐานะที่สอดคล้องกับเกณฑ์รวย 4 เท่า', () => {
+test('กองทุนอ้างอิงไม่เป็นคำตอบตายตัวหลังเพิ่มรางวัลชนะเหตุการณ์', () => {
   const reports = sample({ fund: 1 })
   const rich = reports.filter((report) => report.band.id === 'fire').length / reports.length
   const secureOrRich = reports.filter((report) => ['fire', 'comfortable'].includes(report.band.id)).length / reports.length
 
-  assert.ok(rich >= 0.50 && rich <= 0.70, `อัตรารวย ${(rich * 100).toFixed(1)}% หลุดช่วง 50–70%`)
-  assert.ok(secureOrRich >= 0.75 && secureOrRich <= 0.90, `อัตรามั่นคงหรือรวย ${(secureOrRich * 100).toFixed(1)}% หลุดช่วง 75–90%`)
+  assert.ok(rich >= 0.20 && rich <= 0.40, `อัตรารวย ${(rich * 100).toFixed(1)}% หลุดช่วง 20–40%`)
+  assert.ok(secureOrRich <= 0.70, `อัตรามั่นคงหรือรวย ${(secureOrRich * 100).toFixed(1)}% เกิน 70%`)
 })
 
-test('เงินสดและตราสารหนี้ไม่ถูกจัดเป็นรวย แต่สินทรัพย์เสี่ยงยังมีทั้งหางบนและหางล่าง', () => {
+test('เงินสดไม่รวยและตราสารหนี้รวยไม่เกิน 5% แต่สินทรัพย์เสี่ยงยังมีทั้งหางบนและหางล่าง', () => {
   const cash = sample({ cash: 1 }, 500)
   const bond = sample({ bond: 1 }, 500)
   const crypto = sample({ crypto: 1 })
 
   assert.ok(cash.every((report) => !['fire', 'comfortable'].includes(report.band.id)))
-  assert.ok(bond.every((report) => report.band.id !== 'fire'))
+  assert.ok(bond.filter((report) => report.band.id === 'fire').length / bond.length <= 0.05)
   assert.ok(crypto.some((report) => report.band.id === 'fire'))
   assert.ok(crypto.some((report) => ['tight', 'ruined'].includes(report.band.id)))
 })

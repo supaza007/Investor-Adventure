@@ -68,6 +68,7 @@ function ChapterDetailsModal({ chapter, onClose }) {
       <div><dt>มูลค่าต้นบท</dt><dd>{money(chapter.valueBefore)}</dd></div>
       <div><dt>มูลค่าปลายบท</dt><dd>{money(chapter.valueEnd)} ({pct(chapter.changePct)})</dd></div>
       <div><dt>โบนัสความสามารถ</dt><dd className="text-emerald-300">+{money(chapter.abilityBonus ?? 0)}</dd></div>
+      <div><dt>โบนัสรับมือเหตุการณ์</dt><dd className="text-emerald-300">+{money(chapter.eventReward ?? 0)} ({pct(chapter.eventRewardPct ?? 0)})</dd></div>
       <div><dt>ค่าธรรมเนียม</dt><dd className="text-rose-300">-{money(chapter.abilityCost ?? 0)}</dd></div>
       {chapter.scamAccepted && <div><dt>ความเสียหายจากมิจฉาชีพ</dt><dd className="text-rose-300">-{money(chapter.scamLost ?? 0)}</dd></div>}
     </dl>
@@ -174,6 +175,10 @@ export default function ReportScreen({ report, session, styleId, gameTiming, ver
             <div className="pixel-chip bg-black/20 p-2">กำไร/ขาดทุนสุทธิ<br /><b className={report.netGain >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{report.netGain >= 0 ? '+' : '-'}{money(Math.abs(report.netGain))} ({pct(report.netGainPct)})</b></div>
           </div>
           <div className="mt-2 text-[9px] text-white/55 sm:text-xs">มูลค่าปลายเกมเป็น {report.multiple.toFixed(1)} เท่าของเงินที่ได้รับทั้งหมด</div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-[9px] sm:text-xs">
+            <div className="pixel-chip bg-black/20 p-2">โบนัสรับมือเหตุการณ์ {report.eventWinCount}/4 บท<br /><b className="text-emerald-300">+{money(report.eventReward)}</b></div>
+            <div className="pixel-chip bg-black/20 p-2">โบนัสความสม่ำเสมอ<br /><b className="text-emerald-300">+{money(report.consistencyReward)}</b></div>
+          </div>
         </div>
 
         <details className="pixel-frame mt-1.5 shrink-0 border border-slate-700 bg-slate-900/70 p-2 text-center sm:p-3">

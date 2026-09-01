@@ -69,6 +69,9 @@ export function buildReport(state) {
   const sorted = [...chapters].sort((a, b) => a.changePct - b.changePct)
   const worst = sorted[0] ?? null
   const best = sorted[sorted.length - 1] ?? null
+  const eventReward = chapters.reduce((sum, chapter) => sum + (chapter.eventReward ?? 0), 0)
+  const consistencyReward = chapters.reduce((sum, chapter) => sum + (chapter.consistencyReward ?? 0), 0)
+  const eventWinCount = chapters.filter((chapter) => (chapter.eventRewardPct ?? 0) > 0).length
 
   return {
     finalValue,
@@ -87,6 +90,9 @@ export function buildReport(state) {
     cashOnlyChapters: chapters.filter((c) => c.cashOnly).length,
     worst,
     best,
+    eventReward,
+    consistencyReward,
+    eventWinCount,
     scamVictim: chapters.some((c) => c.scamAccepted),
   }
 }

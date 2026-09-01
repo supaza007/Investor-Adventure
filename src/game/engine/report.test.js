@@ -21,14 +21,14 @@ test('สถานะทางการเงินใช้เงินที�
 })
 
 test('benchmark ให้เวลาเงินก้อนแรกทบต้นมากกว่าเงินก้อนสุดท้าย', () => {
-  assert.equal(benchmarkForIncomeSchedule([100, 100, 100, 100]), 100 * (1.75 ** 4 + 1.75 ** 3 + 1.75 ** 2 + 1.75))
-  assert.equal(benchmarkForIncomeSchedule([100]), 175)
+  assert.equal(benchmarkForIncomeSchedule([100, 100, 100, 100]), 100 * (1.48 ** 4 + 1.48 ** 3 + 1.48 ** 2 + 1.48))
+  assert.equal(benchmarkForIncomeSchedule([100]), 148)
 })
 
 test('ฐานะทางการเงินแยกจากผลงานเทียบ benchmark', () => {
-  const report = reportAt(175)
-  assert.equal(report.band.id, 'adequate')
-  assert.equal(report.benchmark, 175)
+  const report = reportAt(148)
+  assert.equal(report.band.id, 'tight')
+  assert.equal(report.benchmark, 148)
   assert.equal(report.benchmarkRatio, 1)
   assert.equal(report.benchmarkBand.id, 'near')
 })

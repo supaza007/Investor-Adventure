@@ -436,6 +436,19 @@ function finishChapter(state, endedAt = null) {
   // 3) ทบต้นเงียบๆ ตลอดทศวรรษ — รางวัลของการถือ (ดีไซน์ข้อ 3)
   const growth = applyGrowthWithDetails(positions, style.returnMult, rng)
   positions = growth.positions
+
+  // ให้รางวัลเฉพาะการจัดพอร์ตที่รับแรงกระแทกได้โดยไม่ติดลบ
+  // เงินสดล้วนไม่ถือว่า "ชนะ" และโบนัสไม่สามารถชุบชีวิตพอร์ตที่หมดตัวได้
+  const investedAfterGrowth = totalValue(positions)
+  const eventRewardPct = investedAfterGrowth > 0
+    ? (BALANCE.eventWinRewardBands.find((band) => (state.shock?.portfolioReturn ?? -Infinity) >= band.minReturn)?.rewardPct ?? 0)
+    : 0
+  const eventReward = investedAfterGrowth * eventRewardPct
+  if (eventReward > 0) {
+    for (const id of Object.keys(positions)) {
+      positions[id] += eventReward * (positions[id] / investedAfterGrowth)
+    }
+  }
   const growthBonus = Math.max(0, growth.abilityBonus)
   const finalizedAbility = {
     ...state.chapterAbility,
@@ -477,11 +490,30 @@ function finishChapter(state, endedAt = null) {
     scamLost: state.scam?.lost ?? 0,
     valueBefore: state.valueBeforeShock,
     valueAfter: valueAfterShock, // ทันทีหลังแรงกระแทก — ใช้วัดว่าเหตุการณ์ทำอะไรกับพอร์ต
-    valueEnd: totalValue(positions) + cash, // ปลายทศวรรษ หลังฟื้นตัวและทบต้นแล้ว
+    eventRewardPct,
+    eventReward,
+    consistencyRewardPct: 0,
+    consistencyReward: 0,
+    valueEnd: totalValue(positions) + cash, // ปลายทศวรรษ หลังฟื้นตัว ทบต้น และโบนัสเหตุการณ์
   }
-  const history = [...state.history, entry]
+  let history = [...state.history, entry]
 
   if (isLast) {
+    const winCount = history.filter((item) => item.eventRewardPct > 0).length
+    const consistencyRewardPct = BALANCE.consistencyRewardBands.find((band) => winCount >= band.minWins)?.rewardPct ?? 0
+    const investedBeforeConsistency = totalValue(positions)
+    const consistencyReward = investedBeforeConsistency * consistencyRewardPct
+    if (consistencyReward > 0) {
+      for (const id of Object.keys(positions)) {
+        positions[id] += consistencyReward * (positions[id] / investedBeforeConsistency)
+      }
+      history = history.map((item, index) => index === history.length - 1 ? {
+        ...item,
+        consistencyRewardPct,
+        consistencyReward,
+        valueEnd: item.valueEnd + consistencyReward,
+      } : item)
+    }
     const finished = { ...state, seed: rng.getSeed(), positions, cash, history, phase: 'report' }
     const timed = endedAt ? withTiming(finished, { scope: 'run', phase: 'end', at: endedAt }) : finished
     return { ...timed, report: buildReport(timed) }

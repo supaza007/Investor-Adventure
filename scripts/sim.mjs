@@ -64,6 +64,7 @@ function stats(reports) {
   const bandRates = Object.fromEntries(
     BALANCE.outcomeBands.map((band) => [band.id, reports.filter((r) => r.band.id === band.id).length / reports.length]),
   )
+  const allEventWins = reports.filter((report) => report.eventWinCount === BALANCE.chapters.length)
   return {
     median: at(0.5),
     p10: at(0.1),
@@ -78,6 +79,10 @@ function stats(reports) {
     multipleP90: multipleAt(0.9),
     medianBenchmarkRatio: benchmarkAt(0.5),
     bandRates,
+    allEventWinRate: allEventWins.length / reports.length,
+    richWhenAllEventsWon: allEventWins.length > 0
+      ? allEventWins.filter((report) => report.band.id === 'fire').length / allEventWins.length
+      : 0,
   }
 }
 
@@ -114,6 +119,11 @@ for (const [name, s] of Object.entries(results)) {
   console.log(`${name.padEnd(32)} ${s.multipleP10.toFixed(1)} / ${s.medianMultiple.toFixed(1)} / ${s.multipleP90.toFixed(1)} · ${s.medianBenchmarkRatio.toFixed(2)}x`)
 }
 
+console.log('\n── รางวัลการรับมือเหตุการณ์ (ชนะครบ 4 บท / รวยเมื่อชนะครบ) ──')
+for (const [name, s] of Object.entries(results)) {
+  console.log(`${name.padEnd(32)} ${(s.allEventWinRate * 100).toFixed(1).padStart(6)}% / ${(s.richWhenAllEventsWon * 100).toFixed(1).padStart(6)}%`)
+}
+
 console.log('\n── ตรวจว่าเกมสอนถูกไหม ──')
 const spread = results['กระจายตามความเสี่ยง 25/40/25/10']
 const allBond = results['ตราสารหนี้ล้วน (กลัวเสี่ยง)']
@@ -134,9 +144,9 @@ const checks = [
   check(allBond.ruinRate === 0, 'ตราสารหนี้ไม่ทำให้ล้มละลาย (แค่โตไม่ทันเงินเฟ้อ)'),
   behavior === 'buy' || check(allCash.medianMultiple < 1, 'ไม่ลงทุนเลยแพ้เงินเฟ้อ — ได้คืนน้อยกว่าเงินที่ได้รับ'),
   behavior === 'buy' || check(allCash.secureOrRichRate === 0, 'เงินสดล้วนไม่มีโอกาสถูกจัดเป็นฐานะมั่นคงหรือรวย'),
-  check(allBond.richRate === 0, 'ตราสารหนี้ล้วนไม่มีโอกาสถูกจัดเป็นรวย'),
-  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].richRate <= 0.70, 'กองทุนอ้างอิงมีอัตรารวยไม่เกิน 70% ตามเกณฑ์รวยใหม่ที่ 4 เท่า'),
-  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].secureOrRichRate <= 0.90, 'กองทุนอ้างอิงมีอัตรามั่นคงหรือรวยรวมไม่เกิน 90% ตามเกณฑ์ใหม่'),
+  check(allBond.richRate <= 0.05, 'ตราสารหนี้ล้วนมีอัตรารวยไม่เกิน 5%'),
+  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].richRate >= 0.20 && results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].richRate <= 0.40, 'กองทุนอ้างอิงมีอัตรารวย 20–40%'),
+  check(results['กองทุนรวมล้วน (เกณฑ์อ้างอิง)'].secureOrRichRate <= 0.70, 'กองทุนอ้างอิงมีอัตรามั่นคงหรือรวยรวมไม่เกิน 70%'),
 ]
 
 const [best, second] = [...Object.entries(results)].sort((a, b) => b[1].median - a[1].median)
