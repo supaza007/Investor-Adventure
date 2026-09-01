@@ -29,13 +29,13 @@ function sample(weights, runs = 2000) {
   return Array.from({ length: runs }, (_, index) => play(weights, index * 7919 + 13))
 }
 
-test('กองทุนอ้างอิงไม่แจกสถานะมั่นคงหรือรวยเป็นผลลัพธ์ส่วนใหญ่', () => {
+test('กองทุนอ้างอิงอยู่ในช่วงฐานะที่สอดคล้องกับเกณฑ์รวย 4 เท่า', () => {
   const reports = sample({ fund: 1 })
   const rich = reports.filter((report) => report.band.id === 'fire').length / reports.length
   const secureOrRich = reports.filter((report) => ['fire', 'comfortable'].includes(report.band.id)).length / reports.length
 
-  assert.ok(rich >= 0.01 && rich <= 0.10, `อัตรารวย ${(rich * 100).toFixed(1)}% หลุดช่วง 1–10%`)
-  assert.ok(secureOrRich >= 0.25 && secureOrRich <= 0.45, `อัตรามั่นคงหรือรวย ${(secureOrRich * 100).toFixed(1)}% หลุดช่วง 25–45%`)
+  assert.ok(rich >= 0.50 && rich <= 0.70, `อัตรารวย ${(rich * 100).toFixed(1)}% หลุดช่วง 50–70%`)
+  assert.ok(secureOrRich >= 0.75 && secureOrRich <= 0.90, `อัตรามั่นคงหรือรวย ${(secureOrRich * 100).toFixed(1)}% หลุดช่วง 75–90%`)
 })
 
 test('เงินสดและตราสารหนี้ไม่ถูกจัดเป็นรวย แต่สินทรัพย์เสี่ยงยังมีทั้งหางบนและหางล่าง', () => {

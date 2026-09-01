@@ -63,10 +63,10 @@ export const BALANCE = {
   benchmarkValue: 142538, // ค่ากลางกองทุนรวมล้วนจาก simulation 10,000 รอบหลังใช้ mean-corrected lognormal
   benchmarkGrowthMult: 1.75,
   outcomeBands: [
-    { id: 'fire', minMultiple: 8, label: 'รวย!!' },
-    { id: 'comfortable', minMultiple: 6, label: 'ฐานะมั่นคง' },
-    { id: 'adequate', minMultiple: 3, label: 'พออยู่ได้' },
-    { id: 'tight', minMultiple: 1.5, label: 'เงินขาดมือ' },
+    { id: 'fire', minMultiple: 4, label: 'รวย!!' },
+    { id: 'comfortable', minMultiple: 3, label: 'ฐานะมั่นคง' },
+    { id: 'adequate', minMultiple: 1.5, label: 'พออยู่ได้' },
+    { id: 'tight', minMultiple: 1, label: 'เงินขาดมือ' },
     { id: 'ruined', minMultiple: 0, label: 'เจ๊งกะโบ๊ง!' },
   ],
   benchmarkBands: [
