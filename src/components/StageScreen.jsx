@@ -97,12 +97,12 @@ function EventReturnMatrix({ event, shock }) {
   const baseReturns = shock?.baseReturns ?? returnsForEvent(event)
   const returns = shock?.assetReturns ?? baseReturns
   return (
-    <div className="event-return-matrix mx-auto mt-3 grid max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="event-return-matrix mx-auto mt-3 grid w-full min-w-0 max-w-xl grid-cols-2 gap-2 sm:grid-cols-4">
       {getTools().map((tool) => {
         const value = returns[tool.id] ?? 0
         const tone = value > 0 ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300' : value < 0 ? 'border-rose-500/50 bg-rose-950/40 text-rose-300' : 'border-slate-600 bg-slate-900/70 text-white/70'
         return (
-          <div key={tool.id} className={`pixel-frame border p-2 text-left ${tone}`} title={event.impactReasons?.[tool.id]}>
+          <div key={tool.id} className={`pixel-frame min-w-0 border p-2 text-left ${tone}`} title={event.impactReasons?.[tool.id]}>
             <div className="event-return-matrix__name text-base font-bold">{tool.name}</div>
             <div className="event-return-matrix__final text-xs font-bold">ผลสุดท้าย {pct(value)}</div>
             <div className="event-return-matrix__reason text-[8px] leading-snug text-white/55 sm:text-[9px]" title={event.impactReasons?.[tool.id]}>{impactSummary(tool.id, value)}</div>
@@ -558,7 +558,7 @@ export default function StageScreen({ state, command, commandError = null, onDis
             แล้วแต่หัวข้อยังอยู่สูงกว่าขอบ 48px คือมองไม่เห็นและเลื่อนขึ้นไปดูไม่ได้เลย
             safe center สั่งให้สลับไปชิดบนอัตโนมัติเมื่อล้น ทุกบรรทัดจึงเลื่อนถึงได้เสมอ
             เบราว์เซอร์เก่าที่ไม่รู้จักคำนี้จะทิ้งทั้งบรรทัดแล้วได้ค่า default (ชิดบน) ซึ่งก็ยังถูกกว่าเดิม */}
-        <div className="stage-content-viewport flex min-h-0 flex-1 justify-center overflow-y-auto py-2 [align-items:safe_center]">
+        <div className="stage-content-viewport flex min-h-0 min-w-0 flex-1 justify-center overflow-x-hidden overflow-y-auto py-2 [align-items:safe_center]">
           <div className="stage-content-shell">
             {stage.key === 'signal' && <SignalStage event={event} />}
             {stage.key === 'reveal' && <RevealStage event={event} />}

@@ -260,6 +260,17 @@ test('stage return cards prioritize the asset choice over its final result', asy
   assert.match(css, /\.debrief-tip\s*\{[\s\S]*?grid-template-columns:\s*1\.35rem/)
 })
 
+test('all stage content remains reachable when a mobile viewport is shorter than the content', async () => {
+  const stageScreen = await readFile(fileURLToPath(new URL('../components/StageScreen.jsx', import.meta.url)), 'utf8')
+  const css = await readFile(fileURLToPath(new URL('../index.css', import.meta.url)), 'utf8')
+
+  assert.match(stageScreen, /stage-content-viewport[^"`]*min-h-0[^"`]*min-w-0[^"`]*overflow-x-hidden[^"`]*overflow-y-auto/)
+  assert.match(css, /\.stage-content-shell\s*\{[\s\S]*?min-width:\s*0[\s\S]*?align-self:\s*safe center/)
+  assert.doesNotMatch(css, /\.stage-content-shell\s*\{[^}]*align-self:\s*center\s*;/)
+  assert.match(stageScreen, /event-return-matrix[^"`]*w-full[^"`]*min-w-0/)
+  assert.match(css, /@media \(max-height:\s*700px\)[\s\S]*?\.stage-content-viewport[\s\S]*?\.shock-stage__portrait/)
+})
+
 test('pre-assessment visual chrome remains mounted', async () => {
   const jsx = await readFile(fileURLToPath(new URL('../components/LearningScreens.jsx', import.meta.url)), 'utf8')
   for (const asset of ['preAssessmentBackground', 'preAssessmentDisclaimer', 'preAssessmentEyebrow', 'preAssessmentQuestionBadge', 'preAssessmentTitle']) {

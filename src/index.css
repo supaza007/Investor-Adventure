@@ -1805,12 +1805,17 @@ button:focus-visible {
    จึงอ่านได้ทันทีว่าภาพ/ชื่อ/คำอธิบายเป็นผลลัพธ์ของสเตจเดียวกัน */
 .stage-content-viewport {
   scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
 }
 
 .stage-content-shell {
   width: min(100%, 38rem);
+  min-width: 0;
   margin-inline: auto;
-  align-self: center;
+  /* Do not center an overflowing child unsafely. The viewport's safe-center
+     alignment keeps short stages centered and moves tall stages to the top,
+     so their headings and first controls remain reachable on mobile. */
+  align-self: safe center;
   padding: clamp(0.75rem, 2.5vw, 1.25rem);
   border: 2px solid rgba(216, 173, 88, 0.72);
   background: linear-gradient(180deg, rgba(4, 18, 34, 0.9), rgba(3, 11, 22, 0.84));
@@ -1880,8 +1885,21 @@ button:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .stage-content-viewport {
+    scrollbar-gutter: auto;
+  }
+
   .stage-content-shell {
     padding: 0.8rem 0.65rem;
+  }
+
+  .event-return-matrix > * {
+    min-width: 0;
+  }
+
+  .event-return-matrix__name {
+    overflow-wrap: anywhere;
+    word-break: normal;
   }
 
   .stage-footer {
@@ -1894,6 +1912,22 @@ button:focus-visible {
 
   .stage-screen .cozy-hud {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .stage-content-viewport {
+    padding-block: 0.35rem;
+  }
+
+  .stage-content-shell {
+    padding-block: 0.6rem;
+  }
+
+  .reveal-stage__portrait,
+  .shock-stage__portrait {
+    width: 7.5rem !important;
+    height: 7.5rem !important;
   }
 }
 
