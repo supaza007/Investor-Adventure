@@ -10,14 +10,14 @@ const reportAt = (finalValue) => buildReport({
 })
 
 test('สถานะทางการเงินใช้เงินที่ได้รับจริงและตัดช่วงตรงตามแผน', () => {
-  assert.equal(reportAt(19.99).band.id, 'ruined')
-  assert.equal(reportAt(20).band.id, 'tight')
-  assert.equal(reportAt(149.99).band.id, 'tight')
-  assert.equal(reportAt(150).band.id, 'adequate')
+  assert.equal(reportAt(149.99).band.id, 'ruined')
+  assert.equal(reportAt(150).band.id, 'tight')
+  assert.equal(reportAt(299.99).band.id, 'tight')
+  assert.equal(reportAt(300).band.id, 'adequate')
   assert.equal(reportAt(599.99).band.id, 'adequate')
   assert.equal(reportAt(600).band.id, 'comfortable')
-  assert.equal(reportAt(1199.99).band.id, 'comfortable')
-  assert.equal(reportAt(1200).band.id, 'fire')
+  assert.equal(reportAt(799.99).band.id, 'comfortable')
+  assert.equal(reportAt(800).band.id, 'fire')
 })
 
 test('benchmark ให้เวลาเงินก้อนแรกทบต้นมากกว่าเงินก้อนสุดท้าย', () => {
@@ -27,7 +27,7 @@ test('benchmark ให้เวลาเงินก้อนแรกทบต�
 
 test('ฐานะทางการเงินแยกจากผลงานเทียบ benchmark', () => {
   const report = reportAt(175)
-  assert.equal(report.band.id, 'adequate')
+  assert.equal(report.band.id, 'tight')
   assert.equal(report.benchmark, 175)
   assert.equal(report.benchmarkRatio, 1)
   assert.equal(report.benchmarkBand.id, 'near')

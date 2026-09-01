@@ -91,6 +91,7 @@ End condition คือจบบท 4; ไม่มี game over กลางท
 - ตัดขาดทุนขาย 70% เฉพาะสินทรัพย์ที่เสียหายไปตราสารหนี้ ไม่ย้ายทั้งพอร์ต
 - VI ฟื้น 100% เมื่อเงินสดที่ซื้อเพิ่มมีอย่างน้อย 15% ของพอร์ต; ต่ำกว่านั้นฟื้น 50%
 - Trader จ่ายค่าธรรมเนียมครึ่งหนึ่งในการปรับพอร์ตครั้งแรกของแต่ละบท
+- ฐานะตอนจบวัดจากพอร์ตสุดท้ายหารเงินที่ได้รับจริง: รวย ≥8x, มั่นคง ≥6x, พออยู่ ≥3x, ขาดมือ ≥1.5x และเจ๊ง <1.5x
 - Event P/L amount = `valueAfter - valueBefore`; P/L % = amount/valueBefore เมื่อฐาน >0
 - Final multiple = final net worth / total contributed (340)
 - Benchmark ratio = final net worth / 1421; FIRE ≥1.5, comfortable ≥0.9, adequate ≥0.5, tight ≥0
