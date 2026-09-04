@@ -3,7 +3,7 @@ import { characterArtOf } from './art.js'
 import coverBackground from '../assets/ui/cover-background-user.webp'
 import gameSubtitle from '../assets/ui/cover-adventure-subtitle-user.webp'
 import playButton from '../assets/ui/cover-start-button-user.webp'
-import titleLogo from '../assets/title-logo-money-survival.webp'
+import titleLogo from '../assets/title-logo.webp'
 
 // พื้นหลังรุ่นเก่ายังโหลดแบบ optional เพื่อให้ build ผ่านได้ แม้ไม่มีไฟล์ SVG ต้นฉบับ
 const ASSETS = import.meta.glob('../assets/title-*.svg', {

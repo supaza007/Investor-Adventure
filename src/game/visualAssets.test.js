@@ -41,7 +41,7 @@ test('user-supplied Cover assets stay within the web delivery budget', async () 
     assert.ok(info.size <= maxKb * 1024, `${name} exceeds ${maxKb} KB: ${info.size} bytes`)
   }
 
-  const titleLogo = await stat(fileURLToPath(new URL('../assets/title-logo-money-survival.webp', import.meta.url)))
+  const titleLogo = await stat(fileURLToPath(new URL('../assets/title-logo.webp', import.meta.url)))
   assert.ok(titleLogo.size <= 180 * 1024, `title logo exceeds 180 KB: ${titleLogo.size} bytes`)
 })
 
@@ -51,7 +51,7 @@ test('mobile runtime imports optimized artwork instead of authoring assets', asy
       'cover-background-user.webp',
       'cover-adventure-subtitle-user.webp',
       'cover-start-button-user.webp',
-      'title-logo-money-survival.webp',
+      'title-logo.webp',
     ],
     '../components/LearningScreens.jsx': [
       'pre-assessment-background-user.webp',
